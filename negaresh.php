@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Negaresh
- * @version 1.0.1
+ * @version 1.0.2
  */
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
 Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
-Version: 1.0.1
+Version: 1.0.2
 Text Domain: negaresh
 Domain Path: negaresh-languages
 Author: Lord Arma
