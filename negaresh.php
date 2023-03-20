@@ -23,7 +23,7 @@ function fix_farsi_typoes( $content ) {
     );
 
     foreach ($common_prefixes as $word) {
-        $content = str_replace($word . " ", $word . "‌", $content);
+        $content = str_replace(" " . $word . " ", " " . $word . "‌", $content);
     }
 
     $common_suffixes = array(
@@ -32,7 +32,7 @@ function fix_farsi_typoes( $content ) {
     );
 
     foreach ($common_suffixes as $word) {
-        $content = str_replace(" " . $word, "‌" . $word, $content);
+        $content = str_replace(" " . $word . " ", "‌" . $word + " ", $content);
     }
 
     $charsـwith_space_before = array(
