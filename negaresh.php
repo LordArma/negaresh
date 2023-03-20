@@ -101,11 +101,11 @@ function negaresh_menu() {
 
 function negaresh_options() {
 	if ( !current_user_can( 'manage_options' ) )  {
-		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+		wp_die( __( 'You do not have sufficient permissions to access this page.', 'negaresh' ) );
 	}
-	echo '<div class="wrap">';
-	echo "<p>Currently, Negaresh doesn't support options. This feature will be added to Negaresh soon.</p>";
-	echo '</div>';
+	echo '<div class="wrap"><p>';
+	_e("Currently, Negaresh doesn't support options. This feature will be added to Negaresh soon.", "negaresh");
+	echo '</p></div>';
 }
 
 add_action( 'admin_menu', 'negaresh_menu' );
