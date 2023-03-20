@@ -12,3 +12,6 @@ Because negaresh is still a beta version, you need to click on the "Code > Downl
 
 ## Warning
 Negaresh is currently in beta version. It may not be able to perform its jobs at times.
+
+## Some Websites Using It
+- [Varesh Sport](https://VareshSport.com)
