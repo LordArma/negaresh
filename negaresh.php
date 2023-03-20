@@ -103,8 +103,9 @@ function fix_farsi_typoes( $content ) {
         '9' => '۹',
     );
 
+    
     foreach ($english_nums as $char_en => $char_fa) {
-        $content = str_replace($char_en, $char_fa, $content);
+        // $content = str_replace($char_en, $char_fa, $content);
     }
 
     return $content;
