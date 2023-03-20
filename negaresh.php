@@ -104,7 +104,7 @@ function negaresh_options() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 	echo '<div class="wrap">';
-	echo "<p>Currently, ٔNegaresh doesn't support options. This feature will be added to Negaresh soon.</p>";
+	echo "<p>Currently, Negaresh doesn't support options. This feature will be added to Negaresh soon.</p>";
 	echo '</div>';
 }
 
