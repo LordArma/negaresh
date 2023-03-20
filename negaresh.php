@@ -6,7 +6,7 @@
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
-Description: Negaresh tries to fix your Farsi (Persian) typos.
+Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
 Version: 1.0.0
 Text Domain: negaresh
 Domain Path: negaresh-languages
@@ -104,7 +104,7 @@ function negaresh_options() {
 		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 	}
 	echo '<div class="wrap">';
-	echo '<p>Here is where the form would go if I actually had options.</p>';
+	echo "<p>Currently, ٔNegaresh doesn't support options. This feature will be added to Negaresh soon.</p>";
 	echo '</div>';
 }
 
