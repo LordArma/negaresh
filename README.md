@@ -2,6 +2,8 @@
 
 Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
 
+![نگارش](https://github.com/LordArma/negaresh/raw/master/screenshot.png "نگارش")
+
 ## Features
 - Convert Arabic Numbers to Farsi.
 - Convert Arabic characters  (ي & ك) to Farsi.
