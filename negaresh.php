@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Negaresh
- * @version 1.0.0
+ * @version 1.0.1
  */
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
 Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
-Version: 1.0.0
+Version: 1.0.1
 Text Domain: negaresh
 Domain Path: negaresh-languages
 Author: Lord Arma
@@ -88,6 +88,23 @@ function fix_farsi_typoes( $content ) {
 
     foreach ($arabic_nums as $char_ar => $char_fa) {
         $content = str_replace($char_ar, $char_fa, $content);
+    }
+
+    $english_nums = array(
+        '0' => '۰',
+        '1' => '۱',
+        '2' => '۲',
+        '3' => '۳',
+        '4' => '۴',
+        '5' => '۵',
+        '6' => '۶',
+        '7' => '۷',
+        '8' => '۸',
+        '9' => '۹',
+    );
+
+    foreach ($english_nums as $char_en => $char_fa) {
+        $content = str_replace($char_en, $char_fa, $content);
     }
 
     return $content;
