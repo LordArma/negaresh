@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Negaresh
- * @version 2.0.0
+ * @version 2.0.1
  */
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
 Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
-Version: 2.0.0
+Version: 2.0.1
 Text Domain: negaresh
 Domain Path: negaresh-languages
 Author: Lord Arma
@@ -29,7 +29,7 @@ function fix_farsi_typoes( $content ) {
         'normalize_ellipsis' => true,
         'normalize_dates' => true,
         'fix_english_quotes_pairs' => true,
-        'fix_english_quotes' => true,
+        'fix_english_quotes' => false,
         'fix_hamzeh' => true,
         'fix_hamzeh_arabic' => false,
         'cleanup_rlm' => true,
@@ -49,8 +49,8 @@ function fix_farsi_typoes( $content ) {
         'remove_diacritics' => false,
         'fix_persian_glyphs' => true,
         'fix_misc_spacing' => true,
-        'cleanup_spacing' => false,
-        'cleanup_line_breaks' => false,
+        'cleanup_spacing' => true,
+        'cleanup_line_breaks' => true,
         'cleanup_begin_and_end' => true
     ]);
 
