@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Negaresh
- * @version 1.0.2
+ * @version 2.0.0
  */
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
 Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
-Version: 1.0.2
+Version: 2.0.0
 Text Domain: negaresh
 Domain Path: negaresh-languages
 Author: Lord Arma
@@ -15,100 +15,52 @@ Author URI: http://LordArma.com/
 License: GPL3
 */
 
+use Alirezasedghi\Virastar\Virastar;
+
+include('Virastar.php');
+
 function fix_farsi_typoes( $content ) {
 
-    $common_prefixes = array(
-        'می',
-        'نمی',
-    );
+    $virastar = new Virastar([
+        'normalize_eol' => true,
+        'decode_html_entities' => true,
+        'fix_dashes' => true,
+        'fix_three_dots' => true,
+        'normalize_ellipsis' => true,
+        'normalize_dates' => true,
+        'fix_english_quotes_pairs' => true,
+        'fix_english_quotes' => true,
+        'fix_hamzeh' => true,
+        'fix_hamzeh_arabic' => false,
+        'cleanup_rlm' => true,
+        'cleanup_zwnj' => true,
+        'fix_arabic_numbers' => true,
+        'fix_english_numbers' => true,
+        'fix_numeral_symbols' => true,
+        'fix_misc_non_persian_chars' => true,
+        'fix_punctuations' => true,
+        'fix_question_mark' => true,
+        'fix_prefix_spacing' => true,
+        'fix_suffix_spacing' => true,
+        'fix_suffix_misc' => true,
+        'fix_spacing_for_braces_and_quotes' => true,
+        'fix_spacing_for_punctuations' => true,
+        'fix_diacritics' => true,
+        'remove_diacritics' => false,
+        'fix_persian_glyphs' => true,
+        'fix_misc_spacing' => true,
+        'cleanup_spacing' => false,
+        'cleanup_line_breaks' => false,
+        'cleanup_begin_and_end' => true
+    ]);
 
-    foreach ($common_prefixes as $word) {
-        $content = str_replace(" " . $word . " ", " " . $word . "‌", $content);
+    try {
+        $content = $virastar->cleanup($content);
+    } catch (Exception $e) {
+        echo $e->getMessage();
     }
 
-    $common_suffixes = array(
-        'هایی',
-        'های',
-    );
-
-    foreach ($common_suffixes as $word) {
-        $content = str_replace(" " . $word . " ", "‌" . $word + " ", $content);
-    }
-
-    $charsـwith_space_before = array(
-        '.',
-        '،',
-        '؟',
-        '!',
-        ':',
-        '؛',
-        '»',
-        ')',
-        ']',
-        '}',
-        '…',
-    );
-
-    foreach ($charsـwith_space_before as $char) {
-        $content = str_replace(" " . $char, $char, $content);
-    }
-
-    $charsـwith_space_after = array(
-        '«',
-        '(',
-        '[',
-        '{',
-    );
-
-    foreach ($charsـwith_space_after as $char) {
-        $content = str_replace($char . " ", $char, $content);
-    }
-
-    $arabic_chars = array(
-        'ي' => 'ی',
-        'ك' => 'ک',
-    );
-
-    foreach ($arabic_chars as $char_ar => $char_fa) {
-        $content = str_replace($char_ar, $char_fa, $content);
-    }
-
-    $arabic_nums = array(
-        '٠' => '۰',
-        '١' => '۱',
-        '٢' => '۲',
-        '٣' => '۳',
-        '٤' => '۴',
-        '٥' => '۵',
-        '٦' => '۶',
-        '٧' => '۷',
-        '٨' => '۸',
-        '٩' => '۹',
-    );
-
-    foreach ($arabic_nums as $char_ar => $char_fa) {
-        $content = str_replace($char_ar, $char_fa, $content);
-    }
-
-    $english_nums = array(
-        '0' => '۰',
-        '1' => '۱',
-        '2' => '۲',
-        '3' => '۳',
-        '4' => '۴',
-        '5' => '۵',
-        '6' => '۶',
-        '7' => '۷',
-        '8' => '۸',
-        '9' => '۹',
-    );
-
-    
-    foreach ($english_nums as $char_en => $char_fa) {
-        // $content = str_replace($char_en, $char_fa, $content);
-    }
-
-    return $content;
+    return nl2br($content ?? '');
 }
 
 add_filter( 'the_content', 'fix_farsi_typoes' );
