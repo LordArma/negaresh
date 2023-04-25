@@ -1,13 +1,13 @@
 <?php
 /**
  * @package Negaresh
- * @version 2.2.2
+ * @version 3.0.0
  */
 /*
 Plugin Name: Negaresh
 Plugin URI: http://wordpress.org/plugins/negaresh/
 Description: Negaresh tries to fix your Farsi (Persian) typos in Wordpress.
-Version: 2.2.2
+Version: 3.0.0
 Text Domain: negaresh
 Domain Path: /languages
 Author: Lord Arma
@@ -42,65 +42,55 @@ class Negaresh {
         add_settings_section('wcp_first_section', null, null, 'negaresh-options');
     
         $feild_name = 'normalize_eol';
-        $feild_title = 'Replace Windows End of Lines with Unix EOL';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replace Windows End of Lines with Unix EOL', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'decode_html_entities';
-        $feild_title = 'Converts Numeral and Selected HTML Character Sets Into Original Characters';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Converts Numeral and Selected HTML Character Sets Into Original Characters', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_dashes';
-        $feild_title = 'Replaces Triple Dash to mdash and Replaces Double Dash to ndash';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces Triple Dash to mdash and Replaces Double Dash to ndash', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
 
         $feild_name = 'fix_three_dots';
-        $feild_title = 'Removes Spaces Between Dots and Replaces Three Dots with Ellipsis Character';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Removes Spaces Between Dots and Replaces Three Dots with Ellipsis Character', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'normalize_ellipsis';
-        $feild_title = 'Replaces More Than One Ellipsis with One and Replaces (space|tab|zwnj) After Ellipsis with One Space';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces More Than One Ellipsis with One and Replaces (space|tab|zwnj) After Ellipsis with One Space', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         
         $feild_name = 'normalize_dates';
-        $feild_title = 'Reorders Date Parts with Slash as Delimiter';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Reorders Date Parts with Slash as Delimiter', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_english_quotes_pairs';
-        $feild_title = 'Replaces English Quote Pairs with Their Farsi Equivalent';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces English Quote Pairs with Their Farsi Equivalent', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_english_quotes';
-        $feild_title = 'Replaces English Quote Marks with Their Farsi Equivalent';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces English Quote Marks with Their Farsi Equivalent', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_hamzeh';
-        $feild_title = 'Fix Hamzeh';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Fix Hamzeh', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_hamzeh_arabic';
-        $feild_title = 'Fix Arabic Hamzeh';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Fix Arabic Hamzeh', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'cleanup_rlm';
@@ -110,27 +100,23 @@ class Negaresh {
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'cleanup_zwnj';
-        $feild_title = 'Cleanup ZWNJ';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Cleanup ZWNJ', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_arabic_numbers';
-        $feild_title = 'Replaces Arabic Numbers with Their Farsi Equivalent';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces Arabic Numbers with Their Farsi Equivalent', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_english_numbers';
-        $feild_title = 'Replaces English Numbers with Their Farsi Equivalent';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Replaces English Numbers with Their Farsi Equivalent', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_numeral_symbols';
-        $feild_title = 'Fix Numeral Symbols';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Fix Numeral Symbols', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_misc_non_persian_chars';
@@ -146,9 +132,8 @@ class Negaresh {
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_question_mark';
-        $feild_title = $feild_name;
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __("Replaces Question Marks with It's Farsi Equivalent", 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = '';
@@ -176,9 +161,8 @@ class Negaresh {
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_spacing_for_braces_and_quotes';
-        $feild_title = 'Removes Inside Spaces and More Than One Outside Braces and Quotes';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Removes Inside Spaces and More Than One Outside Braces and Quotes', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_spacing_for_punctuations';
@@ -194,15 +178,13 @@ class Negaresh {
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'remove_diacritics';
-        $feild_title = 'Removes All Diacritic Characters';
         $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Removes All Diacritic Characters', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_persian_glyphs';
-        $feild_title = 'Converts Incorrect Farsi Glyphs to Standard Characters';
         $is_default = '1';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        add_settings_field($feild_name, __('Converts Incorrect Farsi Glyphs to Standard Characters', 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
         $feild_name = 'fix_misc_spacing';

@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Negaresh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-25 22:52+0000\n"
+"POT-Creation-Date: 2023-04-25 22:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "Cleanup ZWNJ"
 msgstr ""
 
-#: negaresh.php:187
+#: negaresh.php:188
 msgid "Converts Incorrect Farsi Glyphs to Standard Characters"
 msgstr ""
 
@@ -54,11 +54,11 @@ msgid "Lord Arma"
 msgstr ""
 
 #. Name of the plugin
-#: negaresh.php:271
+#: negaresh.php:272
 msgid "Negaresh"
 msgstr ""
 
-#: negaresh.php:271 negaresh.php:276
+#: negaresh.php:272 negaresh.php:277
 msgid "Negaresh Options"
 msgstr ""
 
@@ -66,11 +66,11 @@ msgstr ""
 msgid "Negaresh tries to fix your Farsi (Persian) typos in Wordpress."
 msgstr ""
 
-#: negaresh.php:182
+#: negaresh.php:183
 msgid "Removes All Diacritic Characters"
 msgstr ""
 
-#: negaresh.php:165
+#: negaresh.php:166
 msgid "Removes Inside Spaces and More Than One Outside Braces and Quotes"
 msgstr ""
 
@@ -107,11 +107,6 @@ msgstr ""
 msgid ""
 "Replaces More Than One Ellipsis with One and Replaces (space|tab|zwnj) After "
 "Ellipsis with One Space"
-msgstr ""
-
-#: negaresh.php:136
-msgctxt "تعویض علامت سؤال انگلیسی با فارسی"
-msgid "Replaces Question Marks with It's Farsi Equivalent"
 msgstr ""
 
 #: negaresh.php:56
