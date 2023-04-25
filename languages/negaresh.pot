@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Negaresh\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-05 22:49+0000\n"
+"POT-Creation-Date: 2023-04-25 21:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -29,14 +29,18 @@ msgid "Lord Arma"
 msgstr ""
 
 #. Name of the plugin
-#: negaresh.php:126
+#: negaresh.php:97
 msgid "Negaresh"
 msgstr ""
 
-#: negaresh.php:126 negaresh.php:131
+#: negaresh.php:97 negaresh.php:102
 msgid "Negaresh Options"
 msgstr ""
 
 #. Description of the plugin
 msgid "Negaresh tries to fix your Farsi (Persian) typos in Wordpress."
+msgstr ""
+
+#: negaresh.php:44
+msgid "Replace Windows End of Lines with Unix EOL (\\n)"
 msgstr ""

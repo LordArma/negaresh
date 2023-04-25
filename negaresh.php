@@ -41,78 +41,239 @@ class Negaresh {
     function settings() {
         add_settings_section('wcp_first_section', null, null, 'negaresh-options');
     
-        add_settings_field('wcp_location', 'Display Location', array($this, 'locationHTML'), 'negaresh-options', 'wcp_first_section');
-        register_setting('wordcountplugin', 'wcp_location', array('sanitize_callback' => array($this, 'sanitizeLocation'), 'default' => '0'));
-    
-        add_settings_field('wcp_headline', 'Headline Text', array($this, 'headlineHTML'), 'negaresh-options', 'wcp_first_section');
-        register_setting('wordcountplugin', 'wcp_headline', array('sanitize_callback' => 'sanitize_text_field', 'default' => 'Post Statistics'));
-    
-        add_settings_field('wcp_wordcount', 'Word Count', array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => 'wcp_wordcount'));
-        register_setting('wordcountplugin', 'wcp_wordcount', array('sanitize_callback' => 'sanitize_text_field', 'default' => '1'));
-    
-        add_settings_field('wcp_charactercount', 'Character Count', array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => 'wcp_charactercount'));
-        register_setting('wordcountplugin', 'wcp_charactercount', array('sanitize_callback' => 'sanitize_text_field', 'default' => '1'));
-    
-        add_settings_field('wcp_readtime', 'Read Time', array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => 'wcp_readtime'));
-        register_setting('wordcountplugin', 'wcp_readtime', array('sanitize_callback' => 'sanitize_text_field', 'default' => '1'));
-    }
+        $feild_name = 'normalize_eol';
+        $feild_title = 'Replace Windows End of Lines with Unix EOL';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
-    function sanitizeLocation($input) {
-        if ($input != '0' AND $input != '1') {
-          add_settings_error('wcp_location', 'wcp_location_error', 'Display location must be either beginning or end.');
-          return get_option('wcp_location');
-        }
-        return $input;
-      }
+        $feild_name = 'decode_html_entities';
+        $feild_title = 'Converts Numeral and Selected HTML Character Sets Into Original Characters';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_dashes';
+        $feild_title = 'Replaces Triple Dash to mdash and Replaces Double Dash to ndash';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+
+        $feild_name = 'fix_three_dots';
+        $feild_title = 'Removes Spaces Between Dots and Replaces Three Dots with Ellipsis Character';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'normalize_ellipsis';
+        $feild_title = 'Replaces More Than One Ellipsis with One and Replaces (space|tab|zwnj) After Ellipsis with One Space';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        
+        $feild_name = 'normalize_dates';
+        $feild_title = 'Reorders Date Parts with Slash as Delimiter';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_english_quotes_pairs';
+        $feild_title = 'Replaces English Quote Pairs with Their Farsi Equivalent';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_english_quotes';
+        $feild_title = 'Replaces English Quote Marks with Their Farsi Equivalent';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_hamzeh';
+        $feild_title = 'Fix Hamzeh';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_hamzeh_arabic';
+        $feild_title = 'Fix Arabic Hamzeh';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'cleanup_rlm';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'cleanup_zwnj';
+        $feild_title = 'Cleanup ZWNJ';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_arabic_numbers';
+        $feild_title = 'Replaces Arabic Numbers with Their Farsi Equivalent';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_english_numbers';
+        $feild_title = 'Replaces English Numbers with Their Farsi Equivalent';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_numeral_symbols';
+        $feild_title = 'Fix Numeral Symbols';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_misc_non_persian_chars';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_punctuations';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_question_mark';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = '';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_prefix_spacing';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_suffix_spacing';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_suffix_misc';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_spacing_for_braces_and_quotes';
+        $feild_title = 'Removes Inside Spaces and More Than One Outside Braces and Quotes';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_spacing_for_punctuations';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_diacritics';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'remove_diacritics';
+        $feild_title = 'Removes All Diacritic Characters';
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_persian_glyphs';
+        $feild_title = 'Converts Incorrect Farsi Glyphs to Standard Characters';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'fix_misc_spacing';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'cleanup_spacing';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'cleanup_line_breaks';
+        $feild_title = 'Cleans More Than Two Contiguous Line Breaks';
+        $is_default = '1';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+
+        $feild_name = 'cleanup_begin_and_end';
+        $feild_title = $feild_name;
+        $is_default = '0';
+        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
+        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
+    }
     
-      function checkboxHTML($args) { ?>
-        <input type="checkbox" name="<?php echo $args['theName'] ?>" value="1" <?php checked(get_option($args['theName']), '1') ?>>
-      <?php }
-    
-      function headlineHTML() { ?>
-        <input type="text" name="wcp_headline" value="<?php echo esc_attr(get_option('wcp_headline')) ?>">
-      <?php }
-    
-      function locationHTML() { ?>
-        <select name="wcp_location">
-          <option value="0" <?php selected(get_option('wcp_location'), '0') ?>>Beginning of post</option>
-          <option value="1" <?php selected(get_option('wcp_location'), '1') ?>>End of post</option>
-        </select>
-      <?php }
+    function checkboxHTML($args) { ?>
+      <input type="checkbox" name="<?php echo $args['theName'] ?>" value="1" <?php checked(get_option($args['theName']), '1') ?>>
+    <?php }
+
+    function Have_OPT( $option ){
+        if (get_option($option) == '1')
+            return true;
+
+        return false;
+    }
 
     function fix_farsi_typoes( $content ) {
 
         $virastar = new Virastar([
-            'normalize_eol' => true,
-            'decode_html_entities' => true,
-            'fix_dashes' => true,
-            'fix_three_dots' => true,
-            'normalize_ellipsis' => true,
-            'normalize_dates' => true,
-            'fix_english_quotes_pairs' => true,
-            'fix_english_quotes' => false,
-            'fix_hamzeh' => true,
-            'fix_hamzeh_arabic' => false,
-            'cleanup_rlm' => true,
-            'cleanup_zwnj' => true,
-            'fix_arabic_numbers' => true,
-            'fix_english_numbers' => true,
-            'fix_numeral_symbols' => true,
-            'fix_misc_non_persian_chars' => true,
-            'fix_punctuations' => true,
-            'fix_question_mark' => true,
-            'fix_prefix_spacing' => true,
-            'fix_suffix_spacing' => true,
-            'fix_suffix_misc' => true,
-            'fix_spacing_for_braces_and_quotes' => false,
-            'fix_spacing_for_punctuations' => true,
-            'fix_diacritics' => true,
-            'remove_diacritics' => false,
-            'fix_persian_glyphs' => true,
-            'fix_misc_spacing' => true,
-            'cleanup_spacing' => true,
-            'cleanup_line_breaks' => true,
-            'cleanup_begin_and_end' => true
+            'normalize_eol' => $this->Have_OPT('normalize_eol'),
+            'decode_html_entities' => $this->Have_OPT('decode_html_entities'),
+            'fix_dashes' => $this->Have_OPT('fix_dashes'),
+            'fix_three_dots' => $this->Have_OPT('fix_three_dots'),
+            'normalize_ellipsis' => $this->Have_OPT('normalize_ellipsis'),
+            'normalize_dates' => $this->Have_OPT('normalize_dates'),
+            'fix_english_quotes_pairs' => $this->Have_OPT('fix_english_quotes_pairs'),
+            'fix_english_quotes' => $this->Have_OPT('fix_english_quotes'),
+            'fix_hamzeh' => $this->Have_OPT('fix_hamzeh'),
+            'fix_hamzeh_arabic' => $this->Have_OPT('fix_hamzeh_arabic'),
+            'cleanup_rlm' => $this->Have_OPT('cleanup_rlm'),
+            'cleanup_zwnj' => $this->Have_OPT('cleanup_zwnj'),
+            'fix_arabic_numbers' => $this->Have_OPT('fix_arabic_numbers'),
+            'fix_english_numbers' => $this->Have_OPT('fix_english_numbers'),
+            'fix_numeral_symbols' => $this->Have_OPT('fix_numeral_symbols'),
+            'fix_misc_non_persian_chars' => $this->Have_OPT('fix_misc_non_persian_chars'),
+            'fix_punctuations' => $this->Have_OPT('fix_punctuations'),
+            'fix_question_mark' => $this->Have_OPT('fix_question_mark'),
+            'fix_prefix_spacing' => $this->Have_OPT('fix_prefix_spacing'),
+            'fix_suffix_spacing' => $this->Have_OPT('fix_suffix_spacing'),
+            'fix_suffix_misc' => $this->Have_OPT('fix_suffix_misc'),
+            'fix_spacing_for_braces_and_quotes' => $this->Have_OPT('fix_spacing_for_braces_and_quotes'),
+            'fix_spacing_for_punctuations' => $this->Have_OPT('fix_spacing_for_punctuations'),
+            'fix_diacritics' => $this->Have_OPT('fix_diacritics'),
+            'remove_diacritics' => $this->Have_OPT('remove_diacritics'),
+            'fix_persian_glyphs' => $this->Have_OPT('fix_persian_glyphs'),
+            'fix_misc_spacing' => $this->Have_OPT('fix_misc_spacing'),
+            'cleanup_spacing' => $this->Have_OPT('cleanup_spacing'),
+            'cleanup_line_breaks' => $this->Have_OPT('cleanup_line_breaks'),
+            'cleanup_begin_and_end' => $this->Have_OPT('cleanup_begin_and_end')
         ]);
 
         try {
@@ -121,7 +282,7 @@ class Negaresh {
             echo $e->getMessage();
         }
 
-        return nl2br($content ?? '');
+        return nl2br($content, true);
     }
 
     function negaresh_menu() {
