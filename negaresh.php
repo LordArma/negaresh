@@ -136,12 +136,6 @@ class Negaresh {
         add_settings_field($feild_name, __("Replaces Question Marks with It's Farsi Equivalent", 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
         register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
 
-        $feild_name = '';
-        $feild_title = $feild_name;
-        $is_default = '0';
-        add_settings_field($feild_name, __($feild_title, 'negaresh'), array($this, 'checkboxHTML'), 'negaresh-options', 'wcp_first_section', array('theName' => $feild_name));
-        register_setting('wordcountplugin', $feild_name, array('sanitize_callback' => 'sanitize_text_field', 'default' => $is_default));
-
         $feild_name = 'fix_prefix_spacing';
         $feild_title = $feild_name;
         $is_default = '0';
