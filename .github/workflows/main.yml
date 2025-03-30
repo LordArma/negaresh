@@ -1,0 +1,23 @@
+
+name: Create ZIP Plugin
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'wp-content/plugins/negaresh/**'
+
+jobs:
+  create-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: negaresh
+          path: wp-content/plugins/negaresh
+      
