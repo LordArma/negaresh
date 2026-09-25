@@ -14,5 +14,7 @@ parameters:
             - wp-content/plugins/negaresh/includes/Virastar.php
     scanFiles:
         - wp-content/plugins/negaresh/includes/Virastar.php
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        - vendor/php-stubs/wp-cli-stubs/wp-cli-tools-stubs.php
     bootstrapFiles:
         - tests/phpstan-bootstrap.php

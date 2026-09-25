@@ -287,7 +287,7 @@ class Negaresh
      * Post types fixed on save: the chosen ones, or every public type with an editor, plus synced
      * patterns (wp_block), which are shown inside posts.
      */
-    private function saves_type(string $type): bool
+    public function saves_type(string $type): bool
     {
         if ('' === $type || in_array($type, self::NEVER_SAVE_TYPES, true)) {
             return false;

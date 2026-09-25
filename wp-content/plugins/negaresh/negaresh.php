@@ -29,7 +29,16 @@ require_once __DIR__ . '/includes/Virastar.php';
 require_once __DIR__ . '/includes/negaresh-settings.php';
 require_once __DIR__ . '/includes/negaresh-class.php';
 require_once __DIR__ . '/includes/negaresh-editor.php';
+require_once __DIR__ . '/includes/negaresh-bulk.php';
 
-$negaresh_settings = new Negaresh_Settings();
-$negaresh = new Negaresh($negaresh_settings);
-$negaresh_editor = new Negaresh_Editor($negaresh, $negaresh_settings);
+// Real globals: WP-CLI loads plugin files from inside a function, where a plain assignment would
+// only create local variables.
+$GLOBALS['negaresh_settings'] = new Negaresh_Settings();
+$GLOBALS['negaresh'] = new Negaresh($GLOBALS['negaresh_settings']);
+$GLOBALS['negaresh_editor'] = new Negaresh_Editor($GLOBALS['negaresh'], $GLOBALS['negaresh_settings']);
+$GLOBALS['negaresh_bulk'] = new Negaresh_Bulk($GLOBALS['negaresh'], $GLOBALS['negaresh_settings']);
+
+if (defined('WP_CLI') && WP_CLI) {
+    require_once __DIR__ . '/includes/negaresh-cli.php';
+    WP_CLI::add_command('negaresh', new Negaresh_CLI($GLOBALS['negaresh_bulk'], $GLOBALS['negaresh']));
+}

@@ -115,7 +115,7 @@ I10 needs user decisions first.
     browser (Playwright, headless Chromium): preview while typing, preview follows unsaved boxes,
     reset asks and dismissing does not submit, no JavaScript errors, in English and in fa_IR.
 
-## I6 Editor integration ⏳ *(opt out + Fix this post done session 3; WP-CLI and bulk tool next)*
+## I6 Editor integration ⏳ *(opt out, Fix this post, engine + WP-CLI done session 3; bulk tool page next)*
 - Per post opt out (post meta + checkbox in Gutenberg sidebar and Classic editor meta box).
 - Gutenberg: "Fix Persian typography" button that runs the processor on the selected block or
   the whole post via REST and shows a diff before applying.
@@ -139,6 +139,26 @@ I10 needs user decisions first.
     (fix, undo, opt out + save) on WP 7.1.2 and 5.8.3; CI now runs the browser test on both.
   - Found in the test harness (not the plugin): `grep -q` in a pipe under `pipefail` hid a FAIL
     and printed ALL PASSED; fixed by capturing the output first.
+- *Result, slice I6b (engine + WP-CLI):*
+  - `Negaresh_Bulk` (`includes/negaresh-bulk.php`): `find()` returns every candidate ID at once
+    (oldest first; save mode post types incl. `wp_block`; publish/future/draft/pending/private;
+    never opted out; posts already fixed with the current rules only with `all`), so a run that
+    marks posts cannot shift a page. `process($id, $apply)` fixes content, and titles/excerpts when
+    enabled, reports before/after per field; applying snapshots the current text with
+    `wp_save_post_revision()` first (found by the e2e check: WordPress only stores the NEW text on
+    update, so without it the original was not restorable), updates with kses switched off (kses
+    is on for users without unfiltered_html, e.g. multisite site admins, and would strip embeds;
+    WP-CLI turns it off itself), and marks the post. `diff()` gives changed lines (LCS).
+  - WP-CLI (`includes/negaresh-cli.php`, loaded only under WP-CLI): `wp negaresh fix [<id>...]
+    [--post_type=] [--all] [--limit=] [--apply] [--diff] [--format=table|csv|json|count]` is a dry
+    run unless `--apply`; `wp negaresh text [<text>]` (or stdin).
+  - Plugin instances are real globals now (`$GLOBALS['negaresh']`, `negaresh_settings`,
+    `negaresh_editor`, `negaresh_bulk`): WP-CLI includes plugin files inside a function, so the
+    old top level variables were local there.
+  - Verified: 165 unit tests (`BulkTest` 11); e2e 43 checks on WP 7.1.2 and 5.8.3 (+ browser):
+    dry run saves nothing, apply fixes, the original is in the revisions, marker set, embeds kept
+    with kses on (proven: the check fails with the kses switch removed), opted out untouched,
+    `wp negaresh text`. `run.sh` now reports the line where it stops instead of ending silently.
 
 ## I7 Release pipeline ✅ *(done session 3; workflows not yet run on GitHub)*
 - On tag `v*`: build zip with only the plugin folder (respecting `export-ignore`), attach to a

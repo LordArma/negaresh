@@ -13,4 +13,10 @@ final class WP_Post
 
     /** @var string */
     public $post_type = 'post';
+
+    /** @var string */
+    public $post_title = '';
+
+    /** @var string */
+    public $post_excerpt = '';
 }

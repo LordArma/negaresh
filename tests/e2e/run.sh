@@ -15,6 +15,8 @@ FAIL=0
 
 cleanup() { [ "${KEEP:-0}" = 1 ] && return; docker rm -f "$DB" "$WEB" >/dev/null 2>&1 || true; docker network rm "$NET" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
+# set -e would end the run without a word; say where it stopped instead.
+trap 'echo "FAIL  run.sh stopped at line $LINENO: $BASH_COMMAND"' ERR
 wp() { docker run --rm -i --network "$NET" --volumes-from "$WEB" --user 33:33 -e HOME=/tmp \
   -e WORDPRESS_DB_HOST="$DB" -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp "$CLI_IMAGE" wp "$@"; }
 check() { if grep -qF -- "$2" <<<"$3"; then echo "PASS  $1"; else echo "FAIL  $1 (expected: $2)"; FAIL=1; fi; }
@@ -121,6 +123,28 @@ DISPLAY_ID="$(wp post create --post_title=d --post_name=display-mode --post_stat
 check "display mode leaves stored text alone (I4)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
 # "..." checks B27 too: the fix must run before wptexturize turns "..." into &#8230;
 check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نمایش…' "$(curl -s "$URL/display-mode/")"
+
+# I6: WP-CLI fixes existing posts (the site is in display mode here, so stored posts are unfixed).
+DRY="$(wp negaresh fix "$DISPLAY_ID" 2>&1)"
+check "wp negaresh fix is a dry run by default (I6)" 'would change' "$DRY"
+check "dry run saved nothing (I6)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
+wp negaresh fix "$DISPLAY_ID" --apply >/dev/null 2>&1
+check "wp negaresh fix --apply fixes the post (I6)" '<p>حالت نمایش…</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
+check "the change left a revision to undo it (I6)" '<p>حالت نمایش ...</p>' "$(wp post list --post_type=revision --post_parent="$DISPLAY_ID" --post_status=inherit --field=post_content)"
+check "fixed post is marked (I6)" "$(wp eval 'echo (new Negaresh_Settings())->rules_hash();')" "$(wp post meta get "$DISPLAY_ID" _negaresh_fixed)"
+EMBED_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d '{"title":"embed","status":"publish","content":"<p>ویدیو ...</p><iframe src=\"https://example.com/embed\" width=\"300\"></iframe>"}' \
+  "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+# WP-CLI turns kses off by itself; switch WordPress's kses on to act like a user without
+# unfiltered_html (multisite site admin), who may use the bulk tool page.
+wp eval "kses_init_filters(); \$GLOBALS['negaresh_bulk']->process($EMBED_ID, true);" >/dev/null 2>&1
+check "fixing keeps embeds even where kses is on (I6)" '<p>ویدیو…</p><iframe src="https://example.com/embed" width="300"></iframe>' "$(wp post get "$EMBED_ID" --field=post_content)"
+OPT_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d '{"title":"opt","status":"publish","content":"<p>نه ...</p>","meta":{"_negaresh_skip":true}}' \
+  "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+wp negaresh fix --all --apply >/dev/null 2>&1
+check "opted out post untouched by a full run (I6)" '<p>نه ...</p>' "$(wp post get "$OPT_ID" --field=post_content)"
+check "wp negaresh text (I6)" 'عدد ۴۵۶…' "$(wp negaresh text 'عدد ٤٥٦ ...' 2>&1)"
 
 # BROWSER=1: drive the settings page in headless Chromium too (tests/e2e/browser.sh, I5)
 if [ "${BROWSER:-0}" = 1 ]; then

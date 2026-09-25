@@ -24,6 +24,18 @@ I10 needs user decisions.
 
 ---
 
+## 2026-09-25 · Session 3 · Phase 2 slice: I6b engine + WP-CLI
+
+Done: `Negaresh_Bulk`, `Negaresh_CLI`, real globals, e2e +11 checks, ERR trap in `run.sh`.
+Found and fixed while testing: (1) no restorable original after a bulk change (WordPress saves
+only the new text as a revision) → snapshot first; (2) the first kses check proved nothing
+(WP-CLI already disables kses) → now simulates kses and was seen failing without the guard;
+(3) plugin globals were local under WP-CLI.
+Verified: 165 unit tests; e2e + browser on WP 7.1.2 and 5.8.3.
+Next: I6c bulk tool page.
+
+---
+
 ## 2026-09-25 · Session 3 · Phase 2 slice: I6a+d opt out, markup skip, Fix this post
 
 Done: see IMPROVEMENT-PLAN I6 "Result so far". New `Negaresh_Editor` class and `assets/editor.js`;
