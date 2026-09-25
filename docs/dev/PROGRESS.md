@@ -8,18 +8,35 @@ Status snapshot is kept up to date at the top.
 | Phase | State |
 | --- | --- |
 | Analysis | ✅ done (session 1) |
-| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done (B0 to B23); release not done |
-| Working branch | `fix/v4.1.0` (local commits, one per slice, not pushed) |
-| Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⏳ ready to start; parts already done in phase 1 (marked there) |
-| Current version | 4.0.0 (tag `v4.0.0`, commit `cd6f826`) |
-| Next release target | 4.1.0, ready on `fix/v4.1.0`, waiting for the user to merge/tag/push |
+| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
+| Working branch | `phase-2` (local commits, one per slice, not pushed); `fix/v4.1.0` is merged |
+| Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⏳ in progress on branch `phase-2` |
+| Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
+| Next release target | 4.2.0 (phase 2 features) |
 
-**Next step:** user decisions: (1) release 4.1.0 (merge `fix/v4.1.0` → `master`, tag, push,
-attach zip), (2) which phase 2 items to start; suggested order I1 → I7 → I2 → I5 → I6 (I11 after I2),
-(3) open questions: I4 "fix on save" mode, I9 wordpress.org submission.
+**Next step:** phase 2 in the order in IMPROVEMENT-PLAN.md, starting with I1.
 
 **Tests:** `composer test` → 74 tests, all pass (PHP 7.4.33 and 8.3.6).
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 4.1.0
+
+User: "release 4.1.0 and start phase 2"; fix before saving is preferred (I4); wordpress.org
+submission later, not now (I9).
+
+Done:
+- CHANGELOG dated, `master` fast forwarded to `fix/v4.1.0`, annotated tag `v4.1.0`, pushed.
+- Zip built with `git archive --prefix=negaresh/ v4.1.0:wp-content/plugins/negaresh` (the 4.0.0
+  zip had no top folder; a `negaresh/` folder is the standard and required by wordpress.org).
+- GitHub release "Negaresh 4.1.0" with `negaresh.zip` and the changelog as notes (bug IDs removed).
+
+Verified:
+- Before pushing: installed the published 4.0.0 zip in a fresh WordPress 7.1.2, saved settings,
+  then `wp plugin install negaresh.zip --force`: stays active, old files gone, settings migrated,
+  links back, debug.log empty.
+- After pushing: the existing "Create ZIP Plugin" workflow passed on `master`.
 
 ---
 

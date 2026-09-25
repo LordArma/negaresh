@@ -1,7 +1,14 @@
 # Phase 2: improvement plan
 
-Start only after BUGFIX-PLAN Critical and High items are closed (v4.1.0 tagged).
-Each item lists the goal, the approach, and what "done" means. Order is the suggested order.
+Started 2026-09-25 (session 3) after 4.1.0 was released. Work happens on branch `phase-2`.
+Each item lists the goal, the approach, and what "done" means.
+
+**User decisions (2026-09-25):**
+- I4: yes, the user prefers fixing text *before saving* (stored content is corrected).
+- I9: submit to wordpress.org, **but not now**; keep the code ready for it (Plugin Check clean).
+
+**Order:** I1 → I7 → I2 → I4 → I5 → I6 → I11 → I8 leftovers → I3 (only if needed) → I9 (when asked).
+I10 needs user decisions first.
 
 ## I1 Tooling and quality gates
 - Already there (phase 1): Composer, PHPUnit 9.6, Brain Monkey, 74 unit tests, `tests/e2e/run.sh`.
@@ -27,13 +34,15 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - Composer autoload (classmap, shipped) or a tiny PSR-4 autoloader; Virastar scoped under
   `Negaresh\Vendor` (PHP-Scoper or a documented manual prefix).
 
-## I4 Performance
+## I4 Fix before saving (user wants this) + performance
 - ~~Build the Virastar instance once per request~~ (done in phase 1).
 - Cache processed output: key = hash(content + options + plugin version), object cache / transient,
   invalidated on `save_post` and option update.
-- Optional "fix on save" mode (`wp_insert_post_data` / `rest_pre_insert_post`) that writes the
-  corrected text into the database, with a confirmation because it is not reversible;
-  render mode remains the default.
+- **"Fix before saving" mode** (user decision 2026-09-25): correct title/content when a post is
+  saved (`wp_insert_post_data`, covers the block editor through REST), so the database holds the
+  fixed text and display time work disappears. Not reversible, so: a clear setting, revisions keep
+  the original, skip autosaves where sensible, and the per post opt out from I6 applies.
+  Display mode stays available; decide the default for new installs when building it.
 
 ## I5 Settings page UX
 - Group rules into sections (Characters, Numbers, Punctuation, Spacing, Cleanup) with a short
@@ -63,7 +72,7 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - `README.fa.md` for Persian readers; update screenshot.
 - ~~Complete `fa_IR` translation~~ (done in phase 1).
 
-## I9 wordpress.org readiness (optional, decide with the user)
+## I9 wordpress.org readiness (wanted later, not now: user 2026-09-25)
 - Plugin Check (`wp plugin check`) clean, GPL compatible headers, no external calls, sanitisation
   and escaping audit, unique prefix audit. Submit.
 

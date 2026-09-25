@@ -145,9 +145,9 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
 
 ## Suggested order
 
-**Phase 1 complete.** Release steps, only when the user asks: merge `fix/v4.1.0` into `master`,
-tag `v4.1.0`, push, build the zip from `wp-content/plugins/negaresh` and attach it to a GitHub
-release with the CHANGELOG entry. Consider sending the Virastar patches upstream.
+**Phase 1 complete and released as 4.1.0 on 2026-09-25**
+(https://github.com/LordArma/negaresh/releases/tag/v4.1.0). Still worth doing some day: send
+the Virastar patches upstream.
 
 From session 3 the plugin's own code (B2 plugin half, B3, B5 to B19) is done as one refactor
 slice, since every item touches the same three files.
