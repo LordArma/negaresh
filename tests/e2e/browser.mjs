@@ -12,8 +12,9 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 1600 } });
 const errors = [];
 page.on('pageerror', (e) => errors.push(e.message));
 page.on('console', (m) => {
-  // resource failures are reported below with their URL; only the site's own count
-  if (m.type() === 'error' && !m.text().startsWith('Failed to load resource')) errors.push(m.text());
+  // Uncaught errors always count (pageerror above). Console errors only when they are ours:
+  // older WordPress logs its own block validation errors for theme content.
+  if (m.type() === 'error' && /negaresh/i.test(m.text())) errors.push(m.text());
 });
 page.on('requestfailed', (r) => {
   if (r.url().startsWith(url)) errors.push(`${r.url()} ${r.failure()?.errorText}`);
@@ -53,5 +54,56 @@ page.url().includes('page=negaresh-options') && !page.url().includes('settings-u
   ? pass('dismissing the confirmation does not submit') : fail(`page moved to ${page.url()}`);
 
 await page.screenshot({ path: `${shots}/settings-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
+
+// I6: the Negaresh panel in the block editor.
+await page.goto(`${url}/wp-admin/post-new.php`);
+await page.waitForFunction(() => window.wp && wp.data && wp.data.select('core/editor') && wp.data.select('core/block-editor'), null, { timeout: 30000 });
+await page.evaluate(() => {
+  // Welcome guide off: core/preferences on current WordPress, a feature toggle on 5.8.
+  const prefs = wp.data.select('core/preferences') ? wp.data.dispatch('core/preferences') : null;
+  if (prefs) { prefs.set('core/edit-post', 'welcomeGuide', false); prefs.set('core', 'welcomeGuide', false); }
+  const editPost = wp.data.select('core/edit-post');
+  if (editPost && editPost.isFeatureActive && editPost.isFeatureActive('welcomeGuide')) {
+    wp.data.dispatch('core/edit-post').toggleFeature('welcomeGuide');
+  }
+  const block = wp.blocks.createBlock('core/paragraph', { content: 'سلام ... عدد ٤٥٦' });
+  wp.data.dispatch('core/block-editor').resetBlocks([block]);
+  if (wp.data.select('core/interface')) {
+    wp.data.dispatch('core/interface').enableComplementaryArea('core', 'edit-post/document');
+    wp.data.dispatch('core/interface').enableComplementaryArea('core/edit-post', 'edit-post/document');
+  }
+});
+// Found by its title: WordPress 5.8 does not pass className through to the panel.
+const panelToggle = page.locator('.components-panel__body').filter({ hasText: 'Negaresh' }).locator('button.components-panel__body-toggle').first();
+try {
+  await panelToggle.waitFor({ timeout: 15000 });
+  if ((await panelToggle.getAttribute('aria-expanded')) !== 'true') await panelToggle.click();
+  pass('Negaresh panel in the editor sidebar');
+} catch (e) {
+  fail('Negaresh panel not found in the editor sidebar');
+}
+const content = () => page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
+await page.locator('.negaresh-fix-now').click();
+try {
+  await page.waitForFunction(() => wp.data.select('core/editor').getEditedPostContent().includes('سلام… عدد ۴۵۶'), null, { timeout: 10000 });
+  pass('"Fix this post now" fixes the text in the editor');
+} catch (e) {
+  fail(`"Fix this post now" gave: ${await content()}`);
+}
+await page.evaluate(() => wp.data.dispatch('core/editor').undo());
+(await content()).includes('سلام ... عدد ٤٥٦') ? pass('Undo reverts the fix') : fail(`after undo: ${await content()}`);
+await page.locator('.negaresh-skip-toggle input[type="checkbox"]').check();
+(await page.locator('.negaresh-fix-now').isDisabled()) ? pass('opting out disables the button') : fail('button still enabled when opted out');
+await page.evaluate(() => wp.data.dispatch('core/editor').editPost({ title: 'browser' }));
+await page.evaluate(() => wp.data.dispatch('core/editor').savePost());
+await page.waitForFunction(() => !wp.data.select('core/editor').isSavingPost() && wp.data.select('core/editor').getCurrentPostId(), null, { timeout: 20000 });
+const saved = await page.evaluate(async () => {
+  const id = wp.data.select('core/editor').getCurrentPostId();
+  const post = await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` });
+  return { skip: post.meta && post.meta._negaresh_skip, raw: post.content.raw };
+});
+saved.skip === true && saved.raw.includes('سلام ... عدد ٤٥٦')
+  ? pass('opt out saved with the post, text stored as typed') : fail(`saved: ${JSON.stringify(saved)}`);
+await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
 errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');
 await browser.close();

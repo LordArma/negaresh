@@ -22,6 +22,9 @@ class Negaresh_Settings
     /** Post meta: hash of the rules a post was fixed with when it was saved (I4). */
     public const FIXED_META = '_negaresh_fixed';
 
+    /** Post meta: '1' when the author asked Negaresh to leave this post alone (I6). */
+    public const SKIP_META = '_negaresh_skip';
+
     /** When to fix: correct the stored text on save, or only the displayed text (I4). */
     public const MODES = ['save', 'display'];
 
@@ -306,6 +309,7 @@ class Negaresh_Settings
         delete_option(self::OPTION);
         delete_option(self::DB_VERSION_OPTION);
         delete_post_meta_by_key(self::FIXED_META);
+        delete_post_meta_by_key(self::SKIP_META);
         foreach (self::LEGACY_OPTIONS as $name) {
             delete_option($name);
         }

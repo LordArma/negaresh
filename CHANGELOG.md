@@ -3,6 +3,16 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Leave this post alone**: a per post choice in the block editor sidebar and in the classic
+  editor, so Negaresh never changes that post (I6).
+- **Fix this post now** button in the block editor: fixes the text in the editor straight away;
+  Undo reverts it (I6).
+- Parts of a post can be left alone with the CSS class `negaresh-skip` (block editor: Advanced →
+  Additional CSS class) or `data-negaresh="off"` (I6).
+
 ## [4.3.0] (2026-09-25)
 
 ### Added

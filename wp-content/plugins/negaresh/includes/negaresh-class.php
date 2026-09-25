@@ -64,6 +64,14 @@ class Negaresh
     /** @var array<string, true> md5 of contents fixed by filter_post_data() and not yet marked */
     private $pending_marks = [];
 
+    /**
+     * Opt out choices sent with the save that is running now, by post ID (0 for a new post):
+     * WordPress stores post meta only after the content went through wp_insert_post_data (I6).
+     *
+     * @var array<int, bool>
+     */
+    private $skip_overrides = [];
+
     /** @var Virastar|null built once per request, reset when the options change */
     private $virastar = null;
 
@@ -108,7 +116,7 @@ class Negaresh
      */
     public function filter_content($content)
     {
-        if (!is_string($content) || !$this->should_filter() || $this->already_fixed()) {
+        if (!is_string($content) || !$this->should_filter() || $this->already_fixed() || $this->opted_out()) {
             return $content;
         }
 
@@ -125,7 +133,10 @@ class Negaresh
     public function filter_title($title, $post_id = 0)
     {
         $post_id = is_numeric($post_id) ? (int) $post_id : 0;
-        if (!is_string($title) || !$this->settings->flag('fix_titles') || !$this->should_filter($post_id) || $this->already_fixed($post_id)) {
+        if (
+            !is_string($title) || !$this->settings->flag('fix_titles') || !$this->should_filter($post_id)
+            || $this->already_fixed($post_id) || $this->opted_out($post_id)
+        ) {
             return $title;
         }
         return $this->safe_fix($title);
@@ -140,7 +151,10 @@ class Negaresh
      */
     public function filter_excerpt($excerpt)
     {
-        if (!is_string($excerpt) || !$this->settings->flag('fix_excerpts') || !$this->should_filter() || $this->already_fixed()) {
+        if (
+            !is_string($excerpt) || !$this->settings->flag('fix_excerpts') || !$this->should_filter()
+            || $this->already_fixed() || $this->opted_out()
+        ) {
             return $excerpt;
         }
         return $this->safe_fix($excerpt);
@@ -223,6 +237,10 @@ class Negaresh
         if (!$this->saves_type($type) || !isset($data['post_content']) || !is_string($data['post_content'])) {
             return $data;
         }
+        $post_id = is_array($postarr) && isset($postarr['ID']) && is_numeric($postarr['ID']) ? (int) $postarr['ID'] : 0;
+        if ($this->skip_for_save($post_id)) {
+            return $data;
+        }
 
         $content = wp_unslash($data['post_content']);
         $fixed = $this->safe_fix($content);
@@ -283,6 +301,50 @@ class Negaresh
     }
 
     /**
+     * Records the opt out choice that arrived with the running save (block editor, I6).
+     */
+    public function override_skip(int $post_id, bool $skip): void
+    {
+        $this->skip_overrides[$post_id] = $skip;
+    }
+
+    /**
+     * Whether the save running now must leave the post alone: the choice sent with this save (block
+     * editor or classic editor box), else the stored one.
+     */
+    private function skip_for_save(int $post_id): bool
+    {
+        if (array_key_exists($post_id, $this->skip_overrides)) {
+            return $this->skip_overrides[$post_id];
+        }
+
+        // Classic editor: the Negaresh box is part of the form being saved.
+        if (
+            isset($_POST[Negaresh_Editor::NONCE_FIELD])
+            && false !== wp_verify_nonce(sanitize_text_field(wp_unslash($_POST[Negaresh_Editor::NONCE_FIELD])), Negaresh_Editor::NONCE_ACTION)
+        ) {
+            return !empty($_POST[Negaresh_Editor::FIELD]);
+        }
+
+        return $this->opted_out($post_id);
+    }
+
+    /**
+     * Whether the post (the one being displayed by default) is opted out (I6).
+     */
+    private function opted_out(int $post_id = 0): bool
+    {
+        if (0 === $post_id) {
+            $post = get_post();
+            if (!$post instanceof \WP_Post) {
+                return false;
+            }
+            $post_id = $post->ID;
+        }
+        return 0 !== $post_id && '1' === (string) get_post_meta($post_id, Negaresh_Settings::SKIP_META, true);
+    }
+
+    /**
      * True when the post (the one being displayed by default) was fixed on save with the current
      * rules.
      */
@@ -297,9 +359,10 @@ class Negaresh
 
     /**
      * fix() with every guard: only Persian content, never on invalid UTF-8, and on any failure or
-     * empty result the input is returned unchanged.
+     * empty result the input is returned unchanged. Uses the saved rules; ignores mode and scope
+     * (callers decide whether to fix).
      */
-    private function safe_fix(string $content): string
+    public function safe_fix(string $content): string
     {
         if ('' === trim($content)) {
             return $content;
@@ -355,7 +418,7 @@ class Negaresh
             $closing = '/' === $part[1];
 
             if (null === $protected) {
-                if (!$closing && in_array($name, self::PROTECTED_ELEMENTS, true)) {
+                if (!$closing && (in_array($name, self::PROTECTED_ELEMENTS, true) || self::marked_skip($part))) {
                     $protected = $name;
                     $depth = 1;
                 }
@@ -423,6 +486,22 @@ class Negaresh
     private static function tag_name(string $markup): string
     {
         return 1 === preg_match('#^</?([A-Za-z][^\s/>]*)#', $markup, $m) ? strtolower($m[1]) : '';
+    }
+
+    /**
+     * An element the author marked to be left alone (I6): class "negaresh-skip" or
+     * data-negaresh="off". In the block editor: Advanced → Additional CSS class.
+     */
+    private static function marked_skip(string $tag): bool
+    {
+        if (1 === preg_match('/\sdata-negaresh\s*=\s*(["\']?)off\1(?=[\s\/>])/i', $tag)) {
+            return true;
+        }
+        if (1 !== preg_match('/\sclass\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>"\']+))/i', $tag, $m)) {
+            return false;
+        }
+        $classes = preg_split('/\s+/', trim(implode(' ', array_slice($m, 1))));
+        return is_array($classes) && in_array('negaresh-skip', $classes, true);
     }
 
     private static function is_self_closing(string $markup): bool

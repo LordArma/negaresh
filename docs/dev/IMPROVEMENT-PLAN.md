@@ -115,12 +115,30 @@ I10 needs user decisions first.
     browser (Playwright, headless Chromium): preview while typing, preview follows unsaved boxes,
     reset asks and dismissing does not submit, no JavaScript errors, in English and in fa_IR.
 
-## I6 Editor integration
+## I6 Editor integration ⏳ *(opt out + Fix this post done session 3; WP-CLI and bulk tool next)*
 - Per post opt out (post meta + checkbox in Gutenberg sidebar and Classic editor meta box).
 - Gutenberg: "Fix Persian typography" button that runs the processor on the selected block or
   the whole post via REST and shows a diff before applying.
 - Bulk tool (Tools → Negaresh): dry run over posts, show changed count and diffs, apply in batches.
 - Optional WP-CLI command `wp negaresh fix [--dry-run] [--post_type=post]`.
+- *Result so far (slice I6a+d):*
+  - Per post opt out: post meta `_negaresh_skip` (registered for REST, `edit_post` auth).
+    Block editor: "Negaresh" panel in the document sidebar (`assets/editor.js`, works on WP 5.8
+    via `wp.editPost` and on 6.6+ via `wp.editor`). Classic editor: side meta box
+    (`__back_compat_meta_box`, nonce). Opted out posts are not fixed on save or display.
+    The save that ticks or unticks the box obeys it: the block editor's choice is read in
+    `rest_pre_insert_{type}`, the classic one from the form (nonce checked), because WordPress
+    stores meta after `wp_insert_post_data`.
+  - Markup skip: elements with class `negaresh-skip` or `data-negaresh="off"` are left alone
+    (nesting aware, like protected elements); in the block editor: Advanced → Additional CSS class.
+  - "Fix this post now" button in the panel: `POST negaresh/v1/fix` (`edit_posts`) returns
+    content and title fixed with the saved rules; the editor applies it with
+    `resetEditorBlocks`, so Undo reverts it. Disabled while the post is opted out.
+  - Uninstall removes `_negaresh_skip` too.
+  - Verified: 150 unit tests (`EditorTest` 15); e2e 32 checks; browser test drives the panel
+    (fix, undo, opt out + save) on WP 7.1.2 and 5.8.3; CI now runs the browser test on both.
+  - Found in the test harness (not the plugin): `grep -q` in a pipe under `pipefail` hid a FAIL
+    and printed ALL PASSED; fixed by capturing the output first.
 
 ## I7 Release pipeline ✅ *(done session 3; workflows not yet run on GitHub)*
 - On tag `v*`: build zip with only the plugin folder (respecting `export-ignore`), attach to a

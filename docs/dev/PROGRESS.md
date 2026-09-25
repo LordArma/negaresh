@@ -18,9 +18,19 @@ Status snapshot is kept up to date at the top.
 WP-CLI, c: bulk tool page, d: editor button), then I8 leftovers, then I11. I9 waits for the user;
 I10 needs user decisions.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 135 unit tests) clean; e2e 28/28 on WP
-7.1.2 and 5.8.3; browser check passes (English and fa_IR).
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 150 unit tests) clean; e2e + browser
+(settings page and editor panel) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I6a+d opt out, markup skip, Fix this post
+
+Done: see IMPROVEMENT-PLAN I6 "Result so far". New `Negaresh_Editor` class and `assets/editor.js`;
+69 translated strings; e2e +4 checks; browser test covers the editor panel on 7.1.2 and 5.8.3.
+Fixed in the harness: a hidden browser FAIL (pipefail + grep -q), 5.8 welcome guide and panel
+selectors, console errors from WordPress's own block validation no longer counted.
+Next: I6b (engine + WP-CLI), I6c (bulk tool page).
 
 ---
 

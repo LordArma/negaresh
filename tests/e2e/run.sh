@@ -96,6 +96,20 @@ REST_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
   "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
 check "block editor (REST) save is fixed (I4)" '<p>از ویرایشگر بلوک… عدد ۷۸۹</p>' "$(wp post get "$REST_ID" --field=post_content)"
 
+# I6: opting out in the block editor applies to the save that ticks the box, and back again.
+SKIP_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d '{"title":"skip","status":"publish","content":"<p>دست نزن ...</p>","meta":{"_negaresh_skip":true}}' \
+  "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+check "opted out post is stored as typed (I6)" '<p>دست نزن ...</p>' "$(wp post get "$SKIP_ID" --field=post_content)"
+curl -s -o /dev/null -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d '{"content":"<p>حالا اصلاح شود ...</p>","meta":{"_negaresh_skip":false}}' "$URL/wp-json/wp/v2/posts/$SKIP_ID"
+check "unticking fixes that same save (I6)" '<p>حالا اصلاح شود…</p>' "$(wp post get "$SKIP_ID" --field=post_content)"
+MARKED_ID="$(wp post create --post_title=m --post_status=publish --porcelain \
+  --post_content='<div class="negaresh-skip"><p>نقل قول ...</p></div><p>بقیه ...</p>')"
+check "negaresh-skip markup left alone, the rest fixed (I6)" '<div class="negaresh-skip"><p>نقل قول ...</p></div><p>بقیه…</p>' "$(wp post get "$MARKED_ID" --field=post_content)"
+FIXED="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' -d '{"content":"<p>متن ...</p>","title":"t"}' "$URL/wp-json/negaresh/v1/fix")"
+check "fix this post endpoint (I6)" '<p>متن…</p>' "$(python3 -c 'import json,sys; print(json.load(sys.stdin)["content"])' <<<"$FIXED" 2>&1)"
+
 # I5: titles, when enabled, are fixed on save too.
 wp option update negaresh_options '{"fix_titles":true}' --format=json >/dev/null
 TITLE_ID="$(wp post create --post_title='عنوان ...' --post_status=publish --post_content='<p>متن</p>' --porcelain)"
@@ -110,7 +124,10 @@ check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نم
 
 # BROWSER=1: drive the settings page in headless Chromium too (tests/e2e/browser.sh, I5)
 if [ "${BROWSER:-0}" = 1 ]; then
-  "$ROOT/tests/e2e/browser.sh" | grep -E '^(PASS|FAIL)' | tee /dev/stderr | grep -q '^FAIL' && FAIL=1
+  # capture first: "grep -q" in a pipe exits early, tee dies of SIGPIPE and pipefail hides the FAIL
+  BROWSER_OUT="$("$ROOT/tests/e2e/browser.sh" 2>&1 || true)"
+  grep -E '^(PASS|FAIL)' <<<"$BROWSER_OUT" || { echo "FAIL  browser check produced no results"; echo "$BROWSER_OUT" | tail -20; }
+  if ! grep -q '^PASS' <<<"$BROWSER_OUT" || grep -q '^FAIL' <<<"$BROWSER_OUT"; then FAIL=1; fi
 fi
 
 LOG="$(docker exec "$WEB" sh -c 'cat /var/www/html/wp-content/debug.log 2>/dev/null' || true)"

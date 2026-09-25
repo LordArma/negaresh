@@ -13,6 +13,10 @@ if [ "${LANG_FA:-0}" = 1 ]; then
     -e WORDPRESS_DB_HOST=negaresh-e2e-db -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp \
     wordpress:cli-php8.3 wp language core install fa_IR --activate >/dev/null
 fi
+# Save mode with the default rules, so "stored as typed" really tests the opt out.
+docker run --rm -i --network negaresh-e2e --volumes-from negaresh-e2e-wp --user 33:33 -e HOME=/tmp \
+  -e WORDPRESS_DB_HOST=negaresh-e2e-db -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp \
+  wordpress:cli-php8.3 wp option update negaresh_options '{"mode":"save"}' --format=json >/dev/null
 docker run --rm --network host -e WP_URL=http://127.0.0.1:8089 -e SHOTS=/shots \
   -e SHOT_NAME="${LANG_FA:+fa}" -v "$ROOT/tests/e2e":/e2e:ro -v "$ROOT/build/shots":/shots "$IMAGE" \
   bash -c "cd /tmp && npm init -y >/dev/null && npm i --silent playwright@$VERSION >/dev/null && cp /e2e/browser.mjs . && node browser.mjs"

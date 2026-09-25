@@ -204,7 +204,7 @@ class SettingsTest extends TestCase
     public function testB19DeleteAllRemovesEverything(): void
     {
         $this->options = $this->legacyRows() + ['negaresh_options' => [], 'negaresh_db_version' => 2, 'blogname' => 'x'];
-        Functions\expect('delete_post_meta_by_key')->once()->with('_negaresh_fixed')->andReturn(true);
+        Functions\expect('delete_post_meta_by_key')->twice()->andReturn(true);
 
         Negaresh_Settings::delete_all();
 

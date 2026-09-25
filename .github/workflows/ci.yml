@@ -60,7 +60,7 @@ jobs:
             browser: '1'
           - wp: '5.8 (minimum)'
             image: 'wordpress:5.8-php7.4-apache'
-            browser: '0'
+            browser: '1'
     steps:
       - uses: actions/checkout@v4
       - name: Run tests/e2e/run.sh

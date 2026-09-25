@@ -28,5 +28,8 @@ define('NEGARESH_FILE', __FILE__);
 require_once __DIR__ . '/includes/Virastar.php';
 require_once __DIR__ . '/includes/negaresh-settings.php';
 require_once __DIR__ . '/includes/negaresh-class.php';
+require_once __DIR__ . '/includes/negaresh-editor.php';
 
-$negaresh = new Negaresh(new Negaresh_Settings());
+$negaresh_settings = new Negaresh_Settings();
+$negaresh = new Negaresh($negaresh_settings);
+$negaresh_editor = new Negaresh_Editor($negaresh, $negaresh_settings);
