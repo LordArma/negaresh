@@ -11,15 +11,27 @@ Status snapshot is kept up to date at the top.
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⏳ in progress on branch `phase-2` |
-| Current version | 4.2.0 (tag `v4.2.0`, commit `92c220b`, released 2026-09-25 by the Release workflow) |
-| Next release target | 4.3.0 |
+| Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
+| Next release target | 4.4.0 |
 
-**Next step:** I6 (editor tools: per post opt out, fix this post, bulk tool). Nothing released
-since 4.2.0: I5 is on `phase-2`.
+**Next step:** user: "release it as 4.3.0 then do all nexts together" → I6 (a: opt out, b: engine +
+WP-CLI, c: bulk tool page, d: editor button), then I8 leftovers, then I11. I9 waits for the user;
+I10 needs user decisions.
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 135 unit tests) clean; e2e 28/28 on WP
 7.1.2 and 5.8.3; browser check passes (English and fa_IR).
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 4.3.0
+
+Done: version 4.3.0, translation headers, CHANGELOG dated; all local checks (135 unit, e2e on WP
+7.1.2 with the browser check and on 5.8.3); `master` pushed, CI green including the Playwright
+check on GitHub (first run there); tag `v4.3.0` → Release workflow published
+https://github.com/LordArma/negaresh/releases/tag/v4.3.0.
+Verified: published zip installed over the published 4.2.0 zip: active, DB 3, mode kept (save,
+fresh 4.2 install), `assets/admin.js` served, empty debug.log.
 
 ---
 
