@@ -3,7 +3,7 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [4.1.0] (unreleased)
+## [4.1.0] (2026-09-25)
 
 A bug fix release. Upgrading is strongly recommended: 4.0.0 damaged the displayed HTML of every post
 and prevented logging in while it was active.
