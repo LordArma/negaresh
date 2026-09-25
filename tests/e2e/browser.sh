@@ -17,12 +17,14 @@ fi
 docker run --rm -i --network negaresh-e2e --volumes-from negaresh-e2e-wp --user 33:33 -e HOME=/tmp \
   -e WORDPRESS_DB_HOST=negaresh-e2e-db -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp \
   wordpress:cli-php8.3 wp option update negaresh_options '{"mode":"save"}' --format=json >/dev/null
-# A post stored unfixed (created in display mode) for the bulk tool to find.
+# A post stored unfixed (created in display mode) for the bulk tool to find; unique per run, so
+# repeated runs on a KEEP=1 site do not see each other's posts.
+BULK_TITLE="bulk-target-$(date +%s)-$RANDOM"
 docker run --rm -i --network negaresh-e2e --volumes-from negaresh-e2e-wp --user 33:33 -e HOME=/tmp \
   -e WORDPRESS_DB_HOST=negaresh-e2e-db -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp \
   wordpress:cli-php8.3 sh -c "wp option update negaresh_options '{\"mode\":\"display\"}' --format=json >/dev/null \
-    && wp post create --post_title=bulk-target --post_status=publish --post_content='<p>گروهی ...</p>' >/dev/null \
+    && wp post create --post_title=$BULK_TITLE --post_status=publish --post_content='<p>گروهی ...</p>' >/dev/null \
     && wp option update negaresh_options '{\"mode\":\"save\"}' --format=json >/dev/null"
-docker run --rm --network host -e WP_URL=http://127.0.0.1:8089 -e SHOTS=/shots \
+docker run --rm --network host -e WP_URL=http://127.0.0.1:8089 -e BULK_TITLE="$BULK_TITLE" -e SHOTS=/shots \
   -e SHOT_NAME="${LANG_FA:+fa}" -v "$ROOT/tests/e2e":/e2e:ro -v "$ROOT/build/shots":/shots "$IMAGE" \
   bash -c "cd /tmp && npm init -y >/dev/null && npm i --silent playwright@$VERSION >/dev/null && cp /e2e/browser.mjs . && node browser.mjs"

@@ -7,129 +7,145 @@ const shots = process.env.SHOTS || '/shots';
 const fail = (msg) => { console.log(`FAIL  ${msg}`); process.exitCode = 1; };
 const pass = (msg) => console.log(`PASS  ${msg}`);
 
-const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: { width: 1280, height: 1600 } });
-const errors = [];
-page.on('pageerror', (e) => errors.push(e.message));
-page.on('console', (m) => {
-  // Uncaught errors always count (pageerror above). Console errors only when they are ours:
-  // older WordPress logs its own block validation errors for theme content.
-  if (m.type() === 'error' && /negaresh/i.test(m.text())) errors.push(m.text());
-});
-page.on('requestfailed', (r) => {
-  if (r.url().startsWith(url)) errors.push(`${r.url()} ${r.failure()?.errorText}`);
-  else console.log(`note  external request failed (ignored): ${r.url()}`);
-});
-
-await page.goto(`${url}/wp-login.php`);
-await page.fill('#user_login', 'admin');
-await page.fill('#user_pass', 'admin');
-await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
-await page.goto(`${url}/wp-admin/options-general.php?page=negaresh-options`);
-
-const output = page.locator('#negaresh-preview-output');
-await page.locator('#negaresh-preview-input').fill('<p>سلام ... عدد ٤٥٦</p>');
+let browser;
 try {
-  await page.waitForFunction(() => document.querySelector('#negaresh-preview-output').value !== '', null, { timeout: 10000 });
-  const first = await output.inputValue();
-  first === '<p>سلام… عدد ۴۵۶</p>' ? pass('preview shows the fixed text while typing') : fail(`preview gave ${first}`);
-} catch (e) {
-  fail('preview never answered');
-}
+  browser = await chromium.launch();
+  const page = await browser.newPage({ viewport: { width: 1280, height: 1600 } });
+  const errors = [];
+  page.on('pageerror', (e) => errors.push(e.message));
+  page.on('console', (m) => {
+    // Uncaught errors always count (pageerror above). Console errors only when they are ours:
+    // older WordPress logs its own block validation errors for theme content.
+    if (m.type() === 'error' && /negaresh/i.test(m.text())) errors.push(m.text());
+  });
+  page.on('requestfailed', (r) => {
+    if (r.url().startsWith(url)) errors.push(`${r.url()} ${r.failure()?.errorText}`);
+    else console.log(`note  external request failed (ignored): ${r.url()}`);
+  });
 
-await page.locator('#negaresh_fix_three_dots').uncheck();
-try {
-  await page.waitForFunction(() => document.querySelector('#negaresh-preview-output').value.includes('...'), null, { timeout: 10000 });
-  pass('preview follows an unsaved checkbox change');
-} catch (e) {
-  fail(`preview did not follow the checkbox: ${await output.inputValue()}`);
-}
+  await page.goto(`${url}/wp-login.php`);
+  await page.fill('#user_login', 'admin');
+  await page.fill('#user_pass', 'admin');
+  await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
+  await page.goto(`${url}/wp-admin/options-general.php?page=negaresh-options`);
 
-let asked = false;
-page.once('dialog', async (dialog) => { asked = true; await dialog.dismiss(); });
-await page.locator('.negaresh-reset').click();
-await page.waitForTimeout(500);
-asked ? pass('reset asks for confirmation') : fail('reset did not ask');
-page.url().includes('page=negaresh-options') && !page.url().includes('settings-updated')
-  ? pass('dismissing the confirmation does not submit') : fail(`page moved to ${page.url()}`);
-
-await page.screenshot({ path: `${shots}/settings-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
-
-// I6: the Negaresh panel in the block editor.
-await page.goto(`${url}/wp-admin/post-new.php`);
-await page.waitForFunction(() => window.wp && wp.data && wp.data.select('core/editor') && wp.data.select('core/block-editor'), null, { timeout: 30000 });
-await page.evaluate(() => {
-  // Welcome guide off: core/preferences on current WordPress, a feature toggle on 5.8.
-  const prefs = wp.data.select('core/preferences') ? wp.data.dispatch('core/preferences') : null;
-  if (prefs) { prefs.set('core/edit-post', 'welcomeGuide', false); prefs.set('core', 'welcomeGuide', false); }
-  const editPost = wp.data.select('core/edit-post');
-  if (editPost && editPost.isFeatureActive && editPost.isFeatureActive('welcomeGuide')) {
-    wp.data.dispatch('core/edit-post').toggleFeature('welcomeGuide');
+  const output = page.locator('#negaresh-preview-output');
+  await page.locator('#negaresh-preview-input').fill('<p>سلام ... عدد ٤٥٦</p>');
+  try {
+    await page.waitForFunction(() => document.querySelector('#negaresh-preview-output').value !== '', null, { timeout: 10000 });
+    const first = await output.inputValue();
+    first === '<p>سلام… عدد ۴۵۶</p>' ? pass('preview shows the fixed text while typing') : fail(`preview gave ${first}`);
+  } catch (e) {
+    fail('preview never answered');
   }
-  const block = wp.blocks.createBlock('core/paragraph', { content: 'سلام ... عدد ٤٥٦' });
-  wp.data.dispatch('core/block-editor').resetBlocks([block]);
-  if (wp.data.select('core/interface')) {
-    wp.data.dispatch('core/interface').enableComplementaryArea('core', 'edit-post/document');
-    wp.data.dispatch('core/interface').enableComplementaryArea('core/edit-post', 'edit-post/document');
-  }
-});
-// Found by its title: WordPress 5.8 does not pass className through to the panel.
-const panelToggle = page.locator('.components-panel__body').filter({ hasText: 'Negaresh' }).locator('button.components-panel__body-toggle').first();
-try {
-  await panelToggle.waitFor({ timeout: 15000 });
-  if ((await panelToggle.getAttribute('aria-expanded')) !== 'true') await panelToggle.click();
-  pass('Negaresh panel in the editor sidebar');
-} catch (e) {
-  fail('Negaresh panel not found in the editor sidebar');
-}
-const content = () => page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
-await page.locator('.negaresh-fix-now').click();
-try {
-  await page.waitForFunction(() => wp.data.select('core/editor').getEditedPostContent().includes('سلام… عدد ۴۵۶'), null, { timeout: 10000 });
-  pass('"Fix this post now" fixes the text in the editor');
-} catch (e) {
-  fail(`"Fix this post now" gave: ${await content()}`);
-}
-await page.evaluate(() => wp.data.dispatch('core/editor').undo());
-(await content()).includes('سلام ... عدد ٤٥٦') ? pass('Undo reverts the fix') : fail(`after undo: ${await content()}`);
-await page.locator('.negaresh-skip-toggle input[type="checkbox"]').check();
-(await page.locator('.negaresh-fix-now').isDisabled()) ? pass('opting out disables the button') : fail('button still enabled when opted out');
-await page.evaluate(() => wp.data.dispatch('core/editor').editPost({ title: 'browser' }));
-await page.evaluate(() => wp.data.dispatch('core/editor').savePost());
-await page.waitForFunction(() => !wp.data.select('core/editor').isSavingPost() && wp.data.select('core/editor').getCurrentPostId(), null, { timeout: 20000 });
-const saved = await page.evaluate(async () => {
-  const id = wp.data.select('core/editor').getCurrentPostId();
-  const post = await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` });
-  return { skip: post.meta && post.meta._negaresh_skip, raw: post.content.raw };
-});
-saved.skip === true && saved.raw.includes('سلام ... عدد ٤٥٦')
-  ? pass('opt out saved with the post, text stored as typed') : fail(`saved: ${JSON.stringify(saved)}`);
-await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
 
-// I6: Tools → Negaresh, scan then fix.
-await page.goto(`${url}/wp-admin/tools.php?page=negaresh-bulk`);
-await page.locator('.negaresh-scan').click();
-const row = page.locator('.negaresh-bulk-results tr', { hasText: 'bulk-target' });
-try {
-  await row.waitFor({ timeout: 30000 });
-  pass('bulk scan lists the unfixed post');
+  await page.locator('#negaresh_fix_three_dots').uncheck();
+  try {
+    await page.waitForFunction(() => document.querySelector('#negaresh-preview-output').value.includes('...'), null, { timeout: 10000 });
+    pass('preview follows an unsaved checkbox change');
+  } catch (e) {
+    fail(`preview did not follow the checkbox: ${await output.inputValue()}`);
+  }
+
+  let asked = false;
+  page.once('dialog', async (dialog) => { asked = true; await dialog.dismiss(); });
+  await page.locator('.negaresh-reset').click();
+  await page.waitForTimeout(500);
+  asked ? pass('reset asks for confirmation') : fail('reset did not ask');
+  page.url().includes('page=negaresh-options') && !page.url().includes('settings-updated')
+    ? pass('dismissing the confirmation does not submit') : fail(`page moved to ${page.url()}`);
+
+  await page.screenshot({ path: `${shots}/settings-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
+  // The top of the page (preview with a fixed example, mode, first rules): the README screenshot.
+  for (const rule of ['fix_three_dots', 'fix_question_mark', 'fix_suffix_spacing', 'fix_english_quotes', 'fix_spacing_for_punctuations']) {
+    await page.locator(`#negaresh_${rule}`).check(); // on the page only, not saved
+  }
+  await page.locator('#negaresh-preview-input').fill('او گفت "سلام" ... کتاب ها را خواندید ?');
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: `${shots}/readme-${process.env.SHOT_NAME || 'page'}.png`, clip: { x: 160, y: 32, width: 1120, height: 900 } });
+
+  // I6: the Negaresh panel in the block editor.
+  await page.goto(`${url}/wp-admin/post-new.php`);
+  await page.waitForFunction(() => window.wp && wp.data && wp.data.select('core/editor') && wp.data.select('core/block-editor'), null, { timeout: 30000 });
+  await page.evaluate(() => {
+    // Welcome guide off: core/preferences on current WordPress, a feature toggle on 5.8.
+    const prefs = wp.data.select('core/preferences') ? wp.data.dispatch('core/preferences') : null;
+    if (prefs) { prefs.set('core/edit-post', 'welcomeGuide', false); prefs.set('core', 'welcomeGuide', false); }
+    const editPost = wp.data.select('core/edit-post');
+    if (editPost && editPost.isFeatureActive && editPost.isFeatureActive('welcomeGuide')) {
+      wp.data.dispatch('core/edit-post').toggleFeature('welcomeGuide');
+    }
+    const block = wp.blocks.createBlock('core/paragraph', { content: 'سلام ... عدد ٤٥٦' });
+    wp.data.dispatch('core/block-editor').resetBlocks([block]);
+    if (wp.data.select('core/interface')) {
+      wp.data.dispatch('core/interface').enableComplementaryArea('core', 'edit-post/document');
+      wp.data.dispatch('core/interface').enableComplementaryArea('core/edit-post', 'edit-post/document');
+    }
+  });
+  // Found by its title: WordPress 5.8 does not pass className through to the panel.
+  const panelTitle = await page.evaluate(() => (window.negareshEditor && window.negareshEditor.title) || 'Negaresh');
+  const panelToggle = page.locator('.components-panel__body').filter({ hasText: panelTitle }).locator('button.components-panel__body-toggle').first();
+  try {
+    await panelToggle.waitFor({ timeout: 15000 });
+    if ((await panelToggle.getAttribute('aria-expanded')) !== 'true') await panelToggle.click();
+    pass('Negaresh panel in the editor sidebar');
+  } catch (e) {
+    fail('Negaresh panel not found in the editor sidebar');
+  }
+  const content = () => page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
+  await page.locator('.negaresh-fix-now').click();
+  try {
+    await page.waitForFunction(() => wp.data.select('core/editor').getEditedPostContent().includes('سلام… عدد ۴۵۶'), null, { timeout: 10000 });
+    pass('"Fix this post now" fixes the text in the editor');
+  } catch (e) {
+    fail(`"Fix this post now" gave: ${await content()}`);
+  }
+  await page.evaluate(() => wp.data.dispatch('core/editor').undo());
+  (await content()).includes('سلام ... عدد ٤٥٦') ? pass('Undo reverts the fix') : fail(`after undo: ${await content()}`);
+  await page.locator('.negaresh-skip-toggle input[type="checkbox"]').check();
+  (await page.locator('.negaresh-fix-now').isDisabled()) ? pass('opting out disables the button') : fail('button still enabled when opted out');
+  await page.evaluate(() => wp.data.dispatch('core/editor').editPost({ title: 'browser' }));
+  await page.evaluate(() => wp.data.dispatch('core/editor').savePost());
+  await page.waitForFunction(() => !wp.data.select('core/editor').isSavingPost() && wp.data.select('core/editor').getCurrentPostId(), null, { timeout: 20000 });
+  const saved = await page.evaluate(async () => {
+    const id = wp.data.select('core/editor').getCurrentPostId();
+    const post = await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` });
+    return { skip: post.meta && post.meta._negaresh_skip, raw: post.content.raw };
+  });
+  saved.skip === true && saved.raw.includes('سلام ... عدد ٤٥٦')
+    ? pass('opt out saved with the post, text stored as typed') : fail(`saved: ${JSON.stringify(saved)}`);
+  await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
+
+  // I6: Tools → Negaresh, scan then fix.
+  await page.goto(`${url}/wp-admin/tools.php?page=negaresh-bulk`);
+  await page.locator('.negaresh-scan').click();
+  const row = page.locator('.negaresh-bulk-results tr', { hasText: process.env.BULK_TITLE || 'bulk-target' });
+  try {
+    await row.waitFor({ timeout: 30000 });
+    pass('bulk scan lists the unfixed post');
+  } catch (e) {
+    fail(`bulk scan did not list the post: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+  }
+  await row.locator('summary').click();
+  (await row.locator('.negaresh-added').first().textContent())?.includes('<p>گروهی…</p>')
+    ? pass('bulk scan shows the changed line') : fail('bulk diff missing');
+  const idOf = await row.getAttribute('data-id');
+  const stored = async () => page.evaluate(async (id) => (await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` })).content.raw, idOf);
+  (await stored()) === '<p>گروهی ...</p>' ? pass('scanning saved nothing') : fail(`scan changed the post: ${await stored()}`);
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.locator('.negaresh-apply').click();
+  try {
+    await page.waitForFunction(() => document.querySelectorAll('.negaresh-bulk-results tr.negaresh-done').length > 0, null, { timeout: 30000 });
+    (await stored()) === '<p>گروهی…</p>' ? pass('"Fix all listed posts" fixes the stored post') : fail(`after fix: ${await stored()}`);
+  } catch (e) {
+    fail(`bulk fix did not finish: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+  }
+  await page.screenshot({ path: `${shots}/bulk-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
+  errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');
 } catch (e) {
-  fail(`bulk scan did not list the post: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+  // A crash must never look like a pass: earlier checks already printed PASS.
+  fail(`browser test stopped: ${e.message.split('\n')[0]}`);
+} finally {
+  if (browser) await browser.close();
+  console.log('DONE');
 }
-await row.locator('summary').click();
-(await row.locator('.negaresh-added').first().textContent())?.includes('<p>گروهی…</p>')
-  ? pass('bulk scan shows the changed line') : fail('bulk diff missing');
-const idOf = await row.getAttribute('data-id');
-const stored = async () => page.evaluate(async (id) => (await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` })).content.raw, idOf);
-(await stored()) === '<p>گروهی ...</p>' ? pass('scanning saved nothing') : fail(`scan changed the post: ${await stored()}`);
-page.once('dialog', (dialog) => dialog.accept());
-await page.locator('.negaresh-apply').click();
-try {
-  await page.waitForFunction(() => document.querySelectorAll('.negaresh-bulk-results tr.negaresh-done').length > 0, null, { timeout: 30000 });
-  (await stored()) === '<p>گروهی…</p>' ? pass('"Fix all listed posts" fixes the stored post') : fail(`after fix: ${await stored()}`);
-} catch (e) {
-  fail(`bulk fix did not finish: ${await page.locator('.negaresh-bulk-status').textContent()}`);
-}
-await page.screenshot({ path: `${shots}/bulk-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
-errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');
-await browser.close();

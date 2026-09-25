@@ -14,12 +14,24 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
 | Next release target | 4.4.0 |
 
-**Next step:** user: "release it as 4.3.0 then do all nexts together" → I6 done; next I8
-leftovers, then I11. I9 waits for the user; I10 needs user decisions.
+**Next step:** I11 (Virastar). Then a summary for the user: I9 waits for the user (check the
+wordpress.org username in readme.txt), I10 needs user decisions.
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 172 unit tests) clean; e2e + browser
 (settings page, editor panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I8 documentation
+
+Done: readme.txt (wordpress.org), README rewrite, README.fa.md, new screenshot, version test for
+readme.txt, `dir="auto"` preview boxes.
+Found in the harness: a crash in `browser.mjs` after some checks printed PASS looked like a pass
+(now any crash prints FAIL and `run.sh` requires a final `DONE`); repeated runs on one KEEP site
+saw each other's bulk test posts (unique title per run); the editor panel was found by its
+English title (now the translated title).
+Verified: 172 unit tests; browser test 14/14 in Persian and in English; e2e on WP 7.1.2.
 
 ---
 

@@ -159,7 +159,11 @@ if [ "${BROWSER:-0}" = 1 ]; then
   # capture first: "grep -q" in a pipe exits early, tee dies of SIGPIPE and pipefail hides the FAIL
   BROWSER_OUT="$("$ROOT/tests/e2e/browser.sh" 2>&1 || true)"
   grep -E '^(PASS|FAIL)' <<<"$BROWSER_OUT" || { echo "FAIL  browser check produced no results"; echo "$BROWSER_OUT" | tail -20; }
-  if ! grep -q '^PASS' <<<"$BROWSER_OUT" || grep -q '^FAIL' <<<"$BROWSER_OUT"; then FAIL=1; fi
+  # A pass needs results, no FAIL, and the DONE line printed after the last check.
+  if ! grep -q '^PASS' <<<"$BROWSER_OUT" || grep -q '^FAIL' <<<"$BROWSER_OUT" || ! grep -q '^DONE' <<<"$BROWSER_OUT"; then
+    FAIL=1
+    grep -q '^DONE' <<<"$BROWSER_OUT" || echo "FAIL  browser check did not finish"
+  fi
 fi
 
 LOG="$(docker exec "$WEB" sh -c 'cat /var/www/html/wp-content/debug.log 2>/dev/null' || true)"

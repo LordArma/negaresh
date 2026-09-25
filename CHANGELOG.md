@@ -15,8 +15,12 @@ versions: [Semantic Versioning](https://semver.org/).
 - **`wp negaresh fix`** (WP-CLI) fixes posts that already exist: a dry run with an optional diff
   unless `--apply` is given; the text before the change is kept as a revision. And
   `wp negaresh text` fixes a piece of text (I6).
+- `readme.txt` for wordpress.org, a Persian README and a new screenshot (I8).
 - Parts of a post can be left alone with the CSS class `negaresh-skip` (block editor: Advanced →
   Additional CSS class) or `data-negaresh="off"` (I6).
+
+### Changed
+- The “Try it” boxes follow the direction of what is typed, so pasted HTML is readable (I8).
 
 ## [4.3.0] (2026-09-25)
 

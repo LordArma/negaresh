@@ -183,10 +183,18 @@ I10 needs user decisions first.
   Found while testing locally: `[ a ] && [ b ]` does not stop a `bash -e` step, so a wrong tag
   could have passed; rewritten as an explicit `if`.
 
-## I8 Documentation and i18n
+## I8 Documentation and i18n ✅ *(done session 3)*
 - `readme.txt` in wordpress.org format (description, FAQ, screenshots, changelog).
 - `README.fa.md` for Persian readers; update screenshot.
 - ~~Complete `fa_IR` translation~~ (done in phase 1).
+- *Result:* `wp-content/plugins/negaresh/readme.txt` in wordpress.org format (ships in the zip;
+  `PluginFilesTest` keeps Stable tag / Requires / Tested up to equal to the plugin header and
+  requires a changelog entry for the version); README rewritten (features, WP-CLI, development);
+  `README.fa.md` added; `screenshot.png` replaced with the real Persian settings page
+  (made by `tests/e2e/browser.mjs` as `build/shots/readme-fa.png`, run with `LANG_FA=1`).
+  Preview boxes are `dir="auto"` now (HTML pasted in RTL showed mirrored tags).
+  **Check before I9:** `Contributors: lordarma` in readme.txt must be the real wordpress.org
+  username.
 
 ## I9 wordpress.org readiness (wanted later, not now: user 2026-09-25)
 - Plugin Check (`wp plugin check`) clean, GPL compatible headers, no external calls, sanitisation

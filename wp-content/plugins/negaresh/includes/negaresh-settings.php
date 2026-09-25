@@ -579,9 +579,9 @@ class Negaresh_Settings
                     ?>
                 </p>
                 <label for="negaresh-preview-input" class="screen-reader-text"><?php esc_html_e('Text to fix', 'negaresh'); ?></label>
-                <textarea id="negaresh-preview-input" dir="rtl" rows="4" class="large-text"></textarea>
+                <textarea id="negaresh-preview-input" dir="auto" rows="4" class="large-text"></textarea>
                 <label for="negaresh-preview-output"><?php esc_html_e('Result', 'negaresh'); ?></label>
-                <textarea id="negaresh-preview-output" dir="rtl" rows="4" class="large-text" readonly></textarea>
+                <textarea id="negaresh-preview-output" dir="auto" rows="4" class="large-text" readonly></textarea>
                 <p class="negaresh-preview-status" aria-live="polite"></p>
             </div>
 
