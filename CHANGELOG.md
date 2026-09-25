@@ -10,6 +10,16 @@ versions: [Semantic Versioning](https://semver.org/).
   rule was on (B24).
 - The space between an ellipsis and a following link or formatted word was removed, so the words
   ran together (B25).
+- The ellipsis and quote rules never worked when fixing on display, because WordPress had already
+  turned `...` and quotes into HTML entities (B27).
+- No space is left after an ellipsis at the end of a line (B26).
+
+### Added
+- **Fix before saving** (I4): a new "When to fix" setting. *When a post is saved* corrects the
+  stored text, so the editor shows what readers get; *when a post is displayed* never changes the
+  stored text. New installs fix before saving; **sites upgrading keep fixing on display** until
+  the setting is changed. Posts saved before the switch are still fixed on display until they are
+  saved again.
 
 ### Changed
 - Only the text between HTML tags is fixed now; tags, attributes and the spaces around tags are

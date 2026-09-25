@@ -109,4 +109,17 @@ class VirastarFixesTest extends TestCase
         self::assertSame('متن', (new Virastar(['cleanup_begin_and_end' => false]))->cleanup('متن'));
         self::assertSame('<p>متن</p>', (new Virastar(['cleanup_begin_and_end' => false]))->cleanup('<p>متن</p>'));
     }
+
+    /**
+     * B26: normalizeEllipsis added a space after "…" even before a line break; in save mode (I4)
+     * that trailing space was stored in every classic editor paragraph ending with "...".
+     */
+    public function testB26NoTrailingSpaceAfterEllipsisAtLineEnd(): void
+    {
+        $v = new Virastar();
+
+        self::assertSame("اول…\nدوم… سوم…", $v->cleanup("اول ...\nدوم ... سوم ..."));
+        self::assertSame("اول…\n\nدوم", $v->cleanup("اول…   \n\nدوم"));
+        self::assertSame('یک… دو', $v->cleanup('یک…دو'));
+    }
 }

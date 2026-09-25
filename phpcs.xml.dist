@@ -23,7 +23,7 @@
     <!-- WordPress naming: classes Negaresh_Settings, methods snake_case, test files PSR-4. -->
     <rule ref="Squiz.Classes.ValidClassName.NotCamelCaps"><exclude-pattern>*</exclude-pattern></rule>
     <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"><exclude-pattern>*</exclude-pattern></rule>
-    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace"><exclude-pattern>wp-content/plugins/negaresh/*</exclude-pattern></rule>
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace"><exclude-pattern>wp-content/plugins/negaresh/*</exclude-pattern><exclude-pattern>tests/stubs/*</exclude-pattern></rule>
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols"><exclude-pattern>*</exclude-pattern></rule>
     <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses"><exclude-pattern>tests/*</exclude-pattern></rule>
     <rule ref="Generic.Files.LineLength"><exclude-pattern>tests/*</exclude-pattern><properties><property name="lineLimit" value="160"/><property name="absoluteLineLimit" value="0"/></properties></rule>

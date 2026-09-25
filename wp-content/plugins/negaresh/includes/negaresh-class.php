@@ -42,8 +42,24 @@ class Negaresh
     /** Whitespace a text node may start or end with; kept exactly as it is (B25). */
     private const EDGE_SPACE = '[\s\x{00A0}\x{200B}-\x{200F}\x{FEFF}]*';
 
+    /** Post meta written when a post is fixed on save (I4). */
+    public const FIXED_META = Negaresh_Settings::FIXED_META;
+
+    /**
+     * Post types that are never fixed on save even though they have an editor: their content is
+     * JSON or site structure, not prose.
+     */
+    public const NEVER_SAVE_TYPES = [
+        'revision', 'attachment', 'nav_menu_item', 'wp_template', 'wp_template_part', 'wp_global_styles',
+        'wp_navigation', 'wp_font_family', 'wp_font_face', 'customize_changeset', 'oembed_cache',
+        'user_request', 'custom_css',
+    ];
+
     /** @var Negaresh_Settings */
     private $settings;
+
+    /** @var array<string, true> md5 of contents fixed by filter_post_data() and not yet marked */
+    private $pending_marks = [];
 
     /** @var Virastar|null built once per request, reset when the options change */
     private $virastar = null;
@@ -58,7 +74,11 @@ class Negaresh
         add_action('admin_init', [$settings, 'register']);
         add_action('add_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
         add_action('update_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
-        add_filter('the_content', [$this, 'filter_content']);
+        // Priority 9 (B27): after do_blocks (9, registered by WordPress first) and before
+        // wptexturize (10), which would already have turned "..." and quotes into entities.
+        add_filter('the_content', [$this, 'filter_content'], 9);
+        add_filter('wp_insert_post_data', [$this, 'filter_post_data'], 10, 2);
+        add_action('save_post', [$this, 'mark_fixed'], 10, 2);
     }
 
     public function load_textdomain(): void
@@ -79,7 +99,97 @@ class Negaresh
      */
     public function filter_content($content)
     {
-        if (!is_string($content) || '' === trim($content) || !$this->should_filter()) {
+        if (!is_string($content) || !$this->should_filter() || $this->already_fixed()) {
+            return $content;
+        }
+
+        return $this->safe_fix($content);
+    }
+
+    /**
+     * `wp_insert_post_data` callback (I4): in save mode the stored content is corrected.
+     * WordPress passes slashed values.
+     *
+     * @param mixed $data
+     * @param mixed $postarr
+     * @return mixed
+     */
+    public function filter_post_data($data, $postarr)
+    {
+        if (!is_array($data) || 'save' !== $this->settings->mode()) {
+            return $data;
+        }
+        $type = isset($data['post_type']) && is_string($data['post_type']) ? $data['post_type'] : '';
+        if (!$this->saves_type($type) || !isset($data['post_content']) || !is_string($data['post_content'])) {
+            return $data;
+        }
+
+        $content = wp_unslash($data['post_content']);
+        $fixed = $this->safe_fix($content);
+        if ($fixed !== $content) {
+            $data['post_content'] = wp_slash($fixed);
+        }
+        $this->pending_marks[md5($fixed)] = true;
+
+        return $data;
+    }
+
+    /**
+     * `save_post` callback: marks the post whose content filter_post_data() just fixed, so display
+     * does not fix it again while the rules stay the same.
+     *
+     * @param mixed $post_id
+     * @param mixed $post
+     */
+    public function mark_fixed($post_id, $post): void
+    {
+        if (!$post instanceof \WP_Post || !is_numeric($post_id) || wp_is_post_revision((int) $post_id)) {
+            return;
+        }
+        $key = md5($post->post_content);
+        if (!isset($this->pending_marks[$key])) {
+            return;
+        }
+        unset($this->pending_marks[$key]);
+        update_post_meta((int) $post_id, self::FIXED_META, $this->settings->rules_hash());
+    }
+
+    /**
+     * Post types fixed on save: the chosen ones, or every public type with an editor, plus synced
+     * patterns (wp_block), which are shown inside posts.
+     */
+    private function saves_type(string $type): bool
+    {
+        if ('' === $type || in_array($type, self::NEVER_SAVE_TYPES, true)) {
+            return false;
+        }
+        $chosen = $this->settings->post_types();
+        if ($chosen) {
+            return in_array($type, $chosen, true);
+        }
+        return post_type_supports($type, 'editor')
+            && ('wp_block' === $type || in_array($type, get_post_types(['public' => true]), true));
+    }
+
+    /**
+     * True when the post being displayed was fixed on save with the current rules.
+     */
+    private function already_fixed(): bool
+    {
+        $post = get_post();
+        if (!$post instanceof \WP_Post || 0 === $post->ID) {
+            return false;
+        }
+        return get_post_meta($post->ID, self::FIXED_META, true) === $this->settings->rules_hash();
+    }
+
+    /**
+     * fix() with every guard: only Persian content, never on invalid UTF-8, and on any failure or
+     * empty result the input is returned unchanged.
+     */
+    private function safe_fix(string $content): string
+    {
+        if ('' === trim($content)) {
             return $content;
         }
 

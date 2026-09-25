@@ -64,7 +64,7 @@ I10 needs user decisions first.
 - Composer autoload (classmap, shipped) or a tiny PSR-4 autoloader; Virastar scoped under
   `Negaresh\Vendor` (PHP-Scoper or a documented manual prefix).
 
-## I4 Fix before saving (user wants this) + performance
+## I4 Fix before saving (user wants this) + performance ✅ *(save mode done session 3; caching open)*
 - ~~Build the Virastar instance once per request~~ (done in phase 1).
 - Cache processed output: key = hash(content + options + plugin version), object cache / transient,
   invalidated on `save_post` and option update.
@@ -73,6 +73,19 @@ I10 needs user decisions first.
   fixed text and display time work disappears. Not reversible, so: a clear setting, revisions keep
   the original, skip autosaves where sensible, and the per post opt out from I6 applies.
   Display mode stays available; decide the default for new installs when building it.
+- *Result:* setting "When to fix" (`mode`: `save` | `display`). **New installs: save** (user's
+  preference). **Upgrades from 4.x keep display** (DB_VERSION 3 migration), so no existing site
+  starts rewriting posts without choosing it. `wp_insert_post_data` fixes `post_content` (classic,
+  block editor via REST, wp-cli, importers) for the chosen post types, else public types with an
+  editor plus `wp_block`; never revisions, attachments, menus, templates, global styles, fonts,
+  navigation, changesets. Titles/excerpts not included (I5 scope item). `save_post` stores the
+  rules hash in `_negaresh_fixed`; display skips posts whose hash matches, so old posts (or posts
+  fixed with other rules) are still fixed on display until saved again. Revisions hold the
+  corrected text (the typed original is not kept; the setting says it cannot be undone).
+  Found and fixed on the way: B26 (trailing space stored), B27 (display ran after wptexturize).
+  Verified: 122 unit tests (`SaveModeTest` 18 new), e2e 21/21 on WP 7.1.2 and 5.8.3 (wp-cli save,
+  REST save, display mode, markers removed on uninstall), 4.1.0 → new upgrade keeps display mode.
+- Still open: caching display output (below), the bulk tool to fix existing posts (I6).
 
 ## I5 Settings page UX
 - Group rules into sections (Characters, Numbers, Punctuation, Spacing, Cleanup) with a short

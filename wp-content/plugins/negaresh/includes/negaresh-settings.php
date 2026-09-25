@@ -15,9 +15,15 @@ class Negaresh_Settings
 {
     public const OPTION = 'negaresh_options';
     public const DB_VERSION_OPTION = 'negaresh_db_version';
-    public const DB_VERSION = 2;
+    public const DB_VERSION = 3;
     public const PAGE = 'negaresh-options';
     public const GROUP = 'negaresh';
+
+    /** Post meta: hash of the rules a post was fixed with when it was saved (I4). */
+    public const FIXED_META = '_negaresh_fixed';
+
+    /** When to fix: correct the stored text on save, or only the displayed text (I4). */
+    public const MODES = ['save', 'display'];
 
     /**
      * Virastar rules the admin can toggle, with their defaults.
@@ -62,8 +68,12 @@ class Negaresh_Settings
         'cleanup_begin_and_end' => false,
     ];
 
-    /** Where the fixes apply (B10). An empty post type list means every post type. */
+    /**
+     * When and where the fixes apply (I4, B10). An empty post type list means every post type.
+     * New installs fix before saving; upgrades from 4.x keep display mode (see maybe_migrate()).
+     */
     public const SCOPE_DEFAULTS = [
+        'mode' => 'save',
         'post_types' => [],
         'apply_in_feeds' => true,
         'apply_in_rest' => true,
@@ -81,7 +91,7 @@ class Negaresh_Settings
     ];
 
     /**
-     * @return array<string, bool|list<string>>
+     * @return array<string, bool|string|list<string>>
      */
     public static function defaults(): array
     {
@@ -90,9 +100,10 @@ class Negaresh_Settings
 
     /**
      * Saved options merged over the defaults, so the front end always has a full set (B5).
-     * Values are normalized: whatever is stored, flags are bool and post_types a list of strings.
+     * Values are normalized: whatever is stored, flags are bool, mode is one of MODES and
+     * post_types a list of strings.
      *
-     * @return array<string, bool|list<string>>
+     * @return array<string, bool|string|list<string>>
      */
     public function get(): array
     {
@@ -106,12 +117,35 @@ class Negaresh_Settings
             $value = array_key_exists($key, $saved) ? $saved[$key] : $default;
             if ('post_types' === $key) {
                 $options[$key] = is_array($value) ? array_values(array_map('strval', array_filter($value, 'is_scalar'))) : [];
+            } elseif ('mode' === $key) {
+                $options[$key] = in_array($value, self::MODES, true) ? $value : self::SCOPE_DEFAULTS['mode'];
             } else {
                 $options[$key] = (bool) $value;
             }
         }
 
         return $options;
+    }
+
+    /**
+     * 'save' (fix the stored text) or 'display' (fix only what is shown).
+     */
+    public function mode(): string
+    {
+        $mode = $this->get()['mode'];
+        return is_string($mode) ? $mode : self::SCOPE_DEFAULTS['mode'];
+    }
+
+    /**
+     * Identifies the current rule set; stored with posts fixed on save.
+     */
+    public function rules_hash(): string
+    {
+        $bits = '';
+        foreach ($this->rules() as $key => $on) {
+            $bits .= $key . ($on ? '=1;' : '=0;');
+        }
+        return md5($bits);
     }
 
     /**
@@ -146,7 +180,7 @@ class Negaresh_Settings
      */
     /**
      * @param mixed $input raw value from the settings form (or another update_option() call)
-     * @return array<string, bool|list<string>>
+     * @return array<string, bool|string|list<string>>
      */
     public function sanitize($input): array
     {
@@ -156,6 +190,9 @@ class Negaresh_Settings
         foreach (array_keys(self::RULE_DEFAULTS) as $key) {
             $clean[$key] = !empty($input[$key]);
         }
+
+        $clean['mode'] = isset($input['mode']) && in_array($input['mode'], self::MODES, true)
+            ? $input['mode'] : self::SCOPE_DEFAULTS['mode'];
 
         $post_types = isset($input['post_types']) && is_array($input['post_types']) ? $input['post_types'] : [];
         $post_types = array_map('sanitize_key', array_map('strval', $post_types));
@@ -168,15 +205,38 @@ class Negaresh_Settings
     }
 
     /**
-     * Moves 4.0 settings into `negaresh_options` once (B9). A site that never saved the 4.0
-     * settings page has no legacy rows and simply gets the defaults (B5).
+     * Upgrades stored data once per DB_VERSION.
+     * - 2 (4.1, B9): moves the 30 unprefixed 4.0 options into `negaresh_options`. A site that never
+     *   saved the 4.0 settings page has no legacy rows and simply gets the defaults (B5).
+     * - 3 (I4): sites upgrading from 4.x keep fixing on display; only new installs fix on save,
+     *   so no existing site starts changing stored posts without choosing it.
      */
     public function maybe_migrate(): void
     {
-        if ((int) get_option(self::DB_VERSION_OPTION, 0) >= self::DB_VERSION) {
+        $version = (int) get_option(self::DB_VERSION_OPTION, 0);
+        if ($version >= self::DB_VERSION) {
             return;
         }
 
+        // An install is "existing" when an earlier version stored anything.
+        $existing = $version > 0;
+        $steps = [2 => 'migrate_to_2', 3 => 'migrate_to_3'];
+        foreach ($steps as $target => $step) {
+            if ($version < $target) {
+                $existing = $this->$step($existing) || $existing;
+            }
+        }
+
+        update_option(self::DB_VERSION_OPTION, self::DB_VERSION);
+    }
+
+    /**
+     * 4.0 → 4.1 (B9): the 30 unprefixed options become one `negaresh_options` array.
+     *
+     * @return bool whether 4.0 settings were found
+     */
+    private function migrate_to_2(bool $existing): bool
+    {
         $legacy = [];
         foreach (self::LEGACY_OPTIONS as $name) {
             $value = get_option($name, null);
@@ -186,9 +246,9 @@ class Negaresh_Settings
         }
 
         if ($legacy && false === get_option(self::OPTION, false)) {
-            $options = self::defaults();
+            $options = self::RULE_DEFAULTS;
             foreach ($legacy as $name => $value) {
-                // decode_html_entities is gone (B2); every other 4.0 option keeps its name as a rule key.
+                // decode_html_entities is gone (B2); every other 4.0 option keeps its name.
                 if (array_key_exists($name, self::RULE_DEFAULTS)) {
                     $options[$name] = ('1' === (string) $value);
                 }
@@ -200,7 +260,23 @@ class Negaresh_Settings
             delete_option($name);
         }
 
-        update_option(self::DB_VERSION_OPTION, self::DB_VERSION);
+        return [] !== $legacy;
+    }
+
+    /**
+     * 4.1 → 4.2 (I4): existing sites keep fixing on display; only new installs fix on save.
+     *
+     * @return bool always false: this step finds nothing new about the install
+     */
+    private function migrate_to_3(bool $existing): bool
+    {
+        if ($existing) {
+            $options = get_option(self::OPTION, []);
+            $options = is_array($options) ? $options : [];
+            $options['mode'] = 'display';
+            update_option(self::OPTION, $options);
+        }
+        return false;
     }
 
     /** Removes everything Negaresh stores, including 4.0 leftovers (B19). */
@@ -208,6 +284,7 @@ class Negaresh_Settings
     {
         delete_option(self::OPTION);
         delete_option(self::DB_VERSION_OPTION);
+        delete_post_meta_by_key(self::FIXED_META);
         foreach (self::LEGACY_OPTIONS as $name) {
             delete_option($name);
         }
@@ -237,6 +314,8 @@ class Negaresh_Settings
         foreach ($sections as $section => $title) {
             add_settings_section('negaresh_' . $section, $title, '__return_false', self::PAGE);
         }
+
+        add_settings_field('negaresh_mode', __('When to fix', 'negaresh'), [$this, 'render_mode'], self::PAGE, 'negaresh_mode');
 
         foreach ($this->rule_labels() as $key => $field) {
             add_settings_field(
@@ -272,6 +351,7 @@ class Negaresh_Settings
     public function sections(): array
     {
         return [
+            'mode' => __('Mode', 'negaresh'),
             'characters' => __('Letters and numbers', 'negaresh'),
             'punctuation' => __('Punctuation', 'negaresh'),
             'spacing' => __('Spacing and half spaces', 'negaresh'),
@@ -487,6 +567,35 @@ class Negaresh_Settings
         if (!empty($args['example'])) {
             printf(' <code dir="rtl">%s</code>', esc_html($args['example']));
         }
+    }
+
+    public function render_mode(): void
+    {
+        $mode = $this->mode();
+        $choices = [
+            'save' => __(
+                'When a post is saved: the stored text is corrected, so what you see in the editor is what readers get',
+                'negaresh'
+            ),
+            'display' => __('When a post is displayed: the stored text is never changed', 'negaresh'),
+        ];
+        echo '<fieldset>';
+        foreach ($choices as $value => $label) {
+            printf(
+                '<label><input type="radio" name="%1$s" value="%2$s" %3$s /> %4$s</label><br />',
+                esc_attr(self::OPTION . '[mode]'),
+                esc_attr($value),
+                checked($mode, $value, false),
+                esc_html($label)
+            );
+        }
+        echo '<p class="description">'
+            . esc_html__(
+                'Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again.',
+                'negaresh'
+            )
+            . '</p>';
+        echo '</fieldset>';
     }
 
     public function render_post_types(): void

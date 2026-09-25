@@ -102,6 +102,7 @@ patches upstream as a PR.
 | B4 | namespace | `Alirezasedghi\Virastar` → `Negaresh\Vendor\Virastar` |
 | B20 | `cleanupZWNJ()`, `cleanupRLM()`, `fixQuestionMark()`, `fixSuffixSpacingHamzeh()` | replacement strings use `"\u{...}"` instead of the literal text `'\x{...}'` |
 | B20 | `fixSuffixMisc()` | `$2` pointed at a missing group; trailing check is now a lookahead |
+| B26 | `normalizeEllipsis()` | no space added after `…` before a line break (and trailing spaces there removed) |
 | B22 | `cleanup()` start | `$text = ' ' . $text . ' ';` restored from the JS original (the end of `cleanup()` already strips it) |
 | B21 | front matter preserver | upstream regex kept; it matches again because of B22 (a session 3 interim change to `/^---/` was reverted) |
 
@@ -133,8 +134,11 @@ To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virast
   handling), `fix()` (since I2: split into markup/text with a quote aware tokenizer, skip protected
   elements, fix each text piece with Virastar keeping its edge whitespace),
   `should_filter()` (scope), `virastar_options()` (all 44 options explicitly), one Virastar per request.
-* `uninstall.php`: `Negaresh_Settings::delete_all()` per site.
-* Stored data: `negaresh_options` (array), `negaresh_db_version` (int, 2).
+* `uninstall.php`: `Negaresh_Settings::delete_all()` per site (options and `_negaresh_fixed` meta).
+* Stored data: `negaresh_options` (array, incl. `mode` since I4), `negaresh_db_version` (int, 3),
+  post meta `_negaresh_fixed` (rules hash of posts fixed on save).
+* Hooks (I4): `the_content` priority 9 (B27); `wp_insert_post_data` fixes stored content in save
+  mode; `save_post` writes the marker; display skips posts whose marker matches the current rules.
 
 ## 7. End to end check in a real WordPress
 

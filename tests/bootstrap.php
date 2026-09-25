@@ -15,6 +15,8 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', '/tmp/wordpress/');
 }
 
+require_once __DIR__ . '/stubs/WP_Post.php';
+
 define('NEGARESH_FILE', NEGARESH_PLUGIN_DIR . '/negaresh.php');
 
 // Same files, same order as negaresh.php, without instantiating the plugin.

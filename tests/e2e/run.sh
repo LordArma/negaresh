@@ -24,7 +24,7 @@ docker run -d --name "$DB" --network "$NET" -e MARIADB_ROOT_PASSWORD=root -e MAR
   -e MARIADB_USER=wp -e MARIADB_PASSWORD=wp mariadb:11 >/dev/null
 docker run -d --name "$WEB" --network "$NET" -p 127.0.0.1:8089:80 -e WORDPRESS_DB_HOST="$DB" \
   -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp -e WORDPRESS_DEBUG=1 \
-  -e WORDPRESS_CONFIG_EXTRA="define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false);" \
+  -e WORDPRESS_CONFIG_EXTRA="define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false); define('WP_ENVIRONMENT_TYPE', 'local');" \
   -v "$PLUGIN":/var/www/html/wp-content/plugins/negaresh:ro "$WP_IMAGE" >/dev/null
 for _ in $(seq 1 60); do curl -s -o /dev/null "$URL/" && break; sleep 2; done
 for _ in $(seq 1 30); do wp core install --url="$URL" --title=Negaresh --admin_user=admin --admin_password=admin \
@@ -42,6 +42,11 @@ wp post create - --post_title=e2e --post_name=e2e --post_status=publish >/dev/nu
 <!-- wp:shortcode -->[negaresh_test label="a,b"]<!-- /wp:shortcode -->
 <!-- wp:code --><pre class="wp-block-code"><code>x ... y // 123</code></pre><!-- /wp:code -->
 HTML
+POST_ID="$(wp post list --name=e2e --post_type=post --field=ID)"
+STORED="$(wp post get "$POST_ID" --field=post_content)"
+check "fresh install fixes on save: stored text fixed (I4)" 'عدد ۴۵۶' "$STORED"
+check "stored shortcode and code untouched (I4)" '[negaresh_test label="a,b"]' "$STORED"
+check "post marked as fixed with the current rules (I4)" "$(wp eval 'echo (new Negaresh_Settings())->rules_hash();')" "$(wp post meta get "$POST_ID" _negaresh_fixed)"
 PAGE="$(curl -s "$URL/e2e/")"
 # themes differ in casing (Twenty Twenty-One writes <!doctype html>)
 check "page starts with doctype (B23)" "<!doctype html>" "$(head -c 15 <<<"$PAGE" | tr 'A-Z' 'a-z')"
@@ -65,12 +70,30 @@ curl -s -b "$JAR" -o /dev/null --data-urlencode option_page=negaresh --data-urle
 check "settings saved and sanitized" '"fix_english_numbers":true,"fix_numeral_symbols":false' "$(wp option get negaresh_options --format=json)"
 rm -f "$JAR"
 
+# Back to the defaults (the form above left only one rule on): save mode, default rules.
+wp option delete negaresh_options >/dev/null
+
+# The block editor saves through the REST API.
+APP_PASS="$(wp user application-password create admin e2e --porcelain)"
+REST_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d '{"title":"rest","status":"publish","content":"<!-- wp:paragraph --><p>از ویرایشگر بلوک ... عدد ٧٨٩</p><!-- /wp:paragraph -->"}' \
+  "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+check "block editor (REST) save is fixed (I4)" '<p>از ویرایشگر بلوک… عدد ۷۸۹</p>' "$(wp post get "$REST_ID" --field=post_content)"
+
+# Display mode never changes what is stored.
+wp option update negaresh_options '{"mode":"display"}' --format=json >/dev/null
+DISPLAY_ID="$(wp post create --post_title=d --post_name=display-mode --post_status=publish --post_content='<p>حالت نمایش ...</p>' --porcelain)"
+check "display mode leaves stored text alone (I4)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
+# "..." checks B27 too: the fix must run before wptexturize turns "..." into &#8230;
+check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نمایش…' "$(curl -s "$URL/display-mode/")"
+
 LOG="$(docker exec "$WEB" sh -c 'cat /var/www/html/wp-content/debug.log 2>/dev/null' || true)"
 if [ -z "$LOG" ]; then echo "PASS  debug.log is empty"; else echo "FAIL  debug.log:"; echo "$LOG" | head -20; FAIL=1; fi
 
 if [ "${KEEP:-0}" != 1 ]; then
   wp plugin deactivate negaresh >/dev/null && wp plugin uninstall negaresh --skip-delete >/dev/null
   check "uninstall removed options (B19)" "none" "$(wp option list --search='negaresh*' --format=count | sed 's/^0$/none/')"
+  check "uninstall removed post markers (I4)" "none" "$(wp post meta list "$POST_ID" --keys=_negaresh_fixed --format=count | sed 's/^0$/none/')"
 fi
 
 [ "$FAIL" = 0 ] && echo "ALL PASSED" || { echo "SOME CHECKS FAILED"; exit 1; }

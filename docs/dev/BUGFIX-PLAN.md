@@ -110,6 +110,18 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   if cheap (drop the leading space from the regex). *Result:* fixed by B22 (padding restored,
   upstream regex kept), test in `VirastarFixesTest`.
 
+- [x] **B27 Display mode ran after `wptexturize`, so ellipsis and quote rules never worked**
+  *(Medium; in 4.0 and 4.1.0; found session 3 by the I4 e2e check; fixed on `phase-2`)*.
+  `the_content` priority 10 put Negaresh after `wptexturize`, which had already turned `...` into
+  `&#8230;` and straight quotes into `&#8220;`/`&#8221;` entities, which Virastar preserves.
+  *Fix:* priority 9 (after `do_blocks`, before `wptexturize`, `wpautop`, `do_shortcode`).
+  Tests: `NegareshFilterTest::testConstructorRegistersHooks`, e2e "display mode fixes the page".
+
+- [x] **B26 Trailing space after `…` at a line end** *(Low; found session 3 while building I4)*.
+  `normalizeEllipsis` always put a space after `…`, also before a line break. Invisible on display,
+  but save mode (I4) would store it in every classic editor line ending with `...`.
+  *Fix:* library patch; test `VirastarFixesTest::testB26...`.
+
 - [x] **B24 A `>` inside an attribute corrupts the tag** *(High; found session 3 while re-checking I2;
   in 4.1.0; fixed by I2 on `phase-2`)*. Virastar's tag regex `<\/?[a-z][^>]*?>` stops at the first
   `>`, so the rest of the tag (`b" src="x.png">`) was treated as text; with a quote rule on it became
@@ -121,7 +133,7 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   `normalizeEllipsis` collapsed the real space and Virastar's space padded placeholder, then the
   restore step ate the remaining one. *Fix:* text nodes are fixed one by one and their leading and
   trailing whitespace is kept byte for byte. Tests: `HtmlProcessingTest`.
-  **Both B24 and B25 are in the released 4.1.0: ship a 4.1.1 or 4.2.0 soon.**
+  **B24, B25 and B27 are in the released 4.1.0: ship 4.2.0 soon.**
 
 - [x] **B23 Output before `<?php` breaks logins, redirects and feeds** *(Critical; found in the
   Docker end to end run and already fixed by the refactor, session 3)*. 4.0's `negaresh-class.php`

@@ -14,11 +14,25 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
 | Next release target | 4.2.0 (phase 2 features) |
 
-**Next step:** I4 (fix before saving). Open, needs the user: release B24/B25 fixes (4.1.1 or 4.2.0),
-and push `phase-2` so CI runs on GitHub.
+**Next step:** I5 (settings page UX). Open, needs the user: release 4.2.0 (B24, B25, B27 fixes
++ save mode), and push `phase-2` so CI runs on GitHub.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 98 unit tests) clean.
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 122 unit tests) clean; e2e 21/21 on WP
+7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I4 fix before saving (+ B26, B27)
+
+Done: "When to fix" setting (save / display), save hooks, rules hash marker, display skip for
+marked posts, DB_VERSION 3 migration (upgrades keep display), uninstall removes markers,
+translations for the new strings (52), e2e extended to 21 checks (wp-cli save, REST save with an
+application password, display mode, markers), migration split into numbered steps.
+Found: B26 (trailing space after `…` before a line break, would be stored in save mode) and B27
+(display mode ran after wptexturize since 4.0, so ellipsis/quote rules never applied); both fixed.
+Verified: see status snapshot; plus a real 4.1.0 zip → new code upgrade: DB 2 → 3, mode display,
+stored text untouched, displayed text fixed (`…`), empty debug.log.
 
 ---
 

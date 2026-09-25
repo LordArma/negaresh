@@ -661,8 +661,11 @@ class Virastar
         // replaces more than one ellipsis with one
         // replaces (space|tab|zwnj) after ellipsis with one space
         // NOTE: allows for space before ellipsis
+        // Negaresh patch (B26): no space is added (and none is kept) between an ellipsis and a line break
         return preg_replace('/(…){2,}/', '…',
-            preg_replace('/([ ]{1,})*…[ \t\x{200c}]*/u', '$1… ', $text)
+            preg_replace('/([ ]{1,})*…[ \t\x{200c}]*+(?!\n)/u', '$1… ',
+                preg_replace('/…[ \t\x{200c}]+(?=\n)/u', '…', $text)
+            )
         );
     }
 

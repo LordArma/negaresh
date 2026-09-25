@@ -46,6 +46,7 @@ abstract class TestCase extends PHPUnitTestCase
         Functions\when('wp_doing_ajax')->justReturn(false);
         Functions\when('is_feed')->justReturn(false);
         Functions\when('get_post_type')->justReturn($post_type);
+        Functions\when('get_post')->justReturn(null);
     }
 
     protected function tearDown(): void

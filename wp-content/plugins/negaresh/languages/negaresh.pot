@@ -9,14 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T13:22:01+00:00\n"
+"POT-Creation-Date: 2026-09-25T13:51:34+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
 
 #. Plugin Name of the plugin
 #: negaresh.php
-#: includes/negaresh-settings.php:173
+#: includes/negaresh-settings.php:269
 msgid "Negaresh"
 msgstr ""
 
@@ -40,171 +40,191 @@ msgstr ""
 msgid "https://LordArma.com/"
 msgstr ""
 
-#: includes/negaresh-settings.php:172
-#: includes/negaresh-settings.php:270
+#: includes/negaresh-settings.php:268
+#: includes/negaresh-settings.php:514
 msgid "Negaresh Options"
 msgstr ""
 
-#: includes/negaresh-settings.php:205
+#: includes/negaresh-settings.php:290
+msgid "When to fix"
+msgstr ""
+
+#: includes/negaresh-settings.php:303
 msgid "Post types"
 msgstr ""
 
-#: includes/negaresh-settings.php:206
+#: includes/negaresh-settings.php:305
 msgid "Fix text in RSS feeds"
 msgstr ""
 
-#: includes/negaresh-settings.php:207
+#: includes/negaresh-settings.php:306
 msgid "Fix text in the REST API"
 msgstr ""
 
-#: includes/negaresh-settings.php:213
+#: includes/negaresh-settings.php:326
+msgid "Mode"
+msgstr ""
+
+#: includes/negaresh-settings.php:327
 msgid "Letters and numbers"
 msgstr ""
 
-#: includes/negaresh-settings.php:214
+#: includes/negaresh-settings.php:328
 msgid "Punctuation"
 msgstr ""
 
-#: includes/negaresh-settings.php:215
+#: includes/negaresh-settings.php:329
 msgid "Spacing and half spaces"
 msgstr ""
 
-#: includes/negaresh-settings.php:216
+#: includes/negaresh-settings.php:330
 msgid "Cleanup"
 msgstr ""
 
-#: includes/negaresh-settings.php:217
+#: includes/negaresh-settings.php:331
 msgid "Where to apply"
 msgstr ""
 
-#: includes/negaresh-settings.php:228
+#: includes/negaresh-settings.php:346
 msgid "Convert presentation form glyphs to standard Persian letters"
 msgstr ""
 
-#: includes/negaresh-settings.php:229
+#: includes/negaresh-settings.php:351
 msgid "Convert Arabic digits to Persian digits"
 msgstr ""
 
-#: includes/negaresh-settings.php:230
+#: includes/negaresh-settings.php:356
 msgid "Convert English digits to Persian digits"
 msgstr ""
 
-#: includes/negaresh-settings.php:231
+#: includes/negaresh-settings.php:361
 msgid "Use Persian percent, decimal and thousands separators"
 msgstr ""
 
-#: includes/negaresh-settings.php:232
+#: includes/negaresh-settings.php:366
 msgid "Replace Arabic Kaf, Yeh and Heh with Persian letters"
 msgstr ""
 
-#: includes/negaresh-settings.php:233
+#: includes/negaresh-settings.php:371
 msgid "Write the ezafe after a final Heh as Hamzeh"
 msgstr ""
 
-#: includes/negaresh-settings.php:234
+#: includes/negaresh-settings.php:376
 msgid "Convert Arabic Teh Marbuta to Heh with Hamzeh (needs the Hamzeh rule)"
 msgstr ""
 
-#: includes/negaresh-settings.php:235
+#: includes/negaresh-settings.php:381
 msgid "Clean up spaces and repeats around diacritics"
 msgstr ""
 
-#: includes/negaresh-settings.php:236
+#: includes/negaresh-settings.php:386
 msgid "Remove all diacritics"
 msgstr ""
 
-#: includes/negaresh-settings.php:237
+#: includes/negaresh-settings.php:391
 msgid "Convert double and triple hyphens to en and em dashes"
 msgstr ""
 
-#: includes/negaresh-settings.php:238
+#: includes/negaresh-settings.php:396
 msgid "Convert three dots to an ellipsis character"
 msgstr ""
 
-#: includes/negaresh-settings.php:239
+#: includes/negaresh-settings.php:401
 msgid "Merge repeated ellipses and put one space after them"
 msgstr ""
 
-#: includes/negaresh-settings.php:240
+#: includes/negaresh-settings.php:406
 msgid "Replace curly English quotes with Persian guillemets"
 msgstr ""
 
-#: includes/negaresh-settings.php:241
+#: includes/negaresh-settings.php:411
 msgid "Replace straight quotes with Persian guillemets"
 msgstr ""
 
-#: includes/negaresh-settings.php:242
+#: includes/negaresh-settings.php:416
 msgid "Use the Persian comma and semicolon"
 msgstr ""
 
-#: includes/negaresh-settings.php:243
+#: includes/negaresh-settings.php:421
 msgid "Use the Persian question mark"
 msgstr ""
 
-#: includes/negaresh-settings.php:244
+#: includes/negaresh-settings.php:426
 msgid "Merge repeated question and exclamation marks"
 msgstr ""
 
-#: includes/negaresh-settings.php:245
+#: includes/negaresh-settings.php:431
 msgid "Treat a Kashida next to a space as a dash"
 msgstr ""
 
-#: includes/negaresh-settings.php:246
+#: includes/negaresh-settings.php:436
 msgid "Reorder dates written with slashes to year/month/day"
 msgstr ""
 
-#: includes/negaresh-settings.php:247
+#: includes/negaresh-settings.php:441
 msgid "Join the prefixes می, نمی and بی with a half space"
 msgstr ""
 
-#: includes/negaresh-settings.php:248
+#: includes/negaresh-settings.php:446
 msgid "Join common suffixes with a half space"
 msgstr ""
 
-#: includes/negaresh-settings.php:249
+#: includes/negaresh-settings.php:451
 msgid "Fix the ای suffix after a final Heh"
 msgstr ""
 
-#: includes/negaresh-settings.php:250
+#: includes/negaresh-settings.php:456
 msgid "Fix spaces inside and around brackets and quotes"
 msgstr ""
 
-#: includes/negaresh-settings.php:251
+#: includes/negaresh-settings.php:461
 msgid "Remove the space before punctuation and keep one after it"
 msgstr ""
 
-#: includes/negaresh-settings.php:252
+#: includes/negaresh-settings.php:466
 msgid "Remove the space before honorifics and numbered references"
 msgstr ""
 
-#: includes/negaresh-settings.php:253
+#: includes/negaresh-settings.php:471
 msgid "Replace repeated spaces with one space"
 msgstr ""
 
-#: includes/negaresh-settings.php:254
+#: includes/negaresh-settings.php:476
 msgid "Remove extra or misplaced half spaces"
 msgstr ""
 
-#: includes/negaresh-settings.php:255
+#: includes/negaresh-settings.php:481
 msgid "Replace right to left marks between letters with half spaces"
 msgstr ""
 
-#: includes/negaresh-settings.php:256
+#: includes/negaresh-settings.php:486
 msgid "Remove Kashidas inside words"
 msgstr ""
 
-#: includes/negaresh-settings.php:257
+#: includes/negaresh-settings.php:491
 msgid "Use Unix line endings"
 msgstr ""
 
-#: includes/negaresh-settings.php:258
+#: includes/negaresh-settings.php:496
 msgid "Reduce more than two line breaks to two"
 msgstr ""
 
-#: includes/negaresh-settings.php:259
+#: includes/negaresh-settings.php:501
 msgid "Trim spaces at the start of lines and of the text"
 msgstr ""
 
-#: includes/negaresh-settings.php:310
+#: includes/negaresh-settings.php:548
+msgid "When a post is saved: the stored text is corrected, so what you see in the editor is what readers get"
+msgstr ""
+
+#: includes/negaresh-settings.php:549
+msgid "When a post is displayed: the stored text is never changed"
+msgstr ""
+
+#: includes/negaresh-settings.php:562
+msgid "Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again."
+msgstr ""
+
+#: includes/negaresh-settings.php:580
 msgid "Leave all unchecked to fix every post type."
 msgstr ""

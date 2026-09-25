@@ -132,19 +132,59 @@ class SettingsTest extends TestCase
         foreach (Negaresh_Settings::LEGACY_OPTIONS as $name) {
             self::assertArrayNotHasKey($name, $this->options, "$name left behind");
         }
-        self::assertSame(2, $this->options['negaresh_db_version']);
+        self::assertSame(Negaresh_Settings::DB_VERSION, $this->options['negaresh_db_version']);
     }
 
     public function testB9FreshInstallOnlyRecordsVersion(): void
     {
         (new Negaresh_Settings())->maybe_migrate();
 
-        self::assertSame(['negaresh_db_version' => 2], $this->options);
+        self::assertSame(['negaresh_db_version' => Negaresh_Settings::DB_VERSION], $this->options);
+        self::assertSame('save', (new Negaresh_Settings())->mode(), 'new installs fix before saving (I4)');
+    }
+
+    public function testI4UpgradeFrom41KeepsDisplayMode(): void
+    {
+        $this->options = ['negaresh_db_version' => 2, 'negaresh_options' => ['fix_dashes' => false]];
+
+        (new Negaresh_Settings())->maybe_migrate();
+
+        self::assertSame(['fix_dashes' => false, 'mode' => 'display'], $this->options['negaresh_options']);
+        self::assertSame(Negaresh_Settings::DB_VERSION, $this->options['negaresh_db_version']);
+    }
+
+    public function testI4UpgradeFrom41WithoutSavedSettingsKeepsDisplayMode(): void
+    {
+        $this->options = ['negaresh_db_version' => 2];
+
+        (new Negaresh_Settings())->maybe_migrate();
+
+        self::assertSame('display', (new Negaresh_Settings())->mode());
+    }
+
+    public function testI4UpgradeFrom40KeepsDisplayMode(): void
+    {
+        $this->options = $this->legacyRows();
+
+        (new Negaresh_Settings())->maybe_migrate();
+
+        self::assertSame('display', (new Negaresh_Settings())->mode());
+    }
+
+    public function testModeIsSanitizedAndNormalized(): void
+    {
+        $settings = new Negaresh_Settings();
+
+        self::assertSame('display', $settings->sanitize(['mode' => 'display'])['mode']);
+        self::assertSame('save', $settings->sanitize(['mode' => 'evil'])['mode']);
+        self::assertSame('save', $settings->sanitize([])['mode']);
+        $this->options['negaresh_options'] = ['mode' => ['x']];
+        self::assertSame('save', $settings->mode());
     }
 
     public function testB9MigrationRunsOnce(): void
     {
-        $this->options = ['negaresh_db_version' => 2, 'fix_dashes' => '1'];
+        $this->options = ['negaresh_db_version' => Negaresh_Settings::DB_VERSION, 'fix_dashes' => '1'];
 
         (new Negaresh_Settings())->maybe_migrate();
 
@@ -158,12 +198,13 @@ class SettingsTest extends TestCase
 
         (new Negaresh_Settings())->maybe_migrate();
 
-        self::assertSame(['fix_dashes' => false], $this->options['negaresh_options']);
+        self::assertSame(['fix_dashes' => false, 'mode' => 'display'], $this->options['negaresh_options']);
     }
 
     public function testB19DeleteAllRemovesEverything(): void
     {
         $this->options = $this->legacyRows() + ['negaresh_options' => [], 'negaresh_db_version' => 2, 'blogname' => 'x'];
+        Functions\expect('delete_post_meta_by_key')->once()->with('_negaresh_fixed')->andReturn(true);
 
         Negaresh_Settings::delete_all();
 
