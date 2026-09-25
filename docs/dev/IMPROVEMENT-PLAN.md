@@ -115,7 +115,7 @@ I10 needs user decisions first.
     browser (Playwright, headless Chromium): preview while typing, preview follows unsaved boxes,
     reset asks and dismissing does not submit, no JavaScript errors, in English and in fa_IR.
 
-## I6 Editor integration ⏳ *(opt out, Fix this post, engine + WP-CLI done session 3; bulk tool page next)*
+## I6 Editor integration ✅ *(done session 3)*
 - Per post opt out (post meta + checkbox in Gutenberg sidebar and Classic editor meta box).
 - Gutenberg: "Fix Persian typography" button that runs the processor on the selected block or
   the whole post via REST and shows a diff before applying.
@@ -159,6 +159,15 @@ I10 needs user decisions first.
     dry run saves nothing, apply fixes, the original is in the revisions, marker set, embeds kept
     with kses on (proven: the check fails with the kses switch removed), opted out untouched,
     `wp negaresh text`. `run.sh` now reports the line where it stops instead of ending silently.
+- *Result, slice I6c (bulk tool page):* Tools → Negaresh (`includes/negaresh-bulk-page.php`,
+  `assets/bulk.js`): choose post types (and "also posts already fixed"), **Scan** (nothing saved;
+  batches of 10 through `POST negaresh/v1/bulk/process` with `apply: false`) lists posts that
+  would change with their changed lines, **Fix all listed posts** (confirmation) fixes exactly
+  those in batches and ticks each row. Routes are `manage_options` only, and each post is also
+  checked with `edit_post`; only changed lines travel to the browser. Count messages are worded
+  without plurals ("Posts fixed: 3"), which reads right in English and Persian.
+  Verified: 172 unit tests (`BulkPageTest` 5); e2e 4 REST checks; browser: scan lists the post,
+  shows the diff, scanning saves nothing, fixing stores the fixed text, on WP 7.1.2 and 5.8.3.
 
 ## I7 Release pipeline ✅ *(done session 3; workflows not yet run on GitHub)*
 - On tag `v*`: build zip with only the plugin folder (respecting `export-ignore`), attach to a

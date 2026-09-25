@@ -24,3 +24,35 @@
 .negaresh-settings p.submit .button + .button {
     margin-inline-start: 0.5em;
 }
+
+/* Tools → Negaresh (I6) */
+.negaresh-bulk fieldset {
+    margin-block: 0.5rem;
+}
+
+.negaresh-bulk-results pre {
+    white-space: pre-wrap;
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    unicode-bidi: plaintext;
+}
+
+.negaresh-bulk-results .negaresh-removed {
+    background: #fcf0f1;
+    color: #8a2424;
+}
+
+.negaresh-bulk-results .negaresh-added {
+    background: #edfaef;
+    color: #1d5a2c;
+}
+
+.negaresh-bulk-results tr.negaresh-done td:first-child::after {
+    content: " ✓";
+    color: #00a32a;
+}
+
+.negaresh-bulk-results tr.negaresh-skipped {
+    opacity: 0.6;
+}

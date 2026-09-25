@@ -14,13 +14,21 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
 | Next release target | 4.4.0 |
 
-**Next step:** user: "release it as 4.3.0 then do all nexts together" → I6 (a: opt out, b: engine +
-WP-CLI, c: bulk tool page, d: editor button), then I8 leftovers, then I11. I9 waits for the user;
-I10 needs user decisions.
+**Next step:** user: "release it as 4.3.0 then do all nexts together" → I6 done; next I8
+leftovers, then I11. I9 waits for the user; I10 needs user decisions.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 150 unit tests) clean; e2e + browser
-(settings page and editor panel) pass on WP 7.1.2 and 5.8.3.
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 172 unit tests) clean; e2e + browser
+(settings page, editor panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I6c bulk tool page
+
+Done: Tools → Negaresh page, bulk find/process REST routes, `bulk.js`, styles, 89 translated
+strings (two sentences split for the line limit; typographic quotes in a msgid to avoid escaping;
+counts reworded without plurals after the "1 posts fixed" screenshot), e2e + browser checks.
+Verified: see status snapshot. I6 is complete.
 
 ---
 

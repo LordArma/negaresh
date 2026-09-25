@@ -10,6 +10,8 @@ versions: [Semantic Versioning](https://semver.org/).
   editor, so Negaresh never changes that post (I6).
 - **Fix this post now** button in the block editor: fixes the text in the editor straight away;
   Undo reverts it (I6).
+- **Tools → Negaresh**: check the posts you already have, see the changed lines, then fix them
+  all; the text before each change is kept in the post's revisions (I6).
 - **`wp negaresh fix`** (WP-CLI) fixes posts that already exist: a dry run with an optional diff
   unless `--apply` is given; the text before the change is kept as a revision. And
   `wp negaresh text` fixes a piece of text (I6).

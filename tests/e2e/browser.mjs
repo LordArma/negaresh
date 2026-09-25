@@ -105,5 +105,31 @@ const saved = await page.evaluate(async () => {
 saved.skip === true && saved.raw.includes('سلام ... عدد ٤٥٦')
   ? pass('opt out saved with the post, text stored as typed') : fail(`saved: ${JSON.stringify(saved)}`);
 await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
+
+// I6: Tools → Negaresh, scan then fix.
+await page.goto(`${url}/wp-admin/tools.php?page=negaresh-bulk`);
+await page.locator('.negaresh-scan').click();
+const row = page.locator('.negaresh-bulk-results tr', { hasText: 'bulk-target' });
+try {
+  await row.waitFor({ timeout: 30000 });
+  pass('bulk scan lists the unfixed post');
+} catch (e) {
+  fail(`bulk scan did not list the post: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+}
+await row.locator('summary').click();
+(await row.locator('.negaresh-added').first().textContent())?.includes('<p>گروهی…</p>')
+  ? pass('bulk scan shows the changed line') : fail('bulk diff missing');
+const idOf = await row.getAttribute('data-id');
+const stored = async () => page.evaluate(async (id) => (await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` })).content.raw, idOf);
+(await stored()) === '<p>گروهی ...</p>' ? pass('scanning saved nothing') : fail(`scan changed the post: ${await stored()}`);
+page.once('dialog', (dialog) => dialog.accept());
+await page.locator('.negaresh-apply').click();
+try {
+  await page.waitForFunction(() => document.querySelectorAll('.negaresh-bulk-results tr.negaresh-done').length > 0, null, { timeout: 30000 });
+  (await stored()) === '<p>گروهی…</p>' ? pass('"Fix all listed posts" fixes the stored post') : fail(`after fix: ${await stored()}`);
+} catch (e) {
+  fail(`bulk fix did not finish: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+}
+await page.screenshot({ path: `${shots}/bulk-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
 errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');
 await browser.close();

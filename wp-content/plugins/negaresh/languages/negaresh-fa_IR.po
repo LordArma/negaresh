@@ -12,13 +12,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T16:07:47+00:00\n"
+"POT-Creation-Date: 2026-09-25T16:38:48+00:00\n"
 "PO-Revision-Date: 2026-09-25 00:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
 
 #. Plugin Name of the plugin
 #: negaresh.php
+#: includes/negaresh-bulk-page.php:36
 #: includes/negaresh-editor.php:57
 #: includes/negaresh-editor.php:179
 #: includes/negaresh-settings.php:322
@@ -44,6 +45,91 @@ msgstr "Lord Arma"
 #: negaresh.php
 msgid "https://LordArma.com/"
 msgstr "https://LordArma.com/"
+
+#: includes/negaresh-bulk-page.php:35
+#: includes/negaresh-bulk-page.php:167
+msgid "Negaresh: fix existing posts"
+msgstr "نگارش: اصلاح نوشته‌های موجود"
+
+#. translators: 1: posts checked so far, 2: posts to check.
+#: includes/negaresh-bulk-page.php:142
+#, php-format
+msgid "Checking posts: %1$d of %2$d"
+msgstr "بررسی نوشته‌ها: %1$d از %2$d"
+
+#. translators: 1: posts fixed so far, 2: posts to fix.
+#: includes/negaresh-bulk-page.php:144
+#, php-format
+msgid "Fixing posts: %1$d of %2$d"
+msgstr "اصلاح نوشته‌ها: %1$d از %2$d"
+
+#. translators: 1: posts that would change, 2: posts checked.
+#: includes/negaresh-bulk-page.php:146
+#, php-format
+msgid "Posts that would change: %1$d of %2$d. Nothing has been saved yet."
+msgstr "نوشته‌هایی که تغییر می‌کنند: %1$d از %2$d. هنوز چیزی ذخیره نشده است."
+
+#: includes/negaresh-bulk-page.php:147
+msgid "Nothing to fix: every post checked is already correct."
+msgstr "چیزی برای اصلاح نیست: همهٔ نوشته‌های بررسی‌شده درست‌اند."
+
+#. translators: %d: posts fixed.
+#: includes/negaresh-bulk-page.php:149
+#, php-format
+msgid "Done. Posts fixed: %d. The text before each change is kept in the post's revisions."
+msgstr "انجام شد. نوشته‌های اصلاح‌شده: %d. متن پیش از هر تغییر در نسخه‌های ذخیره‌شدهٔ همان نوشته نگه داشته می‌شود."
+
+#. translators: %d: posts to fix.
+#: includes/negaresh-bulk-page.php:151
+#, php-format
+msgid "Fix the listed posts now (%d)? This changes the stored posts; each one can be restored from its revisions."
+msgstr "نوشته‌های فهرست همین حالا اصلاح شوند (%d)؟ این کار نوشته‌های ذخیره‌شده را تغییر می‌دهد؛ هر کدام را می‌توان از نسخه‌هایش برگرداند."
+
+#: includes/negaresh-bulk-page.php:152
+msgid "Something went wrong; the list shows what was done."
+msgstr "مشکلی پیش آمد؛ فهرست نشان می‌دهد چه کاری انجام شده است."
+
+#: includes/negaresh-bulk-page.php:153
+msgid "You may not edit this post."
+msgstr "اجازهٔ ویرایش این نوشته را ندارید."
+
+#: includes/negaresh-bulk-page.php:154
+msgid "Edit"
+msgstr "ویرایش"
+
+#: includes/negaresh-bulk-page.php:155
+#: includes/negaresh-bulk-page.php:201
+msgid "Changes"
+msgstr "تغییرها"
+
+#: includes/negaresh-bulk-page.php:169
+msgid "Check the posts you already have with the saved rules, see what would change, then fix them."
+msgstr "نوشته‌های موجود را با قاعده‌های ذخیره‌شده بررسی کنید، ببینید چه چیزی تغییر می‌کند و سپس اصلاحشان کنید."
+
+#: includes/negaresh-bulk-page.php:170
+msgid "Posts marked “Leave this post alone” are never touched."
+msgstr "به نوشته‌هایی که «این نوشته را تغییر نده» دارند هرگز دست زده نمی‌شود."
+
+#: includes/negaresh-bulk-page.php:174
+#: includes/negaresh-settings.php:356
+msgid "Post types"
+msgstr "نوع‌های نوشته"
+
+#: includes/negaresh-bulk-page.php:186
+msgid "Also check posts already fixed with the current rules"
+msgstr "نوشته‌هایی را هم که با قاعده‌های کنونی اصلاح شده‌اند بررسی کن"
+
+#: includes/negaresh-bulk-page.php:191
+msgid "Scan (nothing is saved)"
+msgstr "بررسی (چیزی ذخیره نمی‌شود)"
+
+#: includes/negaresh-bulk-page.php:193
+msgid "Fix all listed posts"
+msgstr "اصلاح همهٔ نوشته‌های فهرست"
+
+#: includes/negaresh-bulk-page.php:200
+msgid "Post"
+msgstr "نوشته"
 
 #: includes/negaresh-editor.php:73
 #: includes/negaresh-editor.php:180
@@ -78,10 +164,6 @@ msgstr "تنظیمات نگارش"
 #: includes/negaresh-settings.php:343
 msgid "When to fix"
 msgstr "زمان اصلاح"
-
-#: includes/negaresh-settings.php:356
-msgid "Post types"
-msgstr "نوع‌های نوشته"
 
 #: includes/negaresh-settings.php:358
 msgid "Fix post titles"

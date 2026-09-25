@@ -26,3 +26,4 @@ require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-settings.php';
 require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-class.php';
 require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-editor.php';
 require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-bulk.php';
+require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-bulk-page.php';

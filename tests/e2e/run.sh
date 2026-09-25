@@ -124,6 +124,14 @@ check "display mode leaves stored text alone (I4)" '<p>حالت نمایش ...</
 # "..." checks B27 too: the fix must run before wptexturize turns "..." into &#8230;
 check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نمایش…' "$(curl -s "$URL/display-mode/")"
 
+# I6: the bulk tool's endpoints (admin only) see the stored, unfixed display mode post.
+BULK_FIND="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' -d '{}' "$URL/wp-json/negaresh/v1/bulk/find")"
+check "bulk find lists unfixed posts (I6)" "$DISPLAY_ID" "$BULK_FIND"
+BULK_DRY="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' -d "{\"ids\":[$DISPLAY_ID]}" "$URL/wp-json/negaresh/v1/bulk/process")"
+check "bulk scan reports the change (I6)" '"changed":true' "$BULK_DRY"
+check "bulk scan saved nothing (I6)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
+check "bulk endpoints refuse anonymous calls (I6)" '401' "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{}' "$URL/wp-json/negaresh/v1/bulk/find")"
+
 # I6: WP-CLI fixes existing posts (the site is in display mode here, so stored posts are unfixed).
 DRY="$(wp negaresh fix "$DISPLAY_ID" 2>&1)"
 check "wp negaresh fix is a dry run by default (I6)" 'would change' "$DRY"

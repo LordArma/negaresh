@@ -9,13 +9,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T16:07:47+00:00\n"
+"POT-Creation-Date: 2026-09-25T16:38:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
 
 #. Plugin Name of the plugin
 #: negaresh.php
+#: includes/negaresh-bulk-page.php:36
 #: includes/negaresh-editor.php:57
 #: includes/negaresh-editor.php:179
 #: includes/negaresh-settings.php:322
@@ -40,6 +41,91 @@ msgstr ""
 #. Author URI of the plugin
 #: negaresh.php
 msgid "https://LordArma.com/"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:35
+#: includes/negaresh-bulk-page.php:167
+msgid "Negaresh: fix existing posts"
+msgstr ""
+
+#. translators: 1: posts checked so far, 2: posts to check.
+#: includes/negaresh-bulk-page.php:142
+#, php-format
+msgid "Checking posts: %1$d of %2$d"
+msgstr ""
+
+#. translators: 1: posts fixed so far, 2: posts to fix.
+#: includes/negaresh-bulk-page.php:144
+#, php-format
+msgid "Fixing posts: %1$d of %2$d"
+msgstr ""
+
+#. translators: 1: posts that would change, 2: posts checked.
+#: includes/negaresh-bulk-page.php:146
+#, php-format
+msgid "Posts that would change: %1$d of %2$d. Nothing has been saved yet."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:147
+msgid "Nothing to fix: every post checked is already correct."
+msgstr ""
+
+#. translators: %d: posts fixed.
+#: includes/negaresh-bulk-page.php:149
+#, php-format
+msgid "Done. Posts fixed: %d. The text before each change is kept in the post's revisions."
+msgstr ""
+
+#. translators: %d: posts to fix.
+#: includes/negaresh-bulk-page.php:151
+#, php-format
+msgid "Fix the listed posts now (%d)? This changes the stored posts; each one can be restored from its revisions."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:152
+msgid "Something went wrong; the list shows what was done."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:153
+msgid "You may not edit this post."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:154
+msgid "Edit"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:155
+#: includes/negaresh-bulk-page.php:201
+msgid "Changes"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:169
+msgid "Check the posts you already have with the saved rules, see what would change, then fix them."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:170
+msgid "Posts marked “Leave this post alone” are never touched."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:174
+#: includes/negaresh-settings.php:356
+msgid "Post types"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:186
+msgid "Also check posts already fixed with the current rules"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:191
+msgid "Scan (nothing is saved)"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:193
+msgid "Fix all listed posts"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:200
+msgid "Post"
 msgstr ""
 
 #: includes/negaresh-editor.php:73
@@ -74,10 +160,6 @@ msgstr ""
 
 #: includes/negaresh-settings.php:343
 msgid "When to fix"
-msgstr ""
-
-#: includes/negaresh-settings.php:356
-msgid "Post types"
 msgstr ""
 
 #: includes/negaresh-settings.php:358
