@@ -55,3 +55,10 @@ wp-config.php
 
 #macOS files
 .DS_Store
+# Claude Code working notes (never commit)
+CLAUDE.md
+CLAUDE.local.md
+
+# Composer and PHPUnit (development only)
+/vendor/
+.phpunit.result.cache

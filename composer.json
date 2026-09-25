@@ -1,0 +1,25 @@
+{
+    "name": "lordarma/negaresh",
+    "description": "Development tooling for the Negaresh WordPress plugin. Not shipped with the plugin.",
+    "type": "project",
+    "license": "GPL-3.0-or-later",
+    "require-dev": {
+        "php": ">=7.4",
+        "phpunit/phpunit": "^9.6",
+        "brain/monkey": "^2.6"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Negaresh\\Tests\\": "tests/"
+        }
+    }
+}
