@@ -79,11 +79,19 @@ I10 needs user decisions first.
 - Bulk tool (Tools → Negaresh): dry run over posts, show changed count and diffs, apply in batches.
 - Optional WP-CLI command `wp negaresh fix [--dry-run] [--post_type=post]`.
 
-## I7 Release pipeline
+## I7 Release pipeline ✅ *(done session 3; workflows not yet run on GitHub)*
 - On tag `v*`: build zip with only the plugin folder (respecting `export-ignore`), attach to a
   GitHub Release, generate release notes from `CHANGELOG.md`.
 - Keep the existing push artifact for testing builds.
 - ~~`CHANGELOG.md`~~ (added in phase 1); keep it updated with every change.
+- *Result:* `bin/build-zip.sh` (git archive of the plugin folder under `negaresh/`; identical
+  layout to the hand built 4.1.0 zip), `bin/release-notes.sh` (CHANGELOG section without
+  internal IDs + install text from the header), `.github/workflows/release.yml` (on `v*` tag:
+  tag = header Version = `NEGARESH_VERSION` and a dated CHANGELOG section, `composer check`,
+  e2e, build, `gh release create`). `main.yml` replaced by a `package` job in `ci.yml` that
+  uploads the same layout as an artifact. `PluginFilesTest` checks the versions agree.
+  Found while testing locally: `[ a ] && [ b ]` does not stop a `bash -e` step, so a wrong tag
+  could have passed; rewritten as an explicit `if`.
 
 ## I8 Documentation and i18n
 - `readme.txt` in wordpress.org format (description, FAQ, screenshots, changelog).

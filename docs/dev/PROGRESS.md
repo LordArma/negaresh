@@ -14,10 +14,22 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
 | Next release target | 4.2.0 (phase 2 features) |
 
-**Next step:** I7 (release pipeline). Open: push `phase-2` so the new CI runs on GitHub (needs the user's OK).
+**Next step:** I2 (HTML aware processing). Open: push `phase-2` so CI and the release workflow
+can be seen running on GitHub (needs the user's OK).
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 76 unit tests) clean on PHP 7.4, 8.3, 8.4.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I7 release pipeline
+
+Done: `bin/build-zip.sh`, `bin/release-notes.sh`, `release.yml`, `package` job in `ci.yml`
+(replaces `main.yml`), version agreement test, release steps in CLAUDE.md §5.
+Verified locally: zip from `v4.1.0` has the same file list as the released asset; notes for 4.1.0
+have no internal IDs; the tag check passes for v4.1.0 and fails for v4.0.0 and v4.2.0 under
+`bash -e` (after fixing an `&&` chain that did not fail the step); `composer check` 77 tests.
+Not verified: the workflows on GitHub.
 
 ---
 

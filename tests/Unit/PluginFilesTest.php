@@ -43,4 +43,21 @@ class PluginFilesTest extends TestCase
 
         self::assertMatchesRegularExpression("/defined\\('(ABSPATH|WP_UNINSTALL_PLUGIN)'\\)|^namespace /m", $code);
     }
+
+    /**
+     * I7: the release workflow refuses a tag that does not match these, so keep them in step.
+     */
+    public function testVersionIsTheSameEverywhere(): void
+    {
+        $main = self::read(NEGARESH_PLUGIN_DIR . '/negaresh.php');
+        preg_match('/^ \* Version: (\S+)$/m', $main, $header);
+        preg_match("/define\('NEGARESH_VERSION', '([^']+)'\);/", $main, $constant);
+
+        self::assertNotEmpty($header, 'Version: missing from the plugin header');
+        self::assertNotEmpty($constant, 'NEGARESH_VERSION missing');
+        self::assertSame($header[1], $constant[1], 'plugin header Version and NEGARESH_VERSION differ');
+
+        $changelog = self::read(dirname(NEGARESH_PLUGIN_DIR, 3) . '/CHANGELOG.md');
+        self::assertStringContainsString('## [' . $header[1] . ']', $changelog, 'CHANGELOG.md has no section for ' . $header[1]);
+    }
 }

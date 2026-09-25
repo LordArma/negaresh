@@ -62,3 +62,6 @@ CLAUDE.local.md
 # Composer and PHPUnit (development only)
 /vendor/
 .phpunit.result.cache
+
+# Built plugin zips
+/build/

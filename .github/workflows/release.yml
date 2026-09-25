@@ -1,0 +1,54 @@
+name: Release
+
+# Push a tag like v4.2.0 to publish a release. The tag must match the plugin header Version,
+# NEGARESH_VERSION and a dated CHANGELOG.md section; all checks must pass first.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the plugin version and the changelog
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          HEADER="$(sed -n 's/^ \* Version: //p' wp-content/plugins/negaresh/negaresh.php)"
+          CONSTANT="$(sed -n "s/^define('NEGARESH_VERSION', '\(.*\)');/\1/p" wp-content/plugins/negaresh/negaresh.php)"
+          echo "tag=$TAG header=$HEADER constant=$CONSTANT"
+          if [ "$TAG" != "$HEADER" ] || [ "$TAG" != "$CONSTANT" ]; then
+            echo "Tag, plugin header Version and NEGARESH_VERSION must be the same"; exit 1
+          fi
+          grep -qE "^## \[$TAG\] \([0-9]{4}-[0-9]{2}-[0-9]{2}\)" CHANGELOG.md \
+            || { echo "CHANGELOG.md needs a dated '## [$TAG] (YYYY-MM-DD)' section"; exit 1; }
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php: '8.3'
+          coverage: none
+          tools: composer:v2
+
+      - name: All checks
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist
+          composer check
+
+      - name: End to end in WordPress
+        run: tests/e2e/run.sh
+
+      - name: Build zip and notes
+        run: |
+          bin/build-zip.sh "$GITHUB_REF_NAME" build/negaresh.zip
+          bin/release-notes.sh "${GITHUB_REF_NAME#v}" > build/notes.md
+
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" build/negaresh.zip \
+            --title "Negaresh ${GITHUB_REF_NAME#v}" --notes-file build/notes.md --verify-tag

@@ -65,3 +65,20 @@ jobs:
         env:
           WP_IMAGE: ${{ matrix.image }}
         run: tests/e2e/run.sh
+
+  package:
+    name: Plugin zip
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the zip exactly as a release would
+        run: |
+          bin/build-zip.sh HEAD build/negaresh.zip
+          unzip -q build/negaresh.zip -d build/unpacked
+      - uses: actions/upload-artifact@v4
+        with:
+          name: negaresh
+          # GitHub zips artifacts itself: uploading the negaresh/ folder gives the same layout
+          # as the release zip, instead of a zip inside a zip.
+          path: build/unpacked
