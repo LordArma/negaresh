@@ -10,7 +10,7 @@ Status snapshot is kept up to date at the top.
 | Analysis | ✅ done (session 1) |
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
-| Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⏳ in progress on branch `phase-2` |
+| Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I11 done (I3 not needed); I9 waits for the user; I10 needs decisions |
 | Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
 | Next release target | 4.4.0 |
 

@@ -56,9 +56,11 @@ I10 needs user decisions first.
   Cost: 156 KB post 34 ms → 55 ms (display mode only; I4 save mode removes display work).
   Tests: `HtmlProcessingTest` (21). All 13 e2e checks pass on WP 7.1.2 and 5.8.3.
 
-## I3 Codebase structure
+## I3 Codebase structure ✅ *(not needed further, session 3)*
 - Partly done in phase 1 (classes `Negaresh`, `Negaresh_Settings`, constants, own Virastar namespace).
 - Remaining: namespaced classes under `src/` if the plugin grows; keep this optional.
+- *Status:* one class per concern now (`Negaresh_Settings`, `Negaresh`, `Negaresh_Editor`,
+  `Negaresh_Bulk`, `Negaresh_Bulk_Page`, `Negaresh_CLI`, Virastar fork); nothing more is needed now.
 - `src/` with `Plugin`, `Settings` (single source of option definitions: key, label, description,
   default, group), `Processor` (wraps Virastar + I2), `Migration`.
 - Composer autoload (classmap, shipped) or a tiny PSR-4 autoloader; Virastar scoped under
