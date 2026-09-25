@@ -211,7 +211,7 @@ I10 needs user decisions first.
   has a `wordpress-org` job (10up deploy action) and `wordpress-org-assets.yml` updates the
   listing; both skip until `SVN_USERNAME`/`SVN_PASSWORD` secrets exist. The plugin folder layout
   already matches what wordpress.org expects (main file, readme.txt, uninstall.php, languages/).
-- **Left for the user:** a wordpress.org account; set `Contributors:` in readme.txt to that
+- **Left for the user** (step by step in `docs/dev/WORDPRESS-ORG.md`): a wordpress.org account; set `Contributors:` in readme.txt to that
   username; submit the zip at https://wordpress.org/plugins/developers/add/ (slug `negaresh`);
   after approval add the two SVN secrets to the GitHub repository. The next tag then deploys.
 
