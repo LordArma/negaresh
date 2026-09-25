@@ -80,6 +80,13 @@ try {
   // I6: the Negaresh panel in the block editor.
   await page.goto(`${url}/wp-admin/post-new.php`);
   await page.waitForFunction(() => window.wp && wp.data && wp.data.select('core/editor') && wp.data.select('core/block-editor'), null, { timeout: 30000 });
+  // Wait until the editor has set up the new post; inserting earlier can be undone by that setup
+  // (seen on slower CI runners: the editor content was empty when the button was pressed).
+  await page.waitForFunction(() => {
+    const editor = wp.data.select('core/editor');
+    const ready = editor.__unstableIsEditorReady ? editor.__unstableIsEditorReady() : true;
+    return ready && editor.getCurrentPostId();
+  }, null, { timeout: 30000 });
   await page.evaluate(() => {
     // Welcome guide off: core/preferences on current WordPress, a feature toggle on 5.8.
     const prefs = wp.data.select('core/preferences') ? wp.data.dispatch('core/preferences') : null;
@@ -106,6 +113,13 @@ try {
     fail('Negaresh panel not found in the editor sidebar');
   }
   const content = () => page.evaluate(() => wp.data.select('core/editor').getEditedPostContent());
+  // The paragraph must really be in the editor before pressing the button; insert again if not.
+  for (let attempt = 0; attempt < 5 && !(await content()).includes('سلام ... عدد ٤٥٦'); attempt++) {
+    await page.waitForTimeout(1000);
+    await page.evaluate(() => {
+      wp.data.dispatch('core/block-editor').resetBlocks([wp.blocks.createBlock('core/paragraph', { content: 'سلام ... عدد ٤٥٦' })]);
+    });
+  }
   await page.locator('.negaresh-fix-now').click();
   try {
     await page.waitForFunction(() => wp.data.select('core/editor').getEditedPostContent().includes('سلام… عدد ۴۵۶'), null, { timeout: 10000 });

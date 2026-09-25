@@ -58,7 +58,10 @@ await page.waitForFunction(() => document.querySelector('#negaresh-preview-outpu
 await page.screenshot({ path: `${out}/screenshot-1.png`, clip: { x: 160, y: 32, width: 1120, height: 860 } });
 
 await page.goto(`${url}/wp-admin/post-new.php`);
-await page.waitForFunction(() => window.wp && wp.data && wp.data.select('core/editor'), null, { timeout: 30000 });
+await page.waitForFunction(() => {
+  const editor = window.wp && wp.data && wp.data.select('core/editor');
+  return editor && (editor.__unstableIsEditorReady ? editor.__unstableIsEditorReady() : true) && editor.getCurrentPostId();
+}, null, { timeout: 30000 });
 await page.evaluate(() => {
   if (wp.data.select('core/preferences')) {
     wp.data.dispatch('core/preferences').set('core/edit-post', 'welcomeGuide', false);
