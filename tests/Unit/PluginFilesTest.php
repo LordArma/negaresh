@@ -70,4 +70,15 @@ class PluginFilesTest extends TestCase
         $changelog = self::read(dirname(NEGARESH_PLUGIN_DIR, 3) . '/CHANGELOG.md');
         self::assertStringContainsString('## [' . $header[1] . ']', $changelog, 'CHANGELOG.md has no section for ' . $header[1]);
     }
+
+    /**
+     * wordpress.org: the plugin carries its license, and the MIT notice of the bundled Virastar.
+     */
+    public function testLicensesShipWithThePlugin(): void
+    {
+        self::assertStringContainsString('GNU GENERAL PUBLIC LICENSE', self::read(NEGARESH_PLUGIN_DIR . '/license.txt'));
+        $virastar = self::read(NEGARESH_PLUGIN_DIR . '/includes/Virastar-LICENSE.txt');
+        self::assertStringContainsString('Copyright (c) 2022 Alireza Sedghi', $virastar);
+        self::assertStringContainsString('Permission is hereby granted', $virastar);
+    }
 }

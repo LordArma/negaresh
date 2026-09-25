@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 4.4.0
+Stable tag: 5.0.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,7 +21,7 @@ Negaresh (نگارش) corrects common Persian typing mistakes in WordPress, usin
 * **Leave a post alone** from the editor sidebar, or part of a post with the CSS class `negaresh-skip`.
 * **Fix this post now** button in the block editor; Undo reverts it.
 * **Fix existing posts** in Tools → Negaresh or with `wp negaresh fix`: see the changed lines first, and every change is kept in the post's revisions.
-* Titles and hand written excerpts can be fixed too (off by default).
+* Titles, hand written excerpts and comments can be fixed too (off by default).
 * Persian translation included.
 
 == Installation ==
@@ -51,9 +51,16 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 
 == Screenshots ==
 
-1. Settings → Negaresh: try the rules on your own text, choose when to fix, pick the rules.
+1. Settings → Negaresh: try the rules on your own text before saving, choose when to fix, pick the rules.
+2. The Negaresh panel in the block editor: leave a post alone, or fix it now (Undo reverts it).
+3. Tools → Negaresh: scan existing posts, see the changed lines, then fix them.
 
 == Changelog ==
+
+= 5.0.0 =
+* Ready for wordpress.org: passes the official Plugin Check, license files included.
+* Optional fixing of comments (off by default).
+* `wp negaresh status`, and a "Fix existing posts" link on the Plugins screen.
 
 = 4.4.0 =
 * Fix: dates written with Persian or Arabic digits were scrambled (۳/۱/۱۳۵۵ became ۱۳/۱/۳۵۵). Upgrade recommended.
@@ -72,6 +79,9 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 The full changelog is at https://github.com/LordArma/negaresh/blob/master/CHANGELOG.md
 
 == Upgrade Notice ==
+
+= 5.0.0 =
+Adds optional fixing of comments and `wp negaresh status`. Includes the 4.4.0 fix for dates written with Persian digits.
 
 = 4.4.0 =
 Fixes Persian and Arabic digit dates being scrambled. Please upgrade.

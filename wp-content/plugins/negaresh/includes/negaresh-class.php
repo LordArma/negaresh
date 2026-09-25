@@ -109,6 +109,10 @@ class Negaresh
 
     public function load_textdomain(): void
     {
+        // Needed for the translation bundled in languages/ (installs from GitHub): WordPress 5.8 does
+        // not find it on its own (checked: 5.8.3 stays English without this call, 7.1.2 does not
+        // need it). On wordpress.org, language packs take over.
+        // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
         load_plugin_textdomain('negaresh', false, dirname(plugin_basename(NEGARESH_FILE)) . '/languages');
     }
 

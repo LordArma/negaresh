@@ -52,3 +52,41 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" build/negaresh.zip \
             --title "Negaresh ${GITHUB_REF_NAME#v}" --notes-file build/notes.md --verify-tag
+
+  wordpress-org:
+    # Publishes the same build to wordpress.org's SVN once the plugin is approved there and the
+    # SVN_USERNAME / SVN_PASSWORD secrets exist; until then it only leaves a notice. It is a job of
+    # this workflow because a release made with GITHUB_TOKEN does not start other workflows.
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Is wordpress.org set up?
+        id: gate
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+        run: |
+          if [ -n "$SVN_USERNAME" ]; then echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else echo "enabled=false" >> "$GITHUB_OUTPUT"; echo "::notice::wordpress.org deploy skipped: add SVN_USERNAME and SVN_PASSWORD secrets after the plugin is approved."; fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
+
+      - name: Build the plugin folder
+        id: build
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          bin/build-zip.sh "$GITHUB_REF_NAME" build/negaresh.zip
+          unzip -q build/negaresh.zip -d build
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to wordpress.org
+        if: steps.gate.outputs.enabled == 'true'
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: negaresh
+          VERSION: ${{ steps.build.outputs.version }}
+          BUILD_DIR: build/negaresh
+          ASSETS_DIR: .wordpress-org
+

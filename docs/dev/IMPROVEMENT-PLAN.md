@@ -198,9 +198,22 @@ I10 needs user decisions first.
   **Check before I9:** `Contributors: lordarma` in readme.txt must be the real wordpress.org
   username.
 
-## I9 wordpress.org readiness (wanted later, not now: user 2026-09-25)
+## I9 wordpress.org readiness ⏳ *(technically ready in 5.0.0; submission is the user's step)*
 - Plugin Check (`wp plugin check`) clean, GPL compatible headers, no external calls, sanitisation
   and escaping audit, unique prefix audit. Submit.
+- *Done for 5.0.0 (user: "make the plugin structure able to publish on wordpress.org, call it
+  version 5"):* Plugin Check 2.1.0 finds nothing, experimental checks included (was: 1 error, the
+  unescaped `gettype()` in Virastar's exception; 1 warning, `load_plugin_textdomain`, kept with a
+  justified ignore: WP 5.8.3 does not load the bundled translation without it, WP 7.1.2 does;
+  both verified on real sites). `license.txt` and `includes/Virastar-LICENSE.txt` (MIT notices of
+  the PHP port and Virastar.js) ship in the zip. `.wordpress-org/` holds icon 128/256, banners
+  772×250/1544×500 and 3 screenshots, made by `tests/e2e/wporg-assets.sh`. The Release workflow
+  has a `wordpress-org` job (10up deploy action) and `wordpress-org-assets.yml` updates the
+  listing; both skip until `SVN_USERNAME`/`SVN_PASSWORD` secrets exist. The plugin folder layout
+  already matches what wordpress.org expects (main file, readme.txt, uninstall.php, languages/).
+- **Left for the user:** a wordpress.org account; set `Contributors:` in readme.txt to that
+  username; submit the zip at https://wordpress.org/plugins/developers/add/ (slug `negaresh`);
+  after approval add the two SVN secrets to the GitHub repository. The next tag then deploys.
 
 ## I10 Stretch ideas (need a user decision before starting)
 - Admin notice / dashboard widget showing how many posts would change.
@@ -243,6 +256,7 @@ start with easy ones". Easy first. Each item: done when tests (unit and/or e2e) 
       comment meta `_negaresh_fixed`; any later change that did not go through the filter drops
       the mark. Display: `comment_text` at 9 (before wptexturize), skips marked comments.
       Uninstall removes the comment markers. Tests: `CommentsTest` (9), e2e (form, REST, older).
-- [ ] **P3-7** WordPress Plugin Check (`wp plugin check`) in the e2e run; fix its findings (prepares I9).
+- [x] **P3-7** WordPress Plugin Check (`wp plugin check --include-experimental`) in the e2e run (WP 6.3+;
+      skipped on 5.8 with a note); findings fixed (see I9).
 - [ ] **P3-8** Accessibility check (axe) of the settings, tools and editor panel in the browser test.
 - [ ] **P3-9** Cache display mode output (content + rules hash; object cache when persistent).

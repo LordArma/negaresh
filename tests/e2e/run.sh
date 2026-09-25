@@ -171,6 +171,18 @@ check "wp negaresh status (P3-5)" '"mode":"display"' "$STATUS"
 check "wp negaresh status counts opted out posts (P3-5)" '"opted_out":1' "$STATUS"
 check "wp negaresh text (I6)" 'عدد ۴۵۶…' "$(wp negaresh text 'عدد ٤٥٦ ...' 2>&1)"
 
+# P3-7: WordPress's own Plugin Check (the wordpress.org review tool) must find nothing.
+# It needs WordPress 6.3 or newer.
+if wp eval 'exit(version_compare(get_bloginfo("version"), "6.3", ">=") ? 0 : 1);' >/dev/null 2>&1; then
+  wp plugin install plugin-check --activate >/dev/null 2>&1
+  PCP="$(wp plugin check negaresh --include-experimental 2>&1 || true)"
+  check "Plugin Check finds no errors or warnings (P3-7)" 'No errors found' "$PCP"
+  grep -q 'No errors found' <<<"$PCP" || echo "$PCP" | head -30
+  wp plugin deactivate plugin-check >/dev/null 2>&1
+else
+  echo "note  Plugin Check skipped: it needs WordPress 6.3+"
+fi
+
 # BROWSER=1: drive the settings page in headless Chromium too (tests/e2e/browser.sh, I5)
 if [ "${BROWSER:-0}" = 1 ]; then
   # capture first: "grep -q" in a pipe exits early, tee dies of SIGPIPE and pipefail hides the FAIL

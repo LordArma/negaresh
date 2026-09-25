@@ -12,16 +12,26 @@ Status snapshot is kept up to date at the top.
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I11 done (I3 not needed); I9 waits for the user; I10 needs decisions |
 | Current version | 4.4.0 (tag `v4.4.0`, commit `1e827c6`, released 2026-09-25 by the Release workflow) |
-| Next release target | 4.5.0 |
+| Next release target | 5.0.0 (wordpress.org ready) |
 
-**Next step:** user: "do anything if exist; if not think about what improvements we can have and
-do them, start with easy ones" → phase 3 list in IMPROVEMENT-PLAN.md (P3-*), easy ones first.
-I9 waits for the user (wordpress.org username in readme.txt); I10 needs user decisions.
+**Next step:** release 5.0.0; then continue phase 3 (P3-8 accessibility, P3-9 caching).
+I9: technically done; the user must create/confirm the wordpress.org account, fix `Contributors:`,
+submit, then add SVN secrets. I10 needs user decisions.
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 343 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · wordpress.org readiness → 5.0.0
+
+Done: see IMPROVEMENT-PLAN I9 and P3-7. Plugin Check clean; license files; listing assets;
+deploy jobs (gated on secrets); readme screenshots/changelog/upgrade notice; version 5.0.0.
+Note on method: the first "works without load_plugin_textdomain" test on 7.1 was invalid (the
+call had already registered the path before `wp eval`); redone with a must-use plugin that
+removes the call before init: 7.1 loads the bundled translation, 5.8 does not.
 
 ---
 

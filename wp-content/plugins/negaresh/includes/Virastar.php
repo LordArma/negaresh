@@ -220,7 +220,7 @@ class Virastar
     public function cleanup($text)
     {
         if (!is_string($text))
-            throw new Exception('Expected a String, but received ' . gettype($text));
+            throw new Exception('Expected a string.'); // Negaresh patch: no unescaped value in the message (Plugin Check)
 
         // trim text
         $text = trim($text);

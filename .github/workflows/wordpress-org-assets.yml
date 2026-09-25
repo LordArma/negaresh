@@ -1,0 +1,42 @@
+name: wordpress.org listing
+
+# Updates only the readme and the listing assets (.wordpress-org/) on wordpress.org between
+# releases. Does nothing until the SVN_USERNAME / SVN_PASSWORD secrets exist.
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.wordpress-org/**'
+      - 'wp-content/plugins/negaresh/readme.txt'
+
+jobs:
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Is wordpress.org set up?
+        id: gate
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+        run: |
+          if [ -n "$SVN_USERNAME" ]; then echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else echo "enabled=false" >> "$GITHUB_OUTPUT"; echo "::notice::wordpress.org listing update skipped: no SVN secrets yet."; fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
+
+      - name: Build the plugin folder
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          bin/build-zip.sh HEAD build/negaresh.zip
+          unzip -q build/negaresh.zip -d build
+
+      - name: Update readme and assets
+        if: steps.gate.outputs.enabled == 'true'
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: negaresh
+          BUILD_DIR: build/negaresh
+          ASSETS_DIR: .wordpress-org
+          README_NAME: readme.txt

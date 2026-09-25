@@ -3,9 +3,16 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [5.0.0] (2026-09-25)
+
+Ready for wordpress.org: the plugin passes WordPress's official Plugin Check (including its
+experimental checks), ships its license and the MIT notice of the bundled Virastar, and the
+repository holds the wordpress.org listing assets and a deploy job that starts once the plugin is
+approved there. No breaking changes; the major version marks the wordpress.org release.
 
 ### Added
+- wordpress.org listing assets (icon, banners, screenshots) and deployment, `license.txt`,
+  `includes/Virastar-LICENSE.txt`.
 - **Fix existing posts** link on the Plugins screen (P3-3).
 - Optional fixing of **comments** (off by default): on save, or on display for older ones (P3-6).
 - **`wp negaresh status`**: how many posts are fixed with the current rules, waiting, or opted
