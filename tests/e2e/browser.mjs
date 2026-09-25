@@ -1,11 +1,23 @@
 // Drives the Negaresh settings page in headless Chromium (Playwright): the live preview reacts to
 // typing and to unsaved checkbox changes, and "Reset rules" asks first. Run by tests/e2e/browser.sh.
 import { chromium } from 'playwright';
+import { createRequire } from 'module';
 
 const url = process.env.WP_URL;
 const shots = process.env.SHOTS || '/shots';
 const fail = (msg) => { console.log(`FAIL  ${msg}`); process.exitCode = 1; };
 const pass = (msg) => console.log(`PASS  ${msg}`);
+
+// P3-8: WCAG 2 A/AA check with axe-core on Negaresh's own part of a page.
+const axePath = createRequire(import.meta.url).resolve('axe-core');
+async function a11y(page, selector, name) {
+  await page.addScriptTag({ path: axePath });
+  const result = await page.evaluate(async (sel) => {
+    const r = await window.axe.run(sel, { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'] } });
+    return r.violations.map((v) => `${v.id} (${v.impact}): ${v.nodes.length} × ${v.nodes[0].target.join(' ')} ${v.help}`);
+  }, selector);
+  result.length ? fail(`accessibility, ${name}: ${result.join(' | ')}`) : pass(`accessibility, ${name}: no WCAG 2 A/AA violations`);
+}
 
 let browser;
 try {
@@ -55,6 +67,7 @@ try {
   page.url().includes('page=negaresh-options') && !page.url().includes('settings-updated')
     ? pass('dismissing the confirmation does not submit') : fail(`page moved to ${page.url()}`);
 
+  await a11y(page, '.negaresh-settings', 'settings page');
   await page.screenshot({ path: `${shots}/settings-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
   // The top of the page (preview with a fixed example, mode, first rules): the README screenshot.
   for (const rule of ['fix_three_dots', 'fix_question_mark', 'fix_suffix_spacing', 'fix_english_quotes', 'fix_spacing_for_punctuations']) {
@@ -114,6 +127,7 @@ try {
   });
   saved.skip === true && saved.raw.includes('سلام ... عدد ٤٥٦')
     ? pass('opt out saved with the post, text stored as typed') : fail(`saved: ${JSON.stringify(saved)}`);
+  await a11y(page, '.negaresh-skip-toggle, .negaresh-fix-now', 'editor panel');
   await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
 
   // I6: Tools → Negaresh, scan then fix.
@@ -140,6 +154,7 @@ try {
   } catch (e) {
     fail(`bulk fix did not finish: ${await page.locator('.negaresh-bulk-status').textContent()}`);
   }
+  await a11y(page, '.negaresh-bulk', 'tools page');
   await page.screenshot({ path: `${shots}/bulk-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
   errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');
 } catch (e) {

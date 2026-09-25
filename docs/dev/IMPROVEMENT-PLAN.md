@@ -258,5 +258,7 @@ start with easy ones". Easy first. Each item: done when tests (unit and/or e2e) 
       Uninstall removes the comment markers. Tests: `CommentsTest` (9), e2e (form, REST, older).
 - [x] **P3-7** WordPress Plugin Check (`wp plugin check --include-experimental`) in the e2e run (WP 6.3+;
       skipped on 5.8 with a note); findings fixed (see I9).
-- [ ] **P3-8** Accessibility check (axe) of the settings, tools and editor panel in the browser test.
+- [x] **P3-8** Accessibility check (axe-core 4, WCAG 2.0/2.1 A and AA) of Negaresh's parts of the settings
+      page, the tools page and the editor panel, in the browser test: no violations on WP 7.1.2 and
+      5.8.3. Seen failing on a planted unlabelled field before being trusted.
 - [ ] **P3-9** Cache display mode output (content + rules hash; object cache when persistent).

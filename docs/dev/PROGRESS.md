@@ -14,7 +14,7 @@ Status snapshot is kept up to date at the top.
 | Current version | 5.0.0 (tag `v5.0.0`, commit `ac8cbe6`, released 2026-09-25 by the Release workflow) |
 | Next release target | 5.1.0 |
 
-**Next step:** continue phase 3 (P3-8 accessibility, P3-9 caching). Open for the user: Dependabot
+**Next step:** continue phase 3 (P3-9 caching). Open for the user: Dependabot
 pull request #1 (actions/checkout 4 → 7, upload-artifact; all checks pass).
 I9: technically done; the user must create/confirm the wordpress.org account, fix `Contributors:`,
 submit, then add SVN secrets. I10 needs user decisions.
@@ -23,6 +23,14 @@ submit, then add SVN secrets. I10 needs user decisions.
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 3 slice: P3-8 accessibility
+
+Done: axe-core scan in `browser.mjs` for the three admin parts; nothing to fix (labels, contrast,
+roles already right). Proven by a planted violation (reported as critical `label`).
+Verified: e2e + browser on WP 7.1.2 and 5.8.3.
 
 ---
 
