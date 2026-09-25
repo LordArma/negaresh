@@ -3,11 +3,15 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [5.1.0] (2026-09-25)
 
 ### Changed
 - When fixing on display, results are kept in the object cache, so sites with Redis or Memcached
   do not fix the same text again (P3-9).
+
+### Added
+- The settings page, the tools page and the editor panel are checked for accessibility (WCAG 2
+  A/AA) with axe-core in the browser tests (P3-8).
 
 ## [5.0.0] (2026-09-25)
 
