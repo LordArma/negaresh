@@ -86,6 +86,19 @@ PREVIEW="$(curl -s -b "$JAR" -H "X-WP-Nonce: $REST_NONCE" -H 'Content-Type: appl
   -d '{"text":"<p>عدد 123 ...</p>","rules":{"fix_english_numbers":true,"fix_three_dots":true,"remove_spaces_before_ellipsis":true}}' "$URL/wp-json/negaresh/v1/preview")"
 check "preview uses the unsaved boxes (I5)" '<p>عدد ۱۲۳…</p>' "$(python3 -c 'import json,sys; print(json.load(sys.stdin)["text"])' <<<"$PREVIEW" 2>&1)"
 check "preview refused without login (I5)" '401' "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{"text":"x"}' "$URL/wp-json/negaresh/v1/preview")"
+
+# I10a: dashboard widget and the "posts are waiting" notice (the sample posts were never checked).
+DASH="$(curl -s -b "$JAR" "$URL/wp-admin/index.php")"
+check "dashboard widget (I10a)" 'id="negaresh"' "$DASH"
+check "waiting posts notice on the dashboard (I10a)" 'posts not yet checked with the current rules' "$DASH"
+check "forged dismiss link refused (I10a)" '403' "$(curl -s -b "$JAR" -o /dev/null -w '%{http_code}' "$URL/wp-admin/admin-post.php?action=negaresh_dismiss_notice&_wpnonce=forged")"
+DISMISS_URL="$(grep -oP 'href="\K[^"]*negaresh_dismiss_notice[^"]*' <<<"$DASH" | head -1 | sed 's/&#038;/\&/g; s/&amp;/\&/g')"
+curl -s -b "$JAR" -o /dev/null "$DISMISS_URL"
+if grep -q 'posts not yet checked with the current rules' <<<"$(curl -s -b "$JAR" "$URL/wp-admin/index.php")"; then
+  echo "FAIL  dismissed notice stays away (I10a)"; FAIL=1
+else
+  echo "PASS  dismissed notice stays away (I10a)"
+fi
 rm -f "$JAR"
 
 # Back to the defaults (the form above left only one rule on): save mode, default rules.

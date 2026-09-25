@@ -216,8 +216,12 @@ I10 needs user decisions first.
   after approval add the two SVN secrets to the GitHub repository. The next tag then deploys.
 
 ## I10 Stretch ideas ⏳ *(user 2026-09-25: "yes do all I10")*
-- [ ] **I10a** Dashboard widget with the counts (fixed / waiting / opted out) and a link to the bulk
+- [x] **I10a** Dashboard widget with the counts (fixed / waiting / opted out) and a link to the bulk
   tool; a dismissible notice when existing posts are waiting. Counts cached (1 hour).
+  *Result:* `Negaresh_Dashboard` (`includes/negaresh-dashboard.php`): widget for `manage_options`;
+  notice on Dashboard and Plugins only, dismissed per user (user meta, `check_admin_referer`);
+  counts in the `negaresh_stats` transient, cleared on `save_post` and settings changes; uninstall
+  removes both. Tests: `DashboardTest` (6), e2e (widget, notice, forged dismiss 403, dismissal).
 - [ ] **I10b** Words to leave alone: a list on the settings page; matches are never changed
   (treated as boundaries, like shortcodes); the preview uses the list from the page.
 - [ ] **I10c** Multisite: network defaults set in Network Admin; sites that never saved their own

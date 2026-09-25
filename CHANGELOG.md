@@ -3,6 +3,12 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Dashboard widget** with how many posts are fixed, waiting or left alone, and a one time,
+  dismissible notice when existing posts are waiting to be checked (I10a).
+
 ## [5.1.0] (2026-09-25)
 
 ### Changed

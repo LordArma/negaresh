@@ -27,6 +27,13 @@ panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 
 ---
 
+## 2026-09-25 · Session 3 · I10a dashboard widget and notice
+
+Done: see IMPROVEMENT-PLAN I10a; 7 new translated strings.
+Verified: unit tests, PHPCS (switched to `check_admin_referer()`), PHPStan; e2e on WP 7.1.2.
+
+---
+
 ## 2026-09-25 · Session 3 · Release 5.1.0 + pull request #1
 
 Release: version bump, checks all green locally; first CI run on GitHub failed the latest WordPress

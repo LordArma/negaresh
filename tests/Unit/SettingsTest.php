@@ -205,11 +205,16 @@ class SettingsTest extends TestCase
     {
         $this->options = $this->legacyRows() + ['negaresh_options' => [], 'negaresh_db_version' => 2, 'blogname' => 'x'];
         Functions\expect('delete_post_meta_by_key')->twice()->andReturn(true);
-        Functions\expect('delete_metadata')->once()->with('comment', 0, '_negaresh_fixed', '', true)->andReturn(true);
+        $metadata = [];
+        Functions\when('delete_metadata')->alias(function ($type, $id, $key, $value, $all) use (&$metadata) {
+            $metadata[] = [$type, $key, $all];
+            return true;
+        });
 
         Negaresh_Settings::delete_all();
 
         self::assertSame(['blogname' => 'x'], $this->options);
+        self::assertSame([['comment', '_negaresh_fixed', true], ['user', 'negaresh_notice_dismissed', true]], $metadata);
     }
 
     public function testB14EveryRuleHasARealLabelInAKnownSection(): void

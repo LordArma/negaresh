@@ -15,6 +15,9 @@ abstract class TestCase extends PHPUnitTestCase
         // No object cache by default (P3-9); CacheTest replaces these with a working one.
         Functions\when('wp_cache_get')->justReturn(false);
         Functions\when('wp_cache_set')->justReturn(true);
+        // Cleanup calls used by uninstall; tests that care replace them.
+        Functions\when('delete_transient')->justReturn(true);
+        Functions\when('delete_metadata')->justReturn(true);
     }
 
     /** @var array<string,mixed> in-memory wp_options table, see stubOptions() */

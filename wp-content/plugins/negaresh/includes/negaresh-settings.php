@@ -315,6 +315,8 @@ class Negaresh_Settings
         delete_post_meta_by_key(self::FIXED_META);
         delete_post_meta_by_key(self::SKIP_META);
         delete_metadata('comment', 0, self::FIXED_META, '', true);
+        delete_metadata('user', 0, 'negaresh_notice_dismissed', '', true); // I10a
+        delete_transient('negaresh_stats');
         foreach (self::LEGACY_OPTIONS as $name) {
             delete_option($name);
         }
