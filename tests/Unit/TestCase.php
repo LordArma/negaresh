@@ -12,6 +12,9 @@ abstract class TestCase extends PHPUnitTestCase
     {
         parent::setUp();
         Monkey\setUp();
+        // No object cache by default (P3-9); CacheTest replaces these with a working one.
+        Functions\when('wp_cache_get')->justReturn(false);
+        Functions\when('wp_cache_set')->justReturn(true);
     }
 
     /** @var array<string,mixed> in-memory wp_options table, see stubOptions() */

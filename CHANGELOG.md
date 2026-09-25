@@ -3,6 +3,12 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- When fixing on display, results are kept in the object cache, so sites with Redis or Memcached
+  do not fix the same text again (P3-9).
+
 ## [5.0.0] (2026-09-25)
 
 Ready for wordpress.org: the plugin passes WordPress's official Plugin Check (including its

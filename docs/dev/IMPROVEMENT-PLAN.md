@@ -261,4 +261,7 @@ start with easy ones". Easy first. Each item: done when tests (unit and/or e2e) 
 - [x] **P3-8** Accessibility check (axe-core 4, WCAG 2.0/2.1 A and AA) of Negaresh's parts of the settings
       page, the tools page and the editor panel, in the browser test: no violations on WP 7.1.2 and
       5.8.3. Seen failing on a planted unlabelled field before being trusted.
-- [ ] **P3-9** Cache display mode output (content + rules hash; object cache when persistent).
+- [x] **P3-9** Display results cached in the object cache (group `negaresh`, one day; key = text md5 +
+      rules hash + plugin version, so no invalidation is needed). Content, titles, excerpts, comments;
+      save paths never cached; no database transients. Key computation is inside the B7 guard
+      (the B7 test caught an exception escaping from it). Tests: `CacheTest` (5).

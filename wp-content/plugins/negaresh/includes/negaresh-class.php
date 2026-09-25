@@ -45,6 +45,12 @@ class Negaresh
     /** Longest text the settings page preview accepts, in bytes (I5). */
     public const PREVIEW_MAX_LENGTH = 50000;
 
+    /** Object cache group for display results (P3-9). */
+    public const CACHE_GROUP = 'negaresh';
+
+    /** How long a display result stays in the object cache, in seconds (one day). */
+    public const CACHE_TTL = 86400;
+
     /** Post meta written when a post is fixed on save (I4). */
     public const FIXED_META = Negaresh_Settings::FIXED_META;
 
@@ -133,7 +139,7 @@ class Negaresh
             return $content;
         }
 
-        return $this->safe_fix($content);
+        return $this->display_fix($content);
     }
 
     /**
@@ -152,7 +158,7 @@ class Negaresh
         ) {
             return $title;
         }
-        return $this->safe_fix($title);
+        return $this->display_fix($title);
     }
 
     /**
@@ -170,7 +176,7 @@ class Negaresh
         ) {
             return $excerpt;
         }
-        return $this->safe_fix($excerpt);
+        return $this->display_fix($excerpt);
     }
 
     /**
@@ -192,7 +198,7 @@ class Negaresh
         ) {
             return $text;
         }
-        return $this->safe_fix($text);
+        return $this->display_fix($text);
     }
 
     /**
@@ -439,6 +445,31 @@ class Negaresh
             return false;
         }
         return get_post_meta($post->ID, self::FIXED_META, true) === $this->settings->rules_hash();
+    }
+
+    /**
+     * safe_fix() for the display filters, through the object cache (P3-9). The key holds the text,
+     * the rules and the plugin version, so a change of rules or an upgrade never serves an old
+     * result. Only the object cache is used (persistent with Redis or Memcached, otherwise per
+     * request); caching every post in the database would bloat it.
+     */
+    private function display_fix(string $text): string
+    {
+        if (1 !== preg_match('/[\x{0600}-\x{06FF}]/u', $text)) {
+            return $text; // nothing to fix, nothing worth caching
+        }
+        try {
+            $key = md5($text) . ':' . $this->settings->rules_hash() . ':' . NEGARESH_VERSION;
+            $hit = wp_cache_get($key, self::CACHE_GROUP);
+        } catch (\Throwable $e) {
+            return $this->safe_fix($text); // B7: never break the page, not even for the cache
+        }
+        if (is_string($hit)) {
+            return $hit;
+        }
+        $fixed = $this->safe_fix($text);
+        wp_cache_set($key, $fixed, self::CACHE_GROUP, self::CACHE_TTL);
+        return $fixed;
     }
 
     /**
