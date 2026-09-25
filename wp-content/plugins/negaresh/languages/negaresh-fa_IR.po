@@ -3,7 +3,7 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Negaresh 4.2.0\n"
+"Project-Id-Version: Negaresh 4.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/LordArma/negaresh/issues\n"
 "Last-Translator: \n"
 "Language-Team: فارسی\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T14:33:23+00:00\n"
+"POT-Creation-Date: 2026-09-25T15:57:09+00:00\n"
 "PO-Revision-Date: 2026-09-25 00:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
@@ -228,50 +228,50 @@ msgstr "حذف فاصله‌ها از آغاز خط‌ها و آغاز و پای
 msgid "Try it"
 msgstr "امتحان کنید"
 
-#: includes/negaresh-settings.php:569
+#: includes/negaresh-settings.php:571
 msgid "Type or paste some text (HTML is fine). The result uses the boxes as they are checked on this page, before you save."
 msgstr "متنی بنویسید یا بچسبانید (HTML هم پذیرفته است). نتیجه بر پایهٔ گزینه‌هایی است که همین حالا در این صفحه انتخاب شده‌اند، پیش از ذخیره."
 
-#: includes/negaresh-settings.php:570
+#: includes/negaresh-settings.php:577
 msgid "Text to fix"
 msgstr "متن برای اصلاح"
 
-#: includes/negaresh-settings.php:572
+#: includes/negaresh-settings.php:579
 msgid "Result"
 msgstr "نتیجه"
 
-#: includes/negaresh-settings.php:586
+#: includes/negaresh-settings.php:593
 msgid "Reset rules to defaults"
 msgstr "بازگرداندن قاعده‌ها به پیش‌فرض"
 
-#: includes/negaresh-settings.php:610
+#: includes/negaresh-settings.php:617
 msgid "Settings"
 msgstr "تنظیمات"
 
-#: includes/negaresh-settings.php:631
+#: includes/negaresh-settings.php:638
 msgid "Working…"
 msgstr "در حال کار…"
 
-#: includes/negaresh-settings.php:632
+#: includes/negaresh-settings.php:639
 msgid "The preview could not be made."
 msgstr "پیش‌نمایش ساخته نشد."
 
-#: includes/negaresh-settings.php:633
+#: includes/negaresh-settings.php:640
 msgid "Set every rule back to its default? Unsaved changes to the rules are lost."
 msgstr "همهٔ قاعده‌ها به حالت پیش‌فرض برگردند؟ تغییرهای ذخیره‌نشدهٔ قاعده‌ها از دست می‌روند."
 
-#: includes/negaresh-settings.php:659
+#: includes/negaresh-settings.php:668
 msgid "When a post is saved: the stored text is corrected, so what you see in the editor is what readers get"
 msgstr "هنگام ذخیرهٔ نوشته: متن ذخیره‌شده اصلاح می‌شود، پس آنچه در ویرایشگر می‌بینید همان است که خوانندگان می‌بینند"
 
-#: includes/negaresh-settings.php:663
+#: includes/negaresh-settings.php:672
 msgid "When a post is displayed: the stored text is never changed"
 msgstr "هنگام نمایش نوشته: متن ذخیره‌شده هرگز تغییر نمی‌کند"
 
-#: includes/negaresh-settings.php:676
+#: includes/negaresh-settings.php:685
 msgid "Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again."
 msgstr "اصلاح هنگام ذخیره نوشته‌ها را تغییر می‌دهد و برگشت‌پذیر نیست. نوشته‌هایی که پیش‌تر ذخیره شده‌اند تا ذخیرهٔ دوباره، هنگام نمایش اصلاح می‌شوند."
 
-#: includes/negaresh-settings.php:697
+#: includes/negaresh-settings.php:706
 msgid "Leave all unchecked to fix every post type."
 msgstr "برای اصلاح همهٔ نوع‌ها، هیچ‌کدام را انتخاب نکنید."

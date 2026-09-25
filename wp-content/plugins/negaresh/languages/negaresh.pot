@@ -2,14 +2,14 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Negaresh 4.2.0\n"
+"Project-Id-Version: Negaresh 4.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/LordArma/negaresh/issues\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T14:33:23+00:00\n"
+"POT-Creation-Date: 2026-09-25T15:57:09+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
@@ -225,50 +225,50 @@ msgstr ""
 msgid "Try it"
 msgstr ""
 
-#: includes/negaresh-settings.php:569
+#: includes/negaresh-settings.php:571
 msgid "Type or paste some text (HTML is fine). The result uses the boxes as they are checked on this page, before you save."
 msgstr ""
 
-#: includes/negaresh-settings.php:570
+#: includes/negaresh-settings.php:577
 msgid "Text to fix"
 msgstr ""
 
-#: includes/negaresh-settings.php:572
+#: includes/negaresh-settings.php:579
 msgid "Result"
 msgstr ""
 
-#: includes/negaresh-settings.php:586
+#: includes/negaresh-settings.php:593
 msgid "Reset rules to defaults"
 msgstr ""
 
-#: includes/negaresh-settings.php:610
+#: includes/negaresh-settings.php:617
 msgid "Settings"
 msgstr ""
 
-#: includes/negaresh-settings.php:631
+#: includes/negaresh-settings.php:638
 msgid "Working…"
 msgstr ""
 
-#: includes/negaresh-settings.php:632
+#: includes/negaresh-settings.php:639
 msgid "The preview could not be made."
 msgstr ""
 
-#: includes/negaresh-settings.php:633
+#: includes/negaresh-settings.php:640
 msgid "Set every rule back to its default? Unsaved changes to the rules are lost."
 msgstr ""
 
-#: includes/negaresh-settings.php:659
+#: includes/negaresh-settings.php:668
 msgid "When a post is saved: the stored text is corrected, so what you see in the editor is what readers get"
 msgstr ""
 
-#: includes/negaresh-settings.php:663
+#: includes/negaresh-settings.php:672
 msgid "When a post is displayed: the stored text is never changed"
 msgstr ""
 
-#: includes/negaresh-settings.php:676
+#: includes/negaresh-settings.php:685
 msgid "Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again."
 msgstr ""
 
-#: includes/negaresh-settings.php:697
+#: includes/negaresh-settings.php:706
 msgid "Leave all unchecked to fix every post type."
 msgstr ""

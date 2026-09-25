@@ -3,7 +3,7 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [4.3.0] (2026-09-25)
 
 ### Added
 - **Try it** box on the settings page: type or paste text and see it fixed straight away, with
