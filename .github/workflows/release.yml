@@ -13,7 +13,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check the tag matches the plugin version and the changelog
         run: |
@@ -68,7 +68,7 @@ jobs:
           if [ -n "$SVN_USERNAME" ]; then echo "enabled=true" >> "$GITHUB_OUTPUT"
           else echo "enabled=false" >> "$GITHUB_OUTPUT"; echo "::notice::wordpress.org deploy skipped: add SVN_USERNAME and SVN_PASSWORD secrets after the plugin is approved."; fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: steps.gate.outputs.enabled == 'true'
 
       - name: Build the plugin folder
