@@ -1,0 +1,979 @@
+{
+ "source": "https://github.com/brothersincode/virastar test/virastar.js",
+ "version": "0.22.1",
+ "cases": [
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences",
+   "input": "ويراستار به شما كمك مي كند تا متون فارسي زيبا تر و درست تري بنويسيد .",
+   "options": {},
+   "expected": "ویراستار به شما کمک می‌کند تا متون فارسی زیباتر و درست‌تری بنویسید."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences",
+   "input": "ويراستار به طور پيش فرض اين کار ها را انجام می دهد :",
+   "options": {},
+   "expected": "ویراستار به طور پیش فرض این کارها را انجام می‌دهد:"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #1",
+   "input": "1. نویسه های عربي را به فارسی تبديل مي کند.  مثلا كاف و ياي عربي .",
+   "options": {},
+   "expected": "۱. نویسه‌های عربی را به فارسی تبدیل می‌کند. مثلا کاف و یای عربی."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #2",
+   "input": "2. نویسه های انگليسي رايج در تايپ فارسي را به معادل صحيح فارسي آن تبدیل می کند, مثلا تبدیل کامای انگلیسی به ویرگول (,), يا نقطه ویرگول به جای semicolon (;) و یا استفاده از \"گيومه های فارسي\"",
+   "options": {},
+   "expected": "۲. نویسه‌های انگلیسی رایج در تایپ فارسی را به معادل صحیح فارسی آن تبدیل می‌کند، مثلا تبدیل کامای انگلیسی به ویرگول (،)، یا نقطه ویرگول به جای semicolon (؛) و یا استفاده از «گیومه‌های فارسی»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #3",
+   "input": "3. اعداد عربي و انگليسي و علائم رياضی را به معادل فارسی آن ها تبديل مي کند.    مثلا  :  12%  456",
+   "options": {},
+   "expected": "۳. اعداد عربی و انگلیسی و علائم ریاضی را به معادل فارسی آن‌ها تبدیل می‌کند. مثلا: ۱۲٪ ۴۵۶"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #4",
+   "input": "4. سه نقطه را به نويسه صحيح آن که تنها يك نويسه است تبديل کرده و فاصله گذاري آن را اصلاح مي کند ...",
+   "options": {},
+   "expected": "۴. سه نقطه را به نویسه صحیح آن که تنها یک نویسه است تبدیل کرده و فاصله گذاری آن را اصلاح می‌کند…"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #5",
+   "input": "5. در ترکيباتي مانند ''خانه ي پدری'' که  با \"ه\" تمام می‌شوند نشانه \"ی\" كسره ی اضافه را به \"هٔ\" تبديل می كند.",
+   "options": {},
+   "expected": "۵. در ترکیباتی مانند «خانهٔ پدری» که با «ه» تمام می‌شوند نشانه «ی» کسرهٔ اضافه را به «هٔ» تبدیل می‌کند."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #6",
+   "input": "6. دو علامت منهاي پي در پي را به خط کشيده کوتاه (--) و سه علامت منهاي پي در پي را به خط کشیده بلند (---) تبديل مي كند .",
+   "options": {},
+   "expected": "۶. دو علامت منهای پی در پی را به خط کشیده کوتاه (–) و سه علامت منهای پی در پی را به خط کشیده بلند (—) تبدیل می‌کند."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #7",
+   "input": "7. فاصله گذاری را تصحيح مي کند . بين هر کلمه تنها یک فاصله و بین پیشوندها و پسوندهاي مانند \"مي\",\"تر\"و\"ترین\"  يک نيم فاصله قرار مي دهد.  بین ویرگول یا نقطه و کلمه قبل آن فاصله را حذف می کند.",
+   "options": {},
+   "expected": "۷. فاصله گذاری را تصحیح می‌کند. بین هر کلمه تنها یک فاصله و بین پیشوندها و پسوندهای مانند «می»، «تر» و «ترین» یک نیم فاصله قرار می‌دهد. بین ویرگول یا نقطه و کلمه قبل آن فاصله را حذف می‌کند."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #8",
+   "input": "8. فاصله گذاری را برای متون بین \"  گیومه  \" , {    آکولاد   }  , [   کروشه  ]  و ( پرانتز    ) تنظيم مي کند .",
+   "options": {},
+   "expected": "۸. فاصله گذاری را برای متون بین «گیومه»، {آکولاد}، [کروشه] و (پرانتز) تنظیم می‌کند."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should cleanup simple sentences #9",
+   "input": "9. علامت تعحب و سوال اضافی را حذف مي کند؟؟؟!!!!!!!",
+   "options": {},
+   "expected": "۹. علامت تعحب و سوال اضافی را حذف می‌کند؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace kashidas to ndash in parenthetic",
+   "input": "ـ که در واقع پدرخوانده‌ام بود ولی من او را جای پدرم می‌دانستم ـ",
+   "options": {},
+   "expected": "– که در واقع پدرخوانده‌ام بود ولی من او را جای پدرم می‌دانستم –"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not put space after dots in numbers",
+   "input": "پوسته دوهزارونوزده، حداقل به نسخه وردپرس 4.7 نیاز دارد. شما نسخه %s را اجرا می کنید. لطفاً وردپرس خود را ارتقا دهید و دوباره سعی کنید.",
+   "options": {},
+   "expected": "پوسته دوهزارونوزده، حداقل به نسخه وردپرس ۴٫۷ نیاز دارد. شما نسخه %s را اجرا می‌کنید. لطفاً وردپرس خود را ارتقا دهید و دوباره سعی کنید."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not replace sprintf directives",
+   "input": "این افزونه به php نسخه \"%1$s\" نياز دارد. شما از نسخه (%2$s) استفاده می کنید. لطفاً پس از ارتقا دوباره تلاش کنید.",
+   "options": {},
+   "expected": "این افزونه به php نسخه «%1$s» نیاز دارد. شما از نسخه (%2$s) استفاده می‌کنید. لطفاً پس از ارتقا دوباره تلاش کنید."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should converts back html named character references",
+   "input": "&quot;گيومه های فارسي&quot;",
+   "options": {},
+   "expected": "«گیومه‌های فارسی»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should converts back html named character references",
+   "input": "&apos;گيومه های فارسي&apos;",
+   "options": {},
+   "expected": "«گیومه‌های فارسی»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace Arabic kaf with its Persian equivalent",
+   "input": "ك",
+   "options": {},
+   "expected": "ک"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace Arabic kaf with its Persian equivalent",
+   "input": "كمك",
+   "options": {},
+   "expected": "کمک"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace Arabic Yeh with its Persian equivalent",
+   "input": "ي",
+   "options": {},
+   "expected": "ی"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace Arabic Yeh with its Persian equivalent",
+   "input": "بيني",
+   "options": {},
+   "expected": "بینی"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace Arabic numbers with their Persian equivalent",
+   "input": "٠١٢٣٤٥٦٧٨٩",
+   "options": {},
+   "expected": "۰۱۲۳۴۵۶۷۸۹"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English numbers with their Persian equivalent",
+   "input": "0123456789",
+   "options": {},
+   "expected": "۰۱۲۳۴۵۶۷۸۹"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English comma and semicolon with their Persian equivalent",
+   "input": ";,",
+   "options": {},
+   "expected": "؛ ،"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should correct :;,.?! spacing (one space after and no space before)",
+   "input": "گفت : سلام",
+   "options": {},
+   "expected": "گفت: سلام"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "''تست''",
+   "options": {},
+   "expected": "«تست»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "'تست'",
+   "options": {},
+   "expected": "«تست»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "`تست`",
+   "options": {
+    "preserve_inline_codes": false
+   },
+   "expected": "«تست»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "``تست``",
+   "options": {
+    "preserve_inline_codes": false
+   },
+   "expected": "«تست»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "\"گفت: سلام\"",
+   "options": {},
+   "expected": "«گفت: سلام»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English quotes with their Persian equivalent",
+   "input": "\"این\" یا \"آن\"",
+   "options": {},
+   "expected": "«این» یا «آن»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should convert ه ی to هٔ",
+   "input": "خانه ی ما",
+   "options": {},
+   "expected": "خانهٔ ما"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should convert ه ی to هٔ",
+   "input": "خانه ی ما",
+   "options": {},
+   "expected": "خانهٔ ما"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should convert ه ی to هٔ",
+   "input": "خانه ي ما",
+   "options": {},
+   "expected": "خانهٔ ما"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace double dash to ndash and triple dash to mdash",
+   "input": "--",
+   "options": {},
+   "expected": "–"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace double dash to ndash and triple dash to mdash",
+   "input": "---",
+   "options": {},
+   "expected": "—"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace more than one space with just a single one",
+   "input": "  سلام   جهان ،  من ویراستار هستم!",
+   "options": {},
+   "expected": "سلام جهان، من ویراستار هستم!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is( a test)",
+   "options": {},
+   "expected": "this is (a test)"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is ( a test  )",
+   "options": {},
+   "expected": "this is (a test)"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is  (  a test )  yeah!",
+   "options": {},
+   "expected": "this is (a test) yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is   (a test )  yeah!",
+   "options": {},
+   "expected": "this is (a test) yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is[ a test]",
+   "options": {},
+   "expected": "this is [a test]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is [ a test  ]",
+   "options": {},
+   "expected": "this is [a test]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is  [  a test ]  yeah!",
+   "options": {},
+   "expected": "this is [a test] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is   [a test ]  yeah!",
+   "options": {},
+   "expected": "this is [a test] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is{ a test}",
+   "options": {},
+   "expected": "this is {a test}"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is { a test  }",
+   "options": {},
+   "expected": "this is {a test}"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is  {  a test }  yeah!",
+   "options": {},
+   "expected": "this is {a test} yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is   {a test }  yeah!",
+   "options": {},
+   "expected": "this is {a test} yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is« a test»",
+   "options": {},
+   "expected": "this is «a test»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is « a test  »",
+   "options": {},
+   "expected": "this is «a test»"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is  «  a test »  yeah!",
+   "options": {},
+   "expected": "this is «a test» yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "this is   «a test »  yeah!",
+   "options": {},
+   "expected": "this is «a test» yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets( don't apply]",
+   "options": {},
+   "expected": "mismatched brackets( don't apply]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets ( don't apply ]",
+   "options": {},
+   "expected": "mismatched brackets ( don't apply ]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets ( don't apply ] yeah!",
+   "options": {},
+   "expected": "mismatched brackets ( don't apply ] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets (don't apply ] yeah!",
+   "options": {},
+   "expected": "mismatched brackets (don't apply ] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets[ don't apply)",
+   "options": {},
+   "expected": "mismatched brackets[ don't apply)"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets [ don't apply )",
+   "options": {},
+   "expected": "mismatched brackets [ don't apply )"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets [ don't apply ) yeah!",
+   "options": {},
+   "expected": "mismatched brackets [ don't apply ) yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets [don't apply ) yeah!",
+   "options": {},
+   "expected": "mismatched brackets [don't apply ) yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets{ don't apply”",
+   "options": {},
+   "expected": "mismatched brackets{ don't apply”"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets { don't apply ”",
+   "options": {},
+   "expected": "mismatched brackets { don't apply ”"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets { don't apply ” yeah!",
+   "options": {},
+   "expected": "mismatched brackets { don't apply ” yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets {don't apply ” yeah!",
+   "options": {},
+   "expected": "mismatched brackets {don't apply ” yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets( don't apply}",
+   "options": {},
+   "expected": "mismatched brackets( don't apply}"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets ( don't apply }",
+   "options": {},
+   "expected": "mismatched brackets ( don't apply }"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets ( don't apply } yeah!",
+   "options": {},
+   "expected": "mismatched brackets ( don't apply } yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets (don't apply } yeah!",
+   "options": {},
+   "expected": "mismatched brackets (don't apply } yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets« don't apply]",
+   "options": {},
+   "expected": "mismatched brackets« don't apply]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets « don't apply ]",
+   "options": {},
+   "expected": "mismatched brackets « don't apply ]"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets « don't apply ] yeah!",
+   "options": {},
+   "expected": "mismatched brackets « don't apply ] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should fix spacing for () [] {}  “” «» (one space outside, no space inside)",
+   "input": "mismatched brackets «don't apply ] yeah!",
+   "options": {},
+   "expected": "mismatched brackets «don't apply ] yeah!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should replace English percent sign to its Persian equivalent",
+   "input": "96%",
+   "options": {},
+   "expected": "۹۶٪"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove spaces before and after line breaks",
+   "input": "this is \n \n \n     \n a test",
+   "options": {},
+   "expected": "this is \n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove spaces before and after line breaks",
+   "input": "this is\n\n\n\na test",
+   "options": {},
+   "expected": "this is\n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove spaces before and after line breaks",
+   "input": "this is \n\n\n    a test",
+   "options": {},
+   "expected": "this is \n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove more that two line breaks",
+   "input": "this is \n \n \n     \n a test",
+   "options": {},
+   "expected": "this is \n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove more that two line breaks",
+   "input": "this is\n\n\n\na test",
+   "options": {},
+   "expected": "this is\n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove more that two line breaks",
+   "input": "this is \n\n\n    a test",
+   "options": {},
+   "expected": "this is \n\na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not replace line breaks and should remove spaces after line break",
+   "input": "this is \n  a test",
+   "options": {},
+   "expected": "this is \na test"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should put zwnj between word and prefix/suffix (ha haye* tar* tarin mi* nemi*)",
+   "input": "ما می توانیم",
+   "options": {},
+   "expected": "ما می‌توانیم"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should put zwnj between word and prefix/suffix (ha haye* tar* tarin mi* nemi*)",
+   "input": "ما نمی توانیم",
+   "options": {},
+   "expected": "ما نمی‌توانیم"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should put zwnj between word and prefix/suffix (ha haye* tar* tarin mi* nemi*)",
+   "input": "این بهترین کتاب ها است",
+   "options": {},
+   "expected": "این بهترین کتاب‌ها است"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should put zwnj between word and prefix/suffix (ha haye* tar* tarin mi* nemi*)",
+   "input": "بزرگ تری و قدرتمند ترین زبان های دنیا",
+   "options": {},
+   "expected": "بزرگ‌تری و قدرتمندترین زبان‌های دنیا"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not replace English numbers in English phrases",
+   "input": "عزیز ATM74 در IBM-96 085 B 95BCS",
+   "options": {},
+   "expected": "عزیز ATM74 در IBM-96 ۰۸۵ B 95BCS"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not create spacing for something like (,)",
+   "input": "this is (,) comma",
+   "options": {},
+   "expected": "this is (،) comma"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not puts space after time colon separator",
+   "input": "12:34",
+   "options": {},
+   "expected": "۱۲:۳۴"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not destroy URLs",
+   "input": "https://virastar.brothersincode.ir",
+   "options": {},
+   "expected": "https://virastar.brothersincode.ir"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not destroy URLs",
+   "input": "https://virastar.brothersincode.ir\nhttp://twitter.com",
+   "options": {},
+   "expected": "https://virastar.brothersincode.ir\nhttp://twitter.com"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not replace line breaks when the line ends with quotes",
+   "input": "salam \"khoobi\" \n chetori",
+   "options": {},
+   "expected": "salam «khoobi» \nchetori"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should not put space after quotes, {}, () or [] if there's ,.; just after that",
+   "input": "«این», {این}, (این), [این] or {این}. بعضی وقت ها (این).",
+   "options": {},
+   "expected": "«این»، {این}، (این)، [این] or {این}. بعضی وقت‌ها (این)."
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should be able to convert numbers with dashes",
+   "input": "1- salam",
+   "options": {},
+   "expected": "۱- salam"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › aggressive editing",
+   "input": "salam!!!",
+   "options": {},
+   "expected": "salam!"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › aggressive editing",
+   "input": "چطور؟؟؟",
+   "options": {},
+   "expected": "چطور؟"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove all kashida",
+   "input": "سلامـــت",
+   "options": {},
+   "expected": "سلامت"
+  },
+  {
+   "name": "Virastar.js › #cleanup() › should remove all kashida",
+   "input": "لــعل سـلـسـبیــل",
+   "options": {},
+   "expected": "لعل سلسبیل"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Equals › should preserve certain strings",
+   "input": "![alt name](https://example.com/media/image.jpg)",
+   "options": {},
+   "expected": "![alt name](https://example.com/media/image.jpg)"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Equals › should preserve certain strings",
+   "input": "[![alt name](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)",
+   "options": {},
+   "expected": "[![alt name](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Equals › should preserve certain strings",
+   "input": "[![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)",
+   "options": {},
+   "expected": "[![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Equals › should preserve certain strings",
+   "input": "[![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg) [![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)",
+   "options": {},
+   "expected": "[![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg) [![](https://example.com/media/image.jpg)](https://example.com/media/image.jpg)"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Equals › should preserve certain strings",
+   "input": "[![](https://upload.wikimedia.org/wikipedia/commons/0/0c/Nastaliq-proportions.jpg)](https://en.wikipedia.org/wiki/File:Nastaliq-proportions.jpg)",
+   "options": {},
+   "expected": "[![](https://upload.wikimedia.org/wikipedia/commons/0/0c/Nastaliq-proportions.jpg)](https://en.wikipedia.org/wiki/File:Nastaliq-proportions.jpg)"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should preserve all code blocks",
+   "input": "```\n(نمایش¬⋅نامه، ۱۳۹۰ شماره یک، ۲۸و۲۹)\n```",
+   "options": {},
+   "expected": "```\n(نمایش¬⋅نامه، ۱۳۹۰ شماره یک، ۲۸و۲۹)\n```"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should preserve all HTML tags",
+   "input": "<strong title=\"نباید تغییر کند!!!!!\">سلام جهان</strong>",
+   "options": {},
+   "expected": "<strong title=\"نباید تغییر کند!!!!!\">سلام جهان</strong>"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus standalone hamza",
+   "input": "از غم به هر بهانهء ممكن عبور كن !",
+   "options": {},
+   "expected": "از غم به هر بهانهٔ ممکن عبور کن!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus standalone hamza",
+   "input": "از غم به هر بهانه ء ممكن عبور كن !",
+   "options": {},
+   "expected": "از غم به هر بهانهٔ ممکن عبور کن!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus hamza into ye",
+   "input": "خانه‌ٔ پدری",
+   "options": {
+    "fix_hamzeh": false
+   },
+   "expected": "خانه‌ی پدری"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus hamza into ye",
+   "input": "خانه ء پدری",
+   "options": {
+    "fix_hamzeh": false
+   },
+   "expected": "خانه‌ی پدری"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus hamza into ye",
+   "input": "خانه ي پدری",
+   "options": {
+    "fix_hamzeh": false
+   },
+   "expected": "خانه‌ی پدری"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should fix heh plus hamza into ye",
+   "input": "خانه‌ی پدری",
+   "options": {
+    "fix_hamzeh": false
+   },
+   "expected": "خانه‌ی پدری"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should convert all soft hyphens into zwnj",
+   "input": "عادت به تنهایی... این دیگر از آن حرف­هاست! ",
+   "options": {},
+   "expected": "عادت به تنهایی… این دیگر از آن حرف‌هاست!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize ellipsis",
+   "input": "...…...",
+   "options": {},
+   "expected": "…"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "عادت به تنهایی... این دیگر از آن حرف­هاست!!!?",
+   "options": {},
+   "expected": "عادت به تنهایی… این دیگر از آن حرف‌هاست؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "متن فارسی؟!",
+   "options": {},
+   "expected": "متن فارسی؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "متن فارسی!؟",
+   "options": {},
+   "expected": "متن فارسی؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "متن فارسی?!",
+   "options": {},
+   "expected": "متن فارسی؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "متن فارسی!?",
+   "options": {},
+   "expected": "متن فارسی؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "؟!",
+   "options": {},
+   "expected": "؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "!؟",
+   "options": {},
+   "expected": "؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "?!",
+   "options": {},
+   "expected": "؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "!?",
+   "options": {},
+   "expected": "؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب????!!!!",
+   "options": {},
+   "expected": "کتاب؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب!!!!?????",
+   "options": {},
+   "expected": "کتاب؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب؟؟؟!!!!",
+   "options": {},
+   "expected": "کتاب؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب!!!!!!!!!؟؟؟؟؟؟؟؟",
+   "options": {},
+   "expected": "کتاب؟!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب!!!!!!",
+   "options": {},
+   "expected": "کتاب!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب؟؟؟؟",
+   "options": {},
+   "expected": "کتاب؟"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize question/exclamation marks",
+   "input": "کتاب?????",
+   "options": {},
+   "expected": "کتاب؟"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › should normalize markdown lists",
+   "input": "· گزینه اول\n· گزینه دوم",
+   "options": {},
+   "expected": "- گزینه اول\n- گزینه دوم"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "\"و من هم به خاطر جلب اعتماد او پذیرفته ام\"",
+   "options": {},
+   "expected": "«و من هم به خاطر جلب اعتماد او پذیرفته‌ام»"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "و من هم به خاطر جلب اعتماد او پذیرفته ام.",
+   "options": {},
+   "expected": "و من هم به خاطر جلب اعتماد او پذیرفته‌ام."
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "و من هم به خاطر جلب اعتماد او پذیرفته ام!",
+   "options": {},
+   "expected": "و من هم به خاطر جلب اعتماد او پذیرفته‌ام!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "و من هم به خاطر جلب اعتماد او پذیرفته ام؟",
+   "options": {},
+   "expected": "و من هم به خاطر جلب اعتماد او پذیرفته‌ام؟"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "و من هم به خاطر جلب اعتماد او پذیرفته ام",
+   "options": {},
+   "expected": "و من هم به خاطر جلب اعتماد او پذیرفته‌ام"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "و به چلو ماهی و باسلوق و مترادف کرده ایم، محض خالی نبودن عریضه دیوان حافظ را هم تنگش زده ایم. سوءتفاهم نشود.",
+   "options": {},
+   "expected": "و به چلو ماهی و باسلوق و مترادف کرده‌ایم، محض خالی نبودن عریضه دیوان حافظ را هم تنگش زده‌ایم. سوءتفاهم نشود."
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "عرضم این است که ما در بیداری نیز خود را فریب می دهیم و به شکم چرانی مان صبغه فرهیختگی می زنیم.",
+   "options": {},
+   "expected": "عرضم این است که ما در بیداری نیز خود را فریب می‌دهیم و به شکم چرانی‌مان صبغه فرهیختگی می‌زنیم."
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixSpacing()",
+   "input": "به خواب های تان دقت کنید.",
+   "options": {},
+   "expected": "به خواب‌های‌تان دقت کنید."
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixMisc()",
+   "input": "خانه‌يی بر روی آب",
+   "options": {},
+   "expected": "خانه‌ای بر روی آب"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixMisc()",
+   "input": "خانه‌ئی بر روی آب",
+   "options": {},
+   "expected": "خانه‌ای بر روی آب"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixSuffixMisc()",
+   "input": "خانه‌یی بر روی آب",
+   "options": {},
+   "expected": "خانه‌ای بر روی آب"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixDiacritics():‌ cleans more than one diacritic characters",
+   "input": "لطفاًً",
+   "options": {},
+   "expected": "لطفاً"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixDiacritics():‌ cleans more than one diacritic characters",
+   "input": "رُّوح",
+   "options": {},
+   "expected": "رُّوح"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixDiacritics():‌ cleans more than one diacritic characters",
+   "input": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ",
+   "options": {},
+   "expected": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِیمِ"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixNumeralSymbols(): replaces english percent signs",
+   "input": "۹۶%",
+   "options": {},
+   "expected": "۹۶٪"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixNumeralSymbols(): replaces dots between numbers into decimal separator",
+   "input": "۱۲.۵۶",
+   "options": {},
+   "expected": "۱۲٫۵۶"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixNumeralSymbols(): replaces commas between numbers into thousands separator",
+   "input": "۱۲,۵۴۳",
+   "options": {},
+   "expected": "۱۲٬۵۴۳"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: cleanupKashidas(): converts kashida between numbers to ndash",
+   "input": "۱۱ـ۲۳",
+   "options": {},
+   "expected": "۱۱–۲۳"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: kashidasAsParenthetic(): replaces kashidas to ndash in parenthetic",
+   "input": "ـکه همواره به فتوحات پادشاهان خویش در هند می‌بالیمـ",
+   "options": {},
+   "expected": "–که همواره به فتوحات پادشاهان خویش در هند می‌بالیم–"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: kashidasAsParenthetic(): replaces kashidas to ndash in parenthetic",
+   "input": "ما مردم افغانستان ـکه همواره به فتوحات پادشاهان خویش در هند می‌بالیمـ شاید حالا که دو دهه رنج تهاجم بیگانگان را چشیده‌ایم‌، بتوانیم درد و رنج مردم هند را در دوران لشکرکشی‌های اجدادمان دریابیم‌.",
+   "options": {},
+   "expected": "ما مردم افغانستان –که همواره به فتوحات پادشاهان خویش در هند می‌بالیم– شاید حالا که دو دهه رنج تهاجم بیگانگان را چشیده‌ایم، بتوانیم درد و رنج مردم هند را در دوران لشکرکشی‌های اجدادمان دریابیم."
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixHamzehArabic(): converts arabic hamza",
+   "input": "آن دسته از علایم که مشخص‌کنندة انتهای جمله",
+   "options": {
+    "fix_hamzeh_arabic": true
+   },
+   "expected": "آن دسته از علایم که مشخص‌کنندهٔ انتهای جمله"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixHamzehArabic(): converts arabic hamza",
+   "input": "آن دسته از علایم که مشخص‌کنندة انتهای جمله",
+   "options": {
+    "fix_hamzeh_arabic": true,
+    "fix_hamzeh": false
+   },
+   "expected": "آن دسته از علایم که مشخص‌کننده‌ی انتهای جمله"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixThreeDots(): removes space between dots/replaces three dots with ellipsis character",
+   "input": "...",
+   "options": {},
+   "expected": "…"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixThreeDots(): removes space between dots/replaces three dots with ellipsis character",
+   "input": "......",
+   "options": {},
+   "expected": "…"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixThreeDots(): removes space between dots/replaces three dots with ellipsis character",
+   "input": ". . . .   ...   ..... . . . .",
+   "options": {},
+   "expected": "…"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixThreeDots(): removes space between dots/replaces three dots with ellipsis character",
+   "input": "خداحافظ ... به به",
+   "options": {},
+   "expected": "خداحافظ… به به"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: normalizeDates(): reorders date parts with slash as delimiter",
+   "input": "23/10/1355",
+   "options": {},
+   "expected": "۱۳۵۵/۱۰/۲۳"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: normalizeDates(): reorders date parts with slash as delimiter",
+   "input": "3/1/1355",
+   "options": {},
+   "expected": "۱۳۵۵/۱/۳"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: removeDiacritics(): removes all diacritic characters",
+   "input": "اذا عَمَّتِ الْبُلْدانَ الْفِتَنُ فَعَلَیکمْ بِقُمْ وَحَوالیها وَنَواحیها فَانَ الْبَلاءَ مَدْفُوعٌ عَنْها",
+   "options": {
+    "remove_diacritics": true
+   },
+   "expected": "اذا عمت البلدان الفتن فعلیکم بقم وحوالیها ونواحیها فان البلاء مدفوع عنها"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixMiscNonPersianChars()",
+   "input": "دیر آمدے؛ ببخش کہ ویرانہ‌ایم ما!",
+   "options": {},
+   "expected": "دیر آمدی؛ ببخش که ویرانه‌ایم ما!"
+  },
+  {
+   "name": "Virastar.js › #cleanup(): Additional › extra: fixMiscNonPersianChars()",
+   "input": "سلام عليكم و رحمۃاللہ",
+   "options": {},
+   "expected": "سلام علیکم و رحمةالله"
+  }
+ ]
+}

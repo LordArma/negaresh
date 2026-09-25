@@ -14,12 +14,28 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
 | Next release target | 4.4.0 |
 
-**Next step:** I11 (Virastar). Then a summary for the user: I9 waits for the user (check the
-wordpress.org username in readme.txt), I10 needs user decisions.
+**Next step:** report to the user; recommend releasing 4.4.0 soon (B29 scrambles Persian dates in
+every release). I9 waits for the user (check the wordpress.org username in readme.txt); I10 needs
+user decisions.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 172 unit tests) clean; e2e + browser
-(settings page, editor panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 343 unit tests incl. 159 Virastar.js
+reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
+panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I11 Virastar re-port (+ B28, B29, B30)
+
+Done: extracted Virastar.js's test suite (159 cases) and ran it against our PHP copy: 134 pass
+(upstream PHP 116). The failures showed three port bugs: B28 (every multi step rule reversed),
+B29 (missing `/u`: Persian digit dates scrambled with default rules, and the tokenizer splitting
+`«»`), B30 (sprintf check). Re-ported all rule functions from JS 0.22.1 in JS order with `/u`;
+added the JS `remove_spaces_before_ellipsis` as a plugin rule; removed two dead functions.
+Result 156/159, 3 documented deviations. `VirastarReferenceTest` + B28/B29/B30 tests (proven to
+fail on the old file: 8/11 and 22 reference failures).
+Verified: 343 unit tests (PHP 8.3 and 7.4), PHPCS, PHPStan; plugin default rules change 8 of 162
+corpus texts, all fixes; e2e + browser on WP 7.1.2 and 5.8.3.
 
 ---
 

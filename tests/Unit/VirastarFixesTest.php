@@ -122,4 +122,60 @@ class VirastarFixesTest extends TestCase
         self::assertSame("اول…\n\nدوم", $v->cleanup("اول…   \n\nدوم"));
         self::assertSame('یک… دو', $v->cleanup('یک…دو'));
     }
+
+    /**
+     * B29: patterns with Persian digits had no /u and matched bytes. With the plugin's default
+     * rules a date written in Persian or Arabic digits was scrambled: ۳/۱/۱۳۵۵ became ۱۳/۱/۳۵۵.
+     *
+     * @return array<string, array{string, string}>
+     */
+    public function b29Provider(): array
+    {
+        return [
+            'Persian digits' => ['تاریخ ۳/۱/۱۳۵۵ است', 'تاریخ ۱۳۵۵/۱/۳ است'],
+            'Arabic digits' => ['تاریخ ٣/١/١٣٥٥ است', 'تاریخ ۱۳۵۵/۱/۳ است'],
+            'English digits' => ['تاریخ 23/10/1355 است', 'تاریخ 1355/10/23 است'],
+            'Persian thousands separator' => ['عدد ۱۲,۵۴۳ است', 'عدد ۱۲٬۵۴۳ است'],
+        ];
+    }
+
+    /** @dataProvider b29Provider */
+    public function testB29PersianDigitsAreNotScrambled(string $in, string $want): void
+    {
+        $options = \Negaresh_Settings::RULE_DEFAULTS + ['fix_numeral_symbols' => true];
+        $options['fix_numeral_symbols'] = true;
+
+        self::assertSame($want, (new Virastar($options))->cleanup($in));
+    }
+
+    /**
+     * B28: the PHP port nested each rule's steps, so they ran in reverse order.
+     *
+     * @return array<string, array{array<string, bool>, string, string}>
+     */
+    public function b28Provider(): array
+    {
+        return [
+            'triple dash (default rule)' => [[], 'الف --- ب', 'الف — ب'],
+            'time stays joined' => [[], 'ساعت ۱۲:۳۴ است', 'ساعت ۱۲:۳۴ است'],
+            'repeated marks' => [[], 'کتاب!!!!?????', 'کتاب؟!'],
+            'kashida between numbers' => [[], '۱۱ـ۲۳', '۱۱–۲۳'],
+            'suffixes after ها' => [[], 'به خواب های تان دقت کنید.', "به خواب\u{200c}های\u{200c}تان دقت کنید."],
+            'stacked diacritics kept' => [[], 'رُّوح', 'رُّوح'],
+        ];
+    }
+
+    /**
+     * @dataProvider b28Provider
+     * @param array<string, bool> $options
+     */
+    public function testB28StepsRunInTheirOrder(array $options, string $in, string $want): void
+    {
+        self::assertSame($want, (new Virastar($options))->cleanup($in));
+    }
+
+    public function testB30SprintfDirectivesKeepTheirDigits(): void
+    {
+        self::assertSame('نسخه «%1$s» است', (new Virastar())->cleanup('نسخه "%1$s" است'));
+    }
 }

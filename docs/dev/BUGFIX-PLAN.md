@@ -110,6 +110,22 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   if cheap (drop the leading space from the regex). *Result:* fixed by B22 (padding restored,
   upstream regex kept), test in `VirastarFixesTest`.
 
+- [x] **B29 Persian digit dates scrambled: `۳/۱/۱۳۵۵` → `۱۳/۱/۳۵۵`** *(Critical: data corruption with
+  the default rules, stored in save mode; every release up to 4.3.0; found session 3 by the I11
+  reference suite; fixed on `phase-2`)*. Patterns with Persian digits (dates, numeral symbols, time
+  and number spacing) and the per word tokenizer had no `/u`, so PCRE matched bytes and split the
+  two byte digits (and `«»`). *Fix:* `/u` on every pattern. Tests: `VirastarFixesTest::testB29...`.
+
+- [x] **B28 Every multi step rule ran its steps in reverse** *(High; every release; found session 3
+  by the I11 reference suite)*. The PHP port nested `preg_replace()` calls for the JS
+  `.replace().replace()` chains, and the innermost runs first. Visible: `---` → `–-` (default rule),
+  `!!!!?????` → `!?!?`, `۱۱ـ۲۳` → `۱۱۲۳`, times getting a space, suffixes half joined, stacked
+  diacritics removed. *Fix:* rule functions re-ported step by step from Virastar.js 0.22.1 (I11).
+  Tests: `VirastarFixesTest::testB28...`, `VirastarReferenceTest`.
+
+- [x] **B30 sprintf directives lost digits (`%1$s` → `%۱$s`)** *(Low)*: the pattern sat in a PHP
+  double quoted string, which ate the backslash of `\$`. Fixed with single quotes.
+
 - [x] **B27 Display mode ran after `wptexturize`, so ellipsis and quote rules never worked**
   *(Medium; in 4.0 and 4.1.0; found session 3 by the I4 e2e check; fixed on `phase-2`)*.
   `the_content` priority 10 put Negaresh after `wptexturize`, which had already turned `...` into
@@ -133,7 +149,8 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   `normalizeEllipsis` collapsed the real space and Virastar's space padded placeholder, then the
   restore step ate the remaining one. *Fix:* text nodes are fixed one by one and their leading and
   trailing whitespace is kept byte for byte. Tests: `HtmlProcessingTest`.
-  **B24, B25 and B27 are in the released 4.1.0: ship 4.2.0 soon.**
+  **B24, B25 and B27 are in the released 4.1.0: ship 4.2.0 soon.** (done: 4.2.0)
+  **B28, B29 and B30 are in every release up to 4.3.0: ship 4.4.0 soon (B29 corrupts dates).**
 
 - [x] **B23 Output before `<?php` breaks logins, redirects and feeds** *(Critical; found in the
   Docker end to end run and already fixed by the refactor, session 3)*. 4.0's `negaresh-class.php`

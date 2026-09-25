@@ -61,6 +61,7 @@ class Virastar
         "preserve_nbsp" => true,
         "preserve_URIs" => true,
         "remove_diacritics" => false,
+        "remove_spaces_before_ellipsis" => true, // Negaresh patch (I11): Virastar.js 0.22 option
         "skip_markdown_ordered_lists_numbers_conversion" => false
     ];
 
@@ -335,6 +336,12 @@ class Virastar
             $text = $this->fixPersianGlyphs($text);
         }
 
+        // Negaresh patch (I11): as in Virastar.js, on the whole text before the other rules (the PHP
+        // port ran it per word, missing letters next to punctuation)
+        if ($options["fix_misc_non_persian_chars"]) {
+            $text = $this->fixMiscNonPersianChars($text);
+        }
+
         if ($options["fix_dashes"]) {
             $text = $this->fixDashes($text);
         }
@@ -345,6 +352,11 @@ class Virastar
 
         if ($options["normalize_ellipsis"]) {
             $text = $this->normalizeEllipsis($text);
+        }
+
+        // Negaresh patch (I11): Virastar.js option, default on
+        if ($options["remove_spaces_before_ellipsis"]) {
+            $text = $this->removeSpaceBeforeEllipsis($text);
         }
 
         if ($options["fix_english_quotes_pairs"]) {
@@ -381,7 +393,8 @@ class Virastar
         }
 
         // word tokenizer
-        $text = preg_replace_callback('/(^|\s+)([[({"\'“«]?)(\S+)([\])}"\'”»]?)(?=($|\s+))/', function ($matches) use ($options) {
+        // Negaresh patch (B29): /u, or « and » (two bytes) were split and the word became invalid UTF-8
+        $text = preg_replace_callback('/(^|\s+)([[({"\'“«]?)(\S+)([\])}"\'”»]?)(?=($|\s+))/u', function ($matches) use ($options) {
             $matched = $matches[0] ?? '';
             // $before = $matches[1] ?? '';
             // $leading = $matches[2] ?? '';
@@ -397,7 +410,9 @@ class Virastar
 
             // should not touch sprintf directives
             unset($word_match);
-            preg_match_all("/%(?:\d+\$)?[+-]?(?:[ 0]|'.{1})?-?\d*(?:\.\d+)?[bcdeEufFgGosxX]/u", $word, $word_match);
+            // Negaresh patch (B30): single quotes, so `\$` reaches PCRE as a literal dollar sign (in double
+            // quotes PHP ate the backslash and `$` meant "end of text", so %1$s lost its digit)
+            preg_match_all('/%(?:\d+\$)?[+-]?(?:[ 0]|\'.{1})?-?\d*(?:\.\d+)?[bcdeEufFgGosxX]/u', $word, $word_match);
             if ($word_match && ( isset($word_match[0]) && !empty($word_match[0]) )) {
                 return $matched;
             }
@@ -426,10 +441,6 @@ class Virastar
 
             if ($options["fix_punctuations"]) {
                 $matched = $this->fixPunctuations($matched);
-            }
-
-            if ($options["fix_misc_non_persian_chars"]) {
-                $matched = $this->fixMiscNonPersianChars($matched);
             }
 
             if ($options["fix_question_mark"]) {
@@ -591,31 +602,38 @@ class Virastar
         return $text;
     }
 
+    /*
+     * Negaresh patch (I11, B28, B29): the rule functions below follow Virastar.js 0.22.1
+     * (https://github.com/brothersincode/virastar lib/virastar.js) step by step, in the JS order.
+     * The PHP port nested its preg_replace() calls, so each rule ran its steps in reverse
+     * (B28), and several patterns with Persian digits lacked /u and matched bytes (B29).
+     * Differences from the JS, all deliberate: every pattern has /u; JS `\w` is spelled out as
+     * [A-Za-z0-9_] because PHP's /u makes \w match Persian letters; steps the JS applies only to
+     * the first match (no /g) apply to all; B1, B20, B22 and B26 fixes are kept.
+     * tests/Unit/VirastarReferenceTest.php runs the JS test suite against this file.
+     */
+
     protected function cleanupZWNJ($text)
     {
         // converts all soft hyphens (&shy;) into zwnj
-        // Negaresh patch (B20): real characters in the replacements, not the text '\x{200c}'
-        return preg_replace('/\x{00ad}/u', "\u{200c}",
-            // removes more than one zwnj
-            preg_replace('/\x{200c}{2,}/u', "\u{200c}",
-                // cleans zwnj before and after numbers, english words, spaces and punctuations
-                // preg_replace('~\x{200c}([\w\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])~u', '$1', // \w is for any english word character in javascript, but it supports words in any language in php
-                preg_replace('~\x{200c}([\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])~u', '$1',
-                    // preg_replace('~([\w\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])\x{200c}~u', '$1', // \w is for any english word character in javascript, but it supports words in any language in php
-                    preg_replace('~([\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])\x{200c}~u', '$1',
-                        // removes unnecessary zwnj on start/end of each line
-                        preg_replace('/(^\x{200c}|\x{200c}$)/um', '', $text)
-                    )
-                )
-            )
-        );
+        $text = preg_replace('/\x{00ad}/u', "\u{200c}", $text);
+        // converts all angled dash (&not;) into zwnj
+        $text = preg_replace('/\x{00ac}/u', "\u{200c}", $text);
+        // removes more than one zwnj
+        $text = preg_replace('/\x{200c}{2,}/u', "\u{200c}", $text);
+        // cleans zwnj before and after numbers, english words, spaces and punctuations
+        $around = '[A-Za-z0-9_\s۰-۹\[\](){}«»“”.…,:;?!$%@#*=+\-\/\\\\،؛٫٬×٪؟ـ]';
+        $text = preg_replace('/\x{200c}(' . $around . ')/u', '$1', $text);
+        $text = preg_replace('/(' . $around . ')\x{200c}/u', '$1', $text);
+        // removes unnecessary zwnj on start/end of each line
+        return preg_replace('/(^\x{200c}|\x{200c}$)/mu', '', $text);
     }
 
-    // late checks for zwnj
+    // late checks for zwnjs
     protected function cleanupZWNJLate($text)
     {
-        // cleans zwnj after characters that don't connect to the next
-        return preg_replace('/([إأةؤورزژاآدذ،؛,:«»\\/@#$٪×*()ـ\-=|])\x{200c}/u', '$1', $text);
+        // cleans zwnj after characters that don't conncet to the next
+        return preg_replace('/([إأةؤورزژاآدذ،؛,:«»\\\\\/@#$٪×*()ـ\-=|])\x{200c}/u', '$1', $text);
     }
 
     protected function charReplace($text, $fromBatch, $toBatch)
@@ -636,62 +654,75 @@ class Virastar
         return $text;
     }
 
+    protected function convertPersianNumbers($text)
+    {
+        return preg_replace_callback('/[\x{0660}-\x{0669}\x{06f0}-\x{06f9}]/u', function ($matched) {
+            return ord($matched[0][0] ?? '') & 0xf;
+        }, $text);
+    }
+
     protected function normalizeEOL($text)
     {
-        // replace windows end of lines with unix eol (`\n`)
-        return preg_replace('/(\r?\n)|(\r\n?)/u', "\n", $text); // Replace windows end of lines with unix eol (`\n`)
+        // replaces windows end of lines with unix eol (`\n`)
+        return preg_replace('/(\r?\n)|(\r\n?)/u', "\n", $text);
     }
 
     protected function fixDashes($text)
     {
-        // replaces triple dash to mdash
-        // replaces double dash to ndash
-        return preg_replace('/-{2}/', '–', preg_replace('/-{3}/', '—', $text));
+        // replaces triple dash to mdash, then double dash to ndash
+        $text = preg_replace('/-{3}/u', '—', $text);
+        return preg_replace('/-{2}/u', '–', $text);
     }
 
     protected function fixThreeDots($text)
     {
-        // remove spaces between dots
+        // removes spaces between dots
+        $text = preg_replace('/\.([ ]+)(?=[.])/u', '.', $text);
         // replaces three dots with ellipsis character
-        return preg_replace('/\.([ ]+)(?=[.])/', '.', preg_replace('/[ \t]*\.{3,}/', '…', $text));
+        return preg_replace('/\.{3,}/u', '…', $text);
     }
 
     protected function normalizeEllipsis($text)
     {
         // replaces more than one ellipsis with one
+        $text = preg_replace('/(…){2,}/u', '…', $text);
+        // replaces more than one space before ellipsis with one space
+        $text = preg_replace('/[ ]{2,}…/u', ' …', $text);
+        // Negaresh patch (B26): no space is kept or added between an ellipsis and a line break
+        $text = preg_replace('/…[ \t\x{200c}]+(?=\n)/u', '…', $text);
         // replaces (space|tab|zwnj) after ellipsis with one space
-        // NOTE: allows for space before ellipsis
-        // Negaresh patch (B26): no space is added (and none is kept) between an ellipsis and a line break
-        return preg_replace('/(…){2,}/', '…',
-            preg_replace('/([ ]{1,})*…[ \t\x{200c}]*+(?!\n)/u', '$1… ',
-                preg_replace('/…[ \t\x{200c}]+(?=\n)/u', '…', $text)
-            )
-        );
+        return preg_replace('/…[ \t\x{200c}]*+(?!\n)/u', '… ', $text);
+    }
+
+    protected function removeSpaceBeforeEllipsis($text)
+    {
+        // removes spaces before ellipsis
+        return preg_replace('/[ \t]*…/u', '…', $text);
     }
 
     protected function fixEnglishQuotesPairs($text)
     {
         // replaces english quote pairs with their persian equivalent
-        return preg_replace('/(“)(.+?)(”)/', '«$2»', $text);
+        return preg_replace('/(“)(.+?)(”)/u', '«$2»', $text);
     }
 
     // replaces english quote marks with their persian equivalent
     protected function fixEnglishQuotes($text)
     {
-        return preg_replace('/(["\'`]+)(.+?)(\1)/', '«$2»', $text);
+        return preg_replace('/(["\'`]+)(.+?)(\1)/u', '«$2»', $text);
     }
 
     protected function fixHamzeh($text)
     {
         $replacement = '$1هٔ$3';
+        // converts arabic `TEH MARBUTA GOAL (U+06C3)` into `TEH MARBUTA (U+0629)`
+        $text = preg_replace('/ۃ/u', 'ة', $text);
         // replaces ه followed by (space|ZWNJ|lrm) follow by ی with هٔ
-        return preg_replace('/(\S)(ه[\s\x{200c}\x{200e}]+[یي])([\s\x{200c}\x{200e}])/u', $replacement,  // heh + ye
-            // replaces ه followed by (space|ZWNJ|lrm|nothing) follow by ء with هٔ
-            preg_replace('/(\S)(ه[\s\x{200c}\x{200e}]?\x{0621})([\s\x{200c}\x{200e}])/u', $replacement, // heh + standalone hamza
-                // replaces هٓ or single-character ۀ with the standard هٔ
-                preg_replace('/(ۀ|هٓ)/u', 'هٔ', $text)
-            )
-        );
+        $text = preg_replace('/(\S)(ه[\s\x{200c}\x{200e}]+[یي])([\s\x{200c}\x{200e}])/u', $replacement, $text);
+        // replaces ه followed by (space|ZWNJ|lrm|nothing) follow by ء with هٔ
+        $text = preg_replace('/(\S)(ه[\s\x{200c}\x{200e}]?\x{0621})([\s\x{200c}\x{200e}])/u', $replacement, $text);
+        // replaces هٓ or single-character ۀ with the standard هٔ
+        return preg_replace('/(ۀ|هٓ)/u', 'هٔ', $text);
     }
 
     protected function fixHamzehArabic($text)
@@ -703,14 +734,13 @@ class Virastar
     protected function fixHamzehArabicAlt($text)
     {
         // converts arabic hamzeh ة to ه‌ی
-        return preg_replace('/(\S)ة([\s\x{200c}\x{200e}])/u', '$1ه‌ی$2', $text);
+        return preg_replace('/(\S)ة([\s\x{200c}\x{200e}])/u', "\$1ه\u{200c}ی\$2", $text);
     }
 
     protected function cleanupRLM($text)
     {
-        // converts Right-to-left marks followed by persian characters to
-        // zero-width non-joiners (ZWNJ)
-        return preg_replace('/([^a-zA-Z\-_])(\x{200f})/u', "\$1\u{200c}", $text); // Negaresh patch (B20)
+        // converts Right-to-left marks followed by persian characters to zero-width non-joiners (ZWNJ)
+        return preg_replace('/([^a-zA-Z\-_])(\x{200f})/u', "\$1\u{200c}", $text);
     }
 
     // converts incorrect persian glyphs to standard characters
@@ -721,7 +751,7 @@ class Virastar
 
     protected function fixMiscNonPersianChars($text)
     {
-        return $this->charReplace($text, 'كڪيىۍېہە', 'ککییییههه');
+        return $this->charReplace($text, 'كڪيےىۍېہە', 'ککیییییههه');
     }
 
     // replaces english numbers with their persian equivalent
@@ -736,247 +766,191 @@ class Virastar
         return $this->charReplace($text, '١٢٣٤٥٦٧٨٩٠', $this->digits);
     }
 
-    // @REF: https://github.com/shkarimpour/pholiday/pull/5/files
-    protected function convertPersianNumbers($text)
-    {
-        return preg_replace_callback('/[\x{0660}-\x{0669}\x{06f0}-\x{06f9}]/', function ($matched) {
-            return ord($matched[0][0] ?? '') & 0xf;
-        }, $text);
-    }
-
     protected function fixNumeralSymbols($text)
     {
         // replaces english percent signs (U+066A)
-        return preg_replace('/([۰-۹]) ?%/', '$1٪',
-            // replaces dots between numbers into decimal separator (U+066B)
-            preg_replace('/([۰-۹])\.(?=[۰-۹])/', '$1٫',
-                // replaces commas between numbers into thousands separator (U+066C)
-                preg_replace('/([۰-۹]),(?=[۰-۹])/', '$1٬', $text)
-            )
-        );
+        $text = preg_replace('/([۰-۹]) ?%/u', '$1٪', $text);
+        // replaces dots between numbers into decimal separator (U+066B)
+        $text = preg_replace('/([۰-۹])\.(?=[۰-۹])/u', '$1٫', $text);
+        // replaces commas between numbers into thousands separator (U+066C)
+        return preg_replace('/([۰-۹]),(?=[۰-۹])/u', '$1٬', $text);
     }
 
     protected function normalizeDates($text)
     {
-        // re-orders date parts with slash as delimiter
-        return preg_replace_callback('#([0-9۰-۹]{1,2})([/-])([0-9۰-۹]{1,2})\2([0-9۰-۹]{4})#', function ($matched) {
-            $day = $matched[1] ?? '';
-            // $delimiter = $matched[2] ?? '';
-            $month = $matched[3] ?? '';
-            $year = $matched[4] ?? '';
-            return $year . '/' . $month . '/' . $day;
+        // re-orders date parts with slash as delimiter: day/month/year → year/month/day
+        return preg_replace_callback('#([0-9۰-۹]{1,2})([/-])([0-9۰-۹]{1,2})\2([0-9۰-۹]{4})#u', function ($matched) {
+            return $matched[4] . '/' . $matched[3] . '/' . $matched[1];
         }, $text);
     }
 
     protected function fixPunctuations($text)
     {
-        return $this->charReplace($text, '٬,;', '،،؛');
+        return $this->charReplace($text, ',;', '،؛');
     }
 
     // replaces question marks with its persian equivalent
     protected function fixQuestionMark($text)
     {
-        return preg_replace('/(\?)/', "\u{061F}", $text); // Negaresh patch (B20): \u{061F} = ؟
+        return preg_replace('/(\?)/u', "\u{061F}", $text); // ؟
     }
 
-    // puts zwnj between the word and the prefix:
-    // - mi* nemi* bi*
-    // NOTE: there's a possible bug here: prefixes could be separate nouns
+    // puts zwnj between the word and the prefix: mi* nemi* bi*
     protected function fixPrefixSpacing($text)
     {
-        $replacement = "$1\u{200c}$3";
-        return preg_replace('/((\s|^)ن?می) ([^ ])/u', $replacement, preg_replace('/((\s|^)بی) ([^ ])/u', $replacement, $text));
+        $replacement = "\$1\u{200c}\$3";
+        $text = preg_replace('/((\s|^)ن?می) ([^ ])/u', $replacement, $text);
+        return preg_replace('/((\s|^)بی) ([^ ])/u', $replacement, $text);
     }
 
     // puts zwnj between the word and the suffix
-    // NOTE: possible bug: suffixes could be nouns
     protected function fixSuffixSpacing($text)
     {
-        $replacement = "$1\u{200c}$2";
-        // must be done before others
-        // *ha *haye
-        return preg_replace('#([' . $this->charsPersian . $this->charsDiacritic . ']) (ها(ی)?[' . $this->patternAfter . '])#u', $replacement,
-            // *am *at *ash *ei *eid *eem *and *man *tan *shan
-            preg_replace('#([' . $this->charsPersian . $this->charsDiacritic . ']) ((ام|ات|اش|ای|اید|ایم|اند|مان|تان|شان)[' . $this->patternAfter . '])#u', $replacement,
-                // *tar *tari *tarin
-                preg_replace('#([' . $this->charsPersian . $this->charsDiacritic . ']) (تر((ی)|(ین))?[' . $this->patternAfter . '])#u', $replacement,
-                    // *hayee *hayam *hayat *hayash *hayetan *hayeman *hayeshan
-                    preg_replace('#([' . $this->charsPersian . $this->charsDiacritic . ']) ((هایی|هایم|هایت|هایش|هایمان|هایتان|هایشان)[' . $this->patternAfter . '])#u', $replacement, $text)
-                )
-            )
-        );
+        $replacement = "\$1\u{200c}\$2";
+        $before = '([' . $this->charsPersian . $this->charsDiacritic . '])';
+        $after = '[' . $this->patternAfter . ']';
+        // *ha *haye (must be done before the others)
+        $text = preg_replace('#' . $before . ' (ها(ی)?' . $after . ')#u', $replacement, $text);
+        // *am *at *ash *ei *eid *eem *and *man *tan *shan
+        $text = preg_replace('#' . $before . ' ((ام|ات|اش|ای|اید|ایم|اند|مان|تان|شان)' . $after . ')#u', $replacement, $text);
+        // *tar *tari *tarin
+        $text = preg_replace('#' . $before . ' (تر((ی)|(ین))?' . $after . ')#u', $replacement, $text);
+        // *hayee *hayam *hayat *hayash *hayetan *hayeman *hayeshan
+        return preg_replace('#' . $before . ' ((هایی|هایم|هایت|هایش|هایمان|هایتان|هایشان)' . $after . ')#u', $replacement, $text);
     }
 
     protected function fixSuffixSpacingHamzeh($text)
     {
-        $replacement = "\$1\u{0647}\u{200c}\u{06cc}\$3"; // Negaresh patch (B20)
+        $replacement = "\$1\u{0647}\u{200c}\u{06cc}\$3";
         // heh + ye
-        return preg_replace('/(\S)(ه[\s\x{200c}]+[یي])([\s\x{200c}])/u', $replacement,
-            // heh + standalone hamza
-            preg_replace('/(\S)(ه[\s\x{200c}]?\x{0621})([\s\x{200c}])/u', $replacement,
-                // heh + hamza above
-                preg_replace('/(\S)(ه[\s\x{200c}]?\x{0654})([\s\x{200c}])/u', $replacement, $text)
-            )
-        );
+        $text = preg_replace('/(\S)(ه[\s\x{200c}]+[یي])([\s\x{200c}])/u', $replacement, $text);
+        // heh + standalone hamza
+        $text = preg_replace('/(\S)(ه[\s\x{200c}]?\x{0621})([\s\x{200c}])/u', $replacement, $text);
+        // heh + hamza above
+        return preg_replace('/(\S)(ه[\s\x{200c}]?\x{0654})([\s\x{200c}])/u', $replacement, $text);
     }
 
     protected function fixSuffixMisc($text)
     {
-        // replaces ه followed by ئ or ی, and then by ی, with ه\x{200c}ای,
-        // EXAMPLE: خانه‌ئی becomes خانه‌ای
-        // preg_replace('/(\S)ه[\x{200c}\x{200e}][ئی]ی([\s\x{200c}\x{200e}])/u', "$1ه\u{200c}ای$2", $text);
-        // Negaresh patch (B20): `$2` referred to a group that did not exist; keep the word end check as a lookahead
+        // replaces ه followed by ئ or ی, and then by ی, with ه‌ای (EXAMPLE: خانه‌ئی becomes خانه‌ای);
+        // the trailing check is a lookahead so it also works at the end of the text (B20)
         return preg_replace('/(\S)ه[\x{200c}\x{200e}][ئی]ی(?=[\s\x{200c}\x{200e}]|$)/u', "\$1ه\u{200c}ای", $text);
     }
 
     protected function cleanupExtraMarks($text)
     {
         // removes space between different/same marks (combining for cleanup)
-        return preg_replace('#([؟?!])([ ]+)(?=[؟?!])#', '$1',
-            // replaces more than one exclamation mark with just one
-            preg_replace('/(!){2,}/u', '$1',
-                // replaces more than one english or persian question mark with just one
-                preg_replace('/(\x{061F}|\?){2,}/u', '$1', // \x{061F} = `؟`
-                    // re-orders consecutive marks
-                    preg_replace('/(!)([ \t]*)([\x{061F}?])/u', '$3$1', $text) // `?!` --> `!?`
-                )
-            )
-        );
+        $text = preg_replace('/([؟?!])([ ]+)(?=[؟?!])/u', '$1', $text);
+        // replaces more than one exclamation mark with just one
+        $text = preg_replace('/(!){2,}/u', '$1', $text);
+        // replaces more than one english or persian question mark with just one
+        $text = preg_replace('/(\x{061F}|\?){2,}/u', '$1', $text);
+        // re-orders consecutive marks: `!?` --> `?!`
+        return preg_replace('/(!)([ \t]*)([\x{061F}?])/u', '$3$1', $text);
     }
 
     // replaces kashidas to ndash in parenthetic
     protected function kashidasAsParenthetic($text)
     {
-        return preg_replace('/(\s)\x{0640}+/u', '$1–', preg_replace('/\x{0640}+(\s)/u', '–$1', $text));
+        $text = preg_replace('/(\s)\x{0640}+/u', '$1–', $text);
+        return preg_replace('/\x{0640}+(\s)/u', '–$1', $text);
     }
 
     protected function cleanupKashidas($text)
     {
         // converts kashida between numbers to ndash
-        return preg_replace('/([0-9۰-۹]+)ـ+([0-9۰-۹]+)/u', '$1–$2',
-            // removes all kashidas between non-whitespace characters
-            // MAYBE: more punctuations
-            preg_replace('/([^\s.])\x{0640}+(?![\s.])/u', '$1', $text)
-        );
+        $text = preg_replace('/([0-9۰-۹]+)ـ+([0-9۰-۹]+)/u', '$1–$2', $text);
+        // removes all kashidas between non-whitespace characters
+        return preg_replace('/([^\s.])\x{0640}+(?![\s.])/u', '$1', $text);
     }
 
     protected function fixPunctuationSpacing($text)
     {
         // removes space before punctuations
-        return preg_replace('/[ \t\x{200c}]*([:;,؛،.؟?!]{1})/u', '$1',
-            // removes more than one space after punctuations
-            // except followed by new-lines (or preservers)
-            // Negaresh patch (B1): possessive `*+` so the lookahead cannot be skipped by backtracking
-            preg_replace('/([:;,؛،.؟?!]{1})[ \t\x{200c}]*+(?!\n|_{2})/u', '$1 ',
-                // removes space after colon that separates time parts
-                preg_replace('/([0-9۰-۹]+):\s+([0-9۰-۹]+)/', '$1:$2',
-                    // removes space after dots in numbers
-                    preg_replace('/([0-9۰-۹]+)\. ([0-9۰-۹]+)/', '$1.$2',
-                        // removes space before common domain tlds
-                        preg_replace('~([\w\-_]+)\. (ir|com|org|net|info|edu|me)([\s/\])»:;.])~', '$1.$2$3',
-                            // removes space between different/same marks (double-check)
-                            preg_replace('/([؟?!])([ ]+)(?=[؟?!])/', '$1', $text)
-                        )
-                    )
-                )
-            )
-        );
+        $text = preg_replace('/[ \t\x{200c}]*([:;,؛،.؟?!]{1})/u', '$1', $text);
+        // removes more than one space after punctuations, except followed by new-lines (or
+        // preservers); Negaresh patch (B1): possessive `*+` so backtracking cannot skip the check
+        $text = preg_replace('/([:;,؛،.؟?!]{1})[ \t\x{200c}]*+(?!\n|_{2})/u', '$1 ', $text);
+        // removes space after colon that separates time parts
+        $text = preg_replace('/([0-9۰-۹]+):\s+([0-9۰-۹]+)/u', '$1:$2', $text);
+        // removes space after dots in numbers
+        $text = preg_replace('/([0-9۰-۹]+)\. ([0-9۰-۹]+)/u', '$1.$2', $text);
+        // removes space before common domain tlds
+        $text = preg_replace('~([A-Za-z0-9_\-]+)\. (ir|com|org|net|info|edu|me)([\s/\\\\\])»:;.])~u', '$1.$2$3', $text);
+        // removes space between different/same marks (double-check)
+        return preg_replace('/([؟?!])([ ]+)(?=[؟?!])/u', '$1', $text);
     }
 
     protected function fixBracesSpacing($text)
     {
+        // removes inside spaces and more than one outside for `()`, `[]`, `{}`, `“”` and `«»`
         $replacement = ' $1$2$3 ';
-        // removes inside spaces and more than one outside
-        // for `()`, `[]`, `{}`, `“”` and `«»`
-        return preg_replace("/[ \t\x{200c}]*(\()\s*([^)]+?)\s*?(\))[ \t\x{200c}]*/u", $replacement,
-            preg_replace("/[ \t\x{200c}]*(\[)\s*([^\]]+?)\s*?(\])[ \t\x{200c}]*/u", $replacement,
-                preg_replace("/[ \t\x{200c}]*(\{)\s*([^}]+?)\s*?(\})[ \t\x{200c}]*/u", $replacement,
-                    preg_replace("/[ \t\x{200c}]*(“)\s*([^”]+?)\s*?(”)[ \t\x{200c}]*/u", $replacement,
-                        preg_replace("/[ \t\x{200c}]*(«)\s*([^»]+?)\s*?(»)[ \t\x{200c}]*/u", $replacement, $text)
-                    )
-                )
-            )
-        );
+        foreach (['\(' => '\)', '\[' => '\]', '\{' => '\}', '“' => '”', '«' => '»'] as $open => $close) {
+            $inner = '\\' === $close[0] ? $close[1] : $close;
+            $text = preg_replace(
+                '/[ \t\x{200c}]*(' . $open . ')\s*([^' . preg_quote($inner, '/') . ']+?)\s*?(' . $close . ')[ \t\x{200c}]*/u',
+                $replacement,
+                $text
+            );
+        }
+        return $text;
     }
 
     protected function fixBracesSpacingInside($text)
     {
-        $replacement = '$1$2$3';
         // removes inside spaces for `()`, `[]`, `{}`, `“”` and `«»`
-        return preg_replace("/(\()\s*([^)]+?)\s*?(\))/u", $replacement,
-            preg_replace("/(\[)\s*([^\]]+?)\s*?(\])/u", $replacement,
-                preg_replace("/(\{)\s*([^}]+?)\s*?(\})/u", $replacement,
-                    preg_replace("/(“)\s*([^”]+?)\s*?(”)/u", $replacement,
-                        preg_replace("/(«)\s*([^»]+?)\s*?(»)/u", $replacement,
-                            // NOTE: must be here, weird not working if on `markdownNormalizeBraces()`
-                            // removes Markdown link spaces inside normal ()
-                            preg_replace("/(\(\[.*?\]\(.*?\))\s+(\))/u", '$1$2', $text)
-                        )
-                    )
-                )
-            )
-        );
+        foreach (['\(' => '\)', '\[' => '\]', '\{' => '\}', '“' => '”', '«' => '»'] as $open => $close) {
+            $inner = '\\' === $close[0] ? $close[1] : $close;
+            $text = preg_replace('/(' . $open . ')\s*([^' . preg_quote($inner, '/') . ']+?)\s*?(' . $close . ')/u', '$1$2$3', $text);
+        }
+        // removes markdown link spaces inside normal ()
+        return preg_replace('/(\(\[.*?\]\(.*?\))\s+(\))/u', '$1$2', $text);
     }
 
     protected function markdownNormalizeBraces($text)
     {
-        // removes space between ! and opening brace on markdown images
-        // EXAMPLE: `! [alt] (src)` --> `![alt](src)`
-        return preg_replace("/! (\[.*?\])[ ]?(\(.*?\))[ ]?/", '!$1$2',
-            // remove spaces between [] and ()
-            // EXAMPLE: `[text] (link)` --> `[text](link)`
-            preg_replace("/(\[.*?\])[ \t]+(\(.*?\))/", '$1$2',
-                // removes spaces inside double () [] {}
-                // EXAMPLE: `[[ text ]]` --> `[[text]]`
-                preg_replace("/\(\([ \t]*(.*?)[ \t]*\)\)/", '(($1))',
-                    preg_replace("/\[\[[ \t]*(.*?)[ \t]*\]\]/", '[[$1]]',
-                        preg_replace("/\{\{[ \t]*(.*?)[ \t]*\}\}/", '{{$1}}',
-                            preg_replace("/\{\{\{[ \t]*(.*?)[ \t]*\}\}\}/", '{{{$1}}}', // mustache escape
-                                // removes spaces between double () [] {}
-                                // EXAMPLE: `[[text] ]` --> `[[text]]`
-                                preg_replace("/(\(\(.*\))[ \t]+(\))/", '$1$2',
-                                    preg_replace("/(\[\[.*\])[ \t]+(\])/", '$1$2',
-                                        preg_replace("/(\{\{.*\})[ \t]+(\})/", '$1$2', $text)
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            )
-        );
+        // removes space between ! and opening brace on markdown images: `! [alt] (src)` --> `![alt](src)`
+        $text = preg_replace('/! (\[.*?\])[ ]?(\(.*?\))[ ]?/u', '!$1$2', $text);
+        // removes spaces between [] and (): `[text] (link)` --> `[text](link)`
+        $text = preg_replace('/(\[.*?\])[ \t]+(\(.*?\))/u', '$1$2', $text);
+        // removes spaces inside double () [] {}: `[[ text ]]` --> `[[text]]`
+        $text = preg_replace('/\(\([ \t]*(.*?)[ \t]*\)\)/u', '(($1))', $text);
+        $text = preg_replace('/\[\[[ \t]*(.*?)[ \t]*\]\]/u', '[[$1]]', $text);
+        $text = preg_replace('/\{\{[ \t]*(.*?)[ \t]*\}\}/u', '{{$1}}', $text);
+        $text = preg_replace('/\{\{\{[ \t]*(.*?)[ \t]*\}\}\}/u', '{{{$1}}}', $text); // mustache escape
+        // removes spaces between double () [] {}: `[[text] ]` --> `[[text]]`
+        $text = preg_replace('/(\(\(.*\))[ \t]+(\))/u', '$1$2', $text);
+        $text = preg_replace('/(\[\[.*\])[ \t]+(\])/u', '$1$2', $text);
+        return preg_replace('/(\{\{.*\})[ \t]+(\})/u', '$1$2', $text);
     }
 
     protected function markdownNormalizeLists($text)
     {
+        // replaces starting `MIDDLE DOT (U+00B7)` following single space with dash
+        $text = preg_replace('/(^ |\n|^)([\x{00b7}]\s)/u', '$1- ', $text);
         // removes extra line between two items list
-        return preg_replace('/((\n|^)\*.*?)\n+(?=\n\*)/', '$1',
-            preg_replace('/((\n|^)-.*?)\n+(?=\n-)/', '$1',
-                preg_replace('/((\n|^)#.*?)\n+(?=\n#)/', '$1', $text)
-            )
-        );
+        $text = preg_replace('/((\n|^)\*.*?)\n+(?=\n\*)/u', '$1', $text);
+        $text = preg_replace('/((\n|^)-.*?)\n+(?=\n-)/u', '$1', $text);
+        return preg_replace('/((\n|^)#.*?)\n+(?=\n#)/u', '$1', $text);
     }
 
     protected function fixMiscSpacing($text)
     {
         // removes space before parentheses on misc cases
-        return preg_replace('/ \((ص|عج|س|ع|ره)\)/u', '($1)',
-            // removes space before braces containing numbers
-            preg_replace('/ \[([0-9۰-۹]+)\]/u', '[$1]', $text)
-        );
+        $text = preg_replace('/ \((ص|عج|س|ع|ره)\)/u', '($1)', $text);
+        // removes space before braces containing numbers
+        return preg_replace('/ \[([0-9۰-۹]+)\]/u', '[$1]', $text);
     }
 
     protected function fixDiacritics($text)
     {
+        $diacritics = '[' . $this->charsDiacritic . ']';
         // cleans zwnj before diacritic characters
-        return preg_replace('#\x{200c}([' . $this->charsDiacritic . '])#u', '$1',
-            // cleans more than one diacritic characters
-            // props @languagetool-org
-            preg_replace('#(.*)([' . $this->charsDiacritic . ']){2,}(.*)#u', '$1$2$3',
-                // clean spaces before diacritic characters
-                preg_replace('#(\\S)[ ]+([' . $this->charsDiacritic . '])#u', '$1$2', $text)
-            )
-        );
+        $text = preg_replace('/\x{200c}(' . $diacritics . ')/u', '$1', $text);
+        // cleans more than one of each diacritic characters (different ones may be stacked)
+        $text = preg_replace('/(' . $diacritics . ')\1+/u', '$1', $text);
+        // cleans spaces before diacritic characters
+        return preg_replace('/(\S)[ ]+(' . $diacritics . ')/u', '$1$2', $text);
     }
 
     protected function removeDiacritics($text)
@@ -987,18 +961,17 @@ class Virastar
 
     protected function cleanupSpacing($text)
     {
-        // replaces more than one space with just a single one
-        // except before/after preservers and before new-lines
-        // .replace(/(?<![_]{2})([ ]{2,})(?![_]{2}|\n)/g, ' ') // WORKS: using lookbehind
-        return preg_replace('/([^_])([ ]{2,})(?![_]{2}|\n)/u', '$1 ',
-            // cleans whitespace/zwnj between new-lines
-            // @REF: https://stackoverflow.com/a/10965543/
-            preg_replace('/\n[\s\x{200c}]*\n/u', "\n\n", $text)
-        );
+        // replaces more than one space with just a single one, except before/after preservers and
+        // before new-lines
+        $text = preg_replace('/([^_])([ ]{2,})(?![_]{2}|\n)/u', '$1 ', $text);
+        // cleans tab/space/zwnj/zwj/nbsp between new-lines
+        return preg_replace('/^\n([\t\x{0020}\x{200c}\x{200d}\x{00a0}]*)\n$/mu', "\n\n", $text);
     }
 
     protected function cleanupLineBreaks($text)
     {
+        // cleans whitespace/zwnj between new-lines
+        $text = preg_replace('/\n[\s\x{200c}]*\n/u', "\n\n", $text);
         // cleans more than two contiguous line-breaks
         return preg_replace('/\n{2,}/u', "\n\n", $text);
     }
@@ -1006,60 +979,8 @@ class Virastar
     protected function cleanupBeginAndEnd($text)
     {
         // removes space/tab/zwnj/nbsp from the beginning of the new-lines
-        return preg_replace('/([\n]+)[ \t\x{200c}\x{00a0}]*/u', '$1',
-            // remove spaces, tabs, zwnj, direction marks and new lines from
-            // the beginning and end of text
-            // @REF: http://stackoverflow.com/a/38490203
-            preg_replace('/^[\s\x{200c}\x{200e}\x{200f}]+|[\s\x{200c}\x{200e}\x{200f}]+$/u', '', $text)
-        );
-    }
-
-    protected function flipPunctuations($text)
-    {
-        $end = ['-'];
-        $start = ['!', '.', '،', '…', '"'];
-        $before = [];
-        $after = [];
-
-        $text = $this->fixThreeDots($text);
-        $trimmed = trim($text);
-
-        $countOfStart = count($start);
-        for ($iStart = 0; $iStart < $countOfStart; $iStart++) {
-            $sElement = $start[$iStart];
-            $sReg = '^\\' . $sElement . '/i';
-            if (preg_match($sReg, $text)) {
-                $text = preg_replace($sReg, '', $trimmed);
-                $after[] = $sElement;
-            }
-        }
-
-        $countOfEnd = count($end);
-        for ($iEnd = 0; $iEnd < $countOfEnd; $iEnd++) {
-            $eElement = $end[$iEnd];
-            $eReg = '\\' . $eElement . '$/i';
-            if (preg_match($eReg, $text)) {
-                $text = preg_replace($eReg, '', $trimmed);
-                $before[] = $eElement;
-            }
-        }
-
-        $countOfBefore = count($before);
-        for ($iBefore = 0; $iBefore < $countOfBefore; $iBefore++) {
-            $text = $before[$iBefore] . ' ' . $text;
-        }
-
-        $countOfAfter = count($after);
-        for ($iAfter = 0; $iAfter < $countOfAfter; $iAfter++) {
-            $text += $after[$iAfter];
-        }
-
-        return $this->normalizeEllipsis($text);
-    }
-
-    // swap incorrect quotes pairs `»«` to `«»` and `”“` to `“”`
-    protected function swapQuotes($text)
-    {
-        return preg_replace('/(»)(.+?)(«)/', '«$2»', preg_replace('/(”)(.+?)(“)/', '“$2”', $text));
+        $text = preg_replace('/([\n]+)[ \t\x{200c}\x{00a0}]*/u', '$1', $text);
+        // removes spaces, tabs, zwnj, direction marks and new lines from the beginning and end of text
+        return preg_replace('/^[\s\x{200c}\x{200e}\x{200f}]+|[\s\x{200c}\x{200e}\x{200f}]+$/u', '', $text);
     }
 }

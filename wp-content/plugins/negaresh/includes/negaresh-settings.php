@@ -47,6 +47,7 @@ class Negaresh_Settings
         'fix_dashes' => true,
         'fix_three_dots' => true,
         'normalize_ellipsis' => true,
+        'remove_spaces_before_ellipsis' => true,
         'fix_english_quotes_pairs' => true,
         'fix_english_quotes' => false,
         'fix_punctuations' => false,
@@ -455,6 +456,11 @@ class Negaresh_Settings
                 'section' => 'punctuation',
                 'label' => __('Merge repeated ellipses and put one space after them', 'negaresh'),
                 'example' => '',
+            ],
+            'remove_spaces_before_ellipsis' => [
+                'section' => 'punctuation',
+                'label' => __('Remove the space before an ellipsis', 'negaresh'),
+                'example' => 'متن … → متن…',
             ],
             'fix_english_quotes_pairs' => [
                 'section' => 'punctuation',

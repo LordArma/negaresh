@@ -92,6 +92,15 @@ patches upstream as a PR.
 
 ### 4.1 Local patches to Virastar.php
 
+**Since I11 (session 3) the rule functions are a re-port of Virastar.js 0.22.1**
+(`https://github.com/brothersincode/virastar`, `lib/virastar.js`), step by step in the JS order,
+with `/u` on every pattern (B28, B29). `VirastarReferenceTest` runs the JS project's own 159 test
+cases (`tests/fixtures/virastar-js-cases.json`): 156 pass, 3 are deliberate deviations (entity
+decoding ×2, Markdown code fences). Also from JS 0.22: `remove_spaces_before_ellipsis` (a plugin
+rule now), `ۃ`→`ة`, `ے`→`ی`, `¬`→ZWNJ, ZWNJ next to English letters, misc letters fixed on the
+whole text. Removed: `flipPunctuations()` and `swapQuotes()` (never called; broken). The table
+below lists the earlier patches, all still in place.
+
 | Bug | Where | Change |
 | --- | --- | --- |
 | B1 | `cleanup()`, every preserver closure (front matter, HTML, comments, brackets, braces, markdown links, URIs, nbsp, entities) | `use ($x)` → `use (&$x)`; store `$matched[0]` instead of the match array |
@@ -104,6 +113,8 @@ patches upstream as a PR.
 | B20 | `fixSuffixMisc()` | `$2` pointed at a missing group; trailing check is now a lookahead |
 | B26 | `normalizeEllipsis()` | no space added after `…` before a line break (and trailing spaces there removed) |
 | B22 | `cleanup()` start | `$text = ' ' . $text . ' ';` restored from the JS original (the end of `cleanup()` already strips it) |
+| B30 | word tokenizer | sprintf check in single quotes (`\$` was eaten in double quotes) |
+| B29 | word tokenizer | `/u` (it split `«»` bytes) |
 | B21 | front matter preserver | upstream regex kept; it matches again because of B22 (a session 3 interim change to `/^---/` was reverted) |
 
 To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virastar.php`, and run

@@ -83,7 +83,7 @@ curl -s -b "$JAR" -o /dev/null --data-urlencode option_page=negaresh --data-urle
 check "reset restores the default rules (I5)" '"fix_english_numbers":false,"fix_numeral_symbols":false,"fix_misc_non_persian_chars":false,"fix_hamzeh":true' "$(wp option get negaresh_options --format=json)"
 REST_NONCE="$(grep -oP 'createNonceMiddleware\(\s*"\K[^"]+' <<<"$SETTINGS")"
 PREVIEW="$(curl -s -b "$JAR" -H "X-WP-Nonce: $REST_NONCE" -H 'Content-Type: application/json' \
-  -d '{"text":"<p>عدد 123 ...</p>","rules":{"fix_english_numbers":true,"fix_three_dots":true}}' "$URL/wp-json/negaresh/v1/preview")"
+  -d '{"text":"<p>عدد 123 ...</p>","rules":{"fix_english_numbers":true,"fix_three_dots":true,"remove_spaces_before_ellipsis":true}}' "$URL/wp-json/negaresh/v1/preview")"
 check "preview uses the unsaved boxes (I5)" '<p>عدد ۱۲۳…</p>' "$(python3 -c 'import json,sys; print(json.load(sys.stdin)["text"])' <<<"$PREVIEW" 2>&1)"
 check "preview refused without login (I5)" '401' "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{"text":"x"}' "$URL/wp-json/negaresh/v1/preview")"
 rm -f "$JAR"

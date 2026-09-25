@@ -41,7 +41,7 @@ class SettingsPageTest extends TestCase
         $this->options[Negaresh_Settings::OPTION] = ['fix_english_numbers' => false];
         $plugin = $this->plugin();
 
-        self::assertSame('<p>عدد ۱۲۳…</p>', $plugin->preview('<p>عدد 123 ...</p>', ['fix_english_numbers' => true, 'fix_three_dots' => true]));
+        self::assertSame('<p>عدد ۱۲۳…</p>', $plugin->preview('<p>عدد 123 ...</p>', ['fix_english_numbers' => true, 'fix_three_dots' => true, 'remove_spaces_before_ellipsis' => true]));
         self::assertSame('<p>عدد 123…</p>', $plugin->filter_content('<p>عدد 123 ...</p>'), 'saved rules are untouched');
     }
 
@@ -92,7 +92,7 @@ class SettingsPageTest extends TestCase
 
     public function testPreviewRouteReturnsTheFixedText(): void
     {
-        $request = new \WP_REST_Request(['text' => '<p>متن ...</p>', 'rules' => ['fix_three_dots' => true]]);
+        $request = new \WP_REST_Request(['text' => '<p>متن ...</p>', 'rules' => ['fix_three_dots' => true, 'remove_spaces_before_ellipsis' => true]]);
 
         self::assertSame(['text' => '<p>متن…</p>'], $this->plugin()->rest_preview($request));
         self::assertSame(['text' => ''], $this->plugin()->rest_preview(new \WP_REST_Request(['text' => ''])));

@@ -5,6 +5,19 @@ versions: [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Dates written with Persian or Arabic digits were scrambled** (`۳/۱/۱۳۵۵` became `۱۳/۱/۳۵۵`)
+  with the default rules, and in "fix before saving" mode the scrambled date was stored (B29).
+- Rules with several steps ran them in the wrong order: `---` became `–-`, repeated `!?` marks
+  were not merged, a Kashida between numbers was deleted instead of becoming a dash, times got a
+  space after the colon, stacked diacritics were removed (B28).
+- `%1$s` style placeholders in text lost their digits (B30).
+
+### Changed
+- The rules now follow Virastar.js 0.22.1 and pass its own test suite (I11). New rule
+  **Remove the space before an ellipsis** (on by default). Posts fixed with the old rules are
+  checked again.
+
 ### Added
 - **Leave this post alone**: a per post choice in the block editor sidebar and in the classic
   editor, so Negaresh never changes that post (I6).

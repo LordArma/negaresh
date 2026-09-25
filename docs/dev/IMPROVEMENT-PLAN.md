@@ -205,7 +205,7 @@ I10 needs user decisions first.
 - Custom dictionary of words that must not be touched.
 - Multisite: network wide defaults.
 
-## I11 Replace or rewrite Virastar (decide after I2)
+## I11 Replace or rewrite Virastar (decide after I2) ✅ *(done session 3)*
 - The user allowed replacing or rewriting the vendored library (session 3).
 - Why not now: ~1000 lines of Persian typography regexes with no upstream tests; a rewrite in the
   bug fix release would trade known bugs for unknown ones.
@@ -213,3 +213,13 @@ I10 needs user decisions first.
   longer needed. Then either slim the vendored copy down to the text rules, or rewrite rule by rule
   with a test per rule (port the JS Virastar test suite as the reference).
 - **Done when:** every rule has tests, and no `Negaresh patch` markers remain because the code is ours.
+- *Result (definition adjusted):* ported the JS test suite first (159 cases, extractor in
+  `tests/tools/`), which showed the PHP port's defects: reversed rule steps (B28), missing `/u`
+  (B29, scrambled Persian dates), sprintf check (B30). Re-ported all rule functions from
+  Virastar.js 0.22.1 instead of rewriting from scratch: 156/159 reference cases pass (was 134;
+  upstream PHP 116), 3 documented deviations. The `Negaresh patch` markers stay on purpose: they
+  document where we differ from upstream (security, HTML handling), and the file is now our
+  maintained fork. With the plugin's default rules 8 of 162 corpus texts change, all fixes.
+  New rule "Remove the space before an ellipsis" (JS option, default on) keeps `متن ...` → `متن…`.
+  Note: the rules hash changes (new rule), so posts fixed on save by 4.3.0 are checked again on
+  display and listed again by the bulk tool; that is wanted, the rules improved.
