@@ -3,7 +3,7 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [4.2.0] (2026-09-25)
 
 ### Fixed
 - A `>` inside an HTML attribute (for example `alt="a > b"`) could break the tag when a quote
