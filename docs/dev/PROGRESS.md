@@ -8,7 +8,7 @@ Status snapshot is kept up to date at the top.
 | Phase | State |
 | --- | --- |
 | Analysis | ✅ done (session 1) |
-| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ 20 of 23 done; left: B15, B16, B17 |
+| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ 21 of 24 done; left: B15, B16, B17 |
 | Working branch | `fix/v4.1.0` (local commits, one per slice, not pushed) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⛔ blocked on phase 1 Critical + High |
 | Current version | 4.0.0 (tag `v4.0.0`, commit `cd6f826`) |
@@ -17,7 +17,20 @@ Status snapshot is kept up to date at the top.
 **Next step:** i18n and release slice: B15 (translations), B16 (header), B17 (README), then an
 end to end check in a real WordPress (Docker), then CHANGELOG.
 
-**Tests:** `composer test` → 61 tests, all pass.
+**Tests:** `composer test` → 71 tests, all pass (also on PHP 7.4.33).
+`tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.
+
+---
+
+## 2026-09-25 · Session 3 · Slice: real WordPress end to end check (+ B23)
+
+Done:
+- Manual upgrade test in Docker: v4.0.0 with its saved settings → new code. Migration correct,
+  output correct, `debug.log` empty. Details and the 4.0 "before" output: ANALYSIS §7.
+- Found **B23** (Critical, 4.0 only): newline before `<?php` in `negaresh-class.php` broke
+  logins, redirects and RSS feeds. Already fixed by the refactor; guarded by `PluginFilesTest`.
+- Added `tests/e2e/run.sh` (13 checks, fresh site, cleans up) and ran it: all pass.
+- Unit suite also passes on PHP 7.4.33 (`php:7.4-cli`).
 
 ---
 

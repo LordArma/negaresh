@@ -110,6 +110,14 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   if cheap (drop the leading space from the regex). *Result:* fixed by B22 (padding restored,
   upstream regex kept), test in `VirastarFixesTest`.
 
+- [x] **B23 Output before `<?php` breaks logins, redirects and feeds** *(Critical; found in the
+  Docker end to end run and already fixed by the refactor, session 3)*. 4.0's `negaresh-class.php`
+  starts with a newline before `<?php`. It is sent on every request: `wp-login.php` fails with
+  "headers already sent" (nobody can log in while 4.0 is active), redirects after saving settings
+  fail, and every page and RSS feed starts with a stray newline (a feed with anything before
+  `<?xml` is invalid XML). *Test:* `PluginFilesTest` checks every PHP file starts with `<?php` and
+  has no closing `?>`; `tests/e2e/run.sh` checks login, doctype and feed XML.
+
 - [x] **B22 Missing space padding in the PHP port** *(found and done session 3)*. The JS Virastar
   pads the text with one space each side before the rules and strips it after; the PHP port kept
   only the stripping. Rules that need a neighbouring space (suffixes ها/تر, hamzeh, Arabic hamzeh)

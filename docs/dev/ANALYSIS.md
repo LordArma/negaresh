@@ -135,9 +135,26 @@ To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virast
 * `uninstall.php`: `Negaresh_Settings::delete_all()` per site.
 * Stored data: `negaresh_options` (array), `negaresh_db_version` (int, 2).
 
-## 7. Environment notes
+## 7. End to end check in a real WordPress
+
+`tests/e2e/run.sh` (Docker: MariaDB 11 + official WordPress image + wp-cli) installs a fresh site,
+mounts the plugin read only, and checks 13 things: doctype and feed XML (B23), link and entities
+(B1, B2), defaults without saving (B5), shortcode and code block (B3), REST, admin login, the
+settings page render and save/sanitize, an empty `debug.log`, and uninstall (B19).
+`KEEP=1` leaves the site at http://127.0.0.1:8089 (admin/admin). `WP_IMAGE=...` picks another
+WordPress/PHP combination.
+
+Session 3 also ran a manual upgrade test: v4.0.0 with its 30 settings rows (as its form stores
+them), then the new code on the same database. Migration mapped every value, removed all legacy
+rows, set `negaresh_db_version` = 2, logged nothing. 4.0 output on the same post, for the record:
+all tags and the link gone, `\x{061F}` text, shortcode mangled and not executed, code block
+rewritten, runs of `<br />`, and a newline before `<!DOCTYPE`.
+
+## 8. Environment notes
 
 * The working copy lives under a Syncthing folder (`../.stfolder`) on a Windows drive mounted in WSL:
   file modes show as 777, so ignore mode noise (`git config core.fileMode false` if it appears).
+* Docker works in this WSL setup (used by `tests/e2e/run.sh`; images: `mariadb:11`,
+  `wordpress:php8.3-apache`, `wordpress:cli-php8.3`, `php:7.4-cli`, `wordpress:5.8-php7.4-apache`).
 * PHP 8.3.6 CLI and Composer (`~/.local/bin/composer`) available. Dev dependencies install into
   `vendor/` (gitignored); Composer platform is pinned to PHP 7.4 so locked versions stay compatible.

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# End to end check of Negaresh in a real WordPress (Docker). Usage:
+#   tests/e2e/run.sh            start a fresh site, run the checks, remove everything
+#   KEEP=1 tests/e2e/run.sh     leave the site running at http://127.0.0.1:8089 (admin / admin)
+# Needs Docker. Uses the latest official images unless WP_IMAGE / CLI_IMAGE are set.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PLUGIN="$ROOT/wp-content/plugins/negaresh"
+WP_IMAGE="${WP_IMAGE:-wordpress:php8.3-apache}"
+CLI_IMAGE="${CLI_IMAGE:-wordpress:cli-php8.3}"
+NET=negaresh-e2e; DB=negaresh-e2e-db; WEB=negaresh-e2e-wp; URL=http://127.0.0.1:8089
+FAIL=0
+
+cleanup() { [ "${KEEP:-0}" = 1 ] && return; docker rm -f "$DB" "$WEB" >/dev/null 2>&1 || true; docker network rm "$NET" >/dev/null 2>&1 || true; }
+trap cleanup EXIT
+wp() { docker run --rm -i --network "$NET" --volumes-from "$WEB" --user 33:33 -e HOME=/tmp \
+  -e WORDPRESS_DB_HOST="$DB" -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp "$CLI_IMAGE" wp "$@"; }
+check() { if grep -qF -- "$2" <<<"$3"; then echo "PASS  $1"; else echo "FAIL  $1 (expected: $2)"; FAIL=1; fi; }
+
+cleanup; KEEP_SAVED="${KEEP:-0}"; KEEP=0; cleanup; KEEP="$KEEP_SAVED"
+docker network create "$NET" >/dev/null
+docker run -d --name "$DB" --network "$NET" -e MARIADB_ROOT_PASSWORD=root -e MARIADB_DATABASE=wp \
+  -e MARIADB_USER=wp -e MARIADB_PASSWORD=wp mariadb:11 >/dev/null
+docker run -d --name "$WEB" --network "$NET" -p 127.0.0.1:8089:80 -e WORDPRESS_DB_HOST="$DB" \
+  -e WORDPRESS_DB_USER=wp -e WORDPRESS_DB_PASSWORD=wp -e WORDPRESS_DB_NAME=wp -e WORDPRESS_DEBUG=1 \
+  -e WORDPRESS_CONFIG_EXTRA="define('WP_DEBUG_LOG', true); define('WP_DEBUG_DISPLAY', false);" \
+  -v "$PLUGIN":/var/www/html/wp-content/plugins/negaresh:ro "$WP_IMAGE" >/dev/null
+for _ in $(seq 1 60); do curl -s -o /dev/null "$URL/" && break; sleep 2; done
+for _ in $(seq 1 30); do wp core install --url="$URL" --title=Negaresh --admin_user=admin --admin_password=admin \
+  --admin_email=a@example.com --skip-email >/dev/null 2>&1 && break; sleep 2; done
+echo "WordPress $(wp core version), PHP $(docker exec "$WEB" php -r 'echo PHP_VERSION;')"
+wp rewrite structure '/%postname%/' >/dev/null 2>&1
+wp plugin activate negaresh >/dev/null
+# setup noise (for example the database not being up yet) is not ours
+docker exec "$WEB" sh -c ': > /var/www/html/wp-content/debug.log'
+printf '%s\n' '<?php' "add_shortcode('negaresh_test', function (\$a) { return '<span class=\"sc\">' . esc_html(\$a['label'] ?? '') . '</span>'; });" \
+  | docker exec -i -u 33 "$WEB" sh -c 'mkdir -p /var/www/html/wp-content/mu-plugins && cat > /var/www/html/wp-content/mu-plugins/e2e.php'
+
+wp post create - --post_title=e2e --post_name=e2e --post_status=publish >/dev/null <<'HTML'
+<!-- wp:paragraph --><p>سلام دوستان، به <a href="https://example.com/?a=1&amp;b=2">این صفحه</a> سر بزنید... عدد ٤٥٦ و A&amp;B و &lt;b&gt; متن</p><!-- /wp:paragraph -->
+<!-- wp:shortcode -->[negaresh_test label="a,b"]<!-- /wp:shortcode -->
+<!-- wp:code --><pre class="wp-block-code"><code>x ... y // 123</code></pre><!-- /wp:code -->
+HTML
+PAGE="$(curl -s "$URL/e2e/")"
+check "page starts with doctype (B23)" "<!DOCTYPE html>" "$(head -c 15 <<<"$PAGE")"
+check "link kept (B1)" '<a href="https://example.com/?a=1&amp;b=2">این صفحه</a>' "$PAGE"
+check "entities kept (B1, B2)" 'A&amp;B و &lt;b&gt; متن' "$PAGE"
+check "defaults applied without saving (B5)" 'عدد ۴۵۶' "$PAGE"
+check "shortcode ran with its attribute (B3)" '<span class="sc">a,b</span>' "$PAGE"
+check "code block untouched (B3)" '<code>x ... y // 123</code>' "$PAGE"
+check "RSS feed is valid XML (B23)" "ok" "$(curl -s "$URL/feed/" | python3 -c 'import sys,xml.dom.minidom as m; m.parseString(sys.stdin.buffer.read()); print("ok")' 2>&1)"
+check "REST content fixed" 'عدد ۴۵۶' "$(curl -s "$URL/wp-json/wp/v2/posts?slug=e2e" | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["content"]["rendered"])')"
+
+JAR="$(mktemp)"; curl -s -c "$JAR" -b "$JAR" -o /dev/null "$URL/wp-login.php"
+LOGIN="$(curl -s -c "$JAR" -b "$JAR" -o /dev/null -w '%{http_code}' -d 'log=admin&pwd=admin&testcookie=1' "$URL/wp-login.php")"
+check "admin login works (B23)" "302" "$LOGIN"
+SETTINGS="$(curl -s -b "$JAR" "$URL/wp-admin/options-general.php?page=negaresh-options")"
+check "settings page renders" 'name="negaresh_options[fix_dashes]"' "$SETTINGS"
+NONCE="$(grep -oP "name=['\"]_wpnonce['\"] value=['\"]\K[^'\"]+" <<<"$SETTINGS")"
+curl -s -b "$JAR" -o /dev/null --data-urlencode option_page=negaresh --data-urlencode action=update \
+  --data-urlencode "_wpnonce=$NONCE" --data-urlencode "negaresh_options[fix_english_numbers]=1" \
+  --data-urlencode "negaresh_options[post_types][]=bogus" "$URL/wp-admin/options.php"
+check "settings saved and sanitized" '"fix_english_numbers":true,"fix_numeral_symbols":false' "$(wp option get negaresh_options --format=json)"
+rm -f "$JAR"
+
+LOG="$(docker exec "$WEB" sh -c 'cat /var/www/html/wp-content/debug.log 2>/dev/null' || true)"
+if [ -z "$LOG" ]; then echo "PASS  debug.log is empty"; else echo "FAIL  debug.log:"; echo "$LOG" | head -20; FAIL=1; fi
+
+if [ "${KEEP:-0}" != 1 ]; then
+  wp plugin deactivate negaresh >/dev/null && wp plugin uninstall negaresh --skip-delete >/dev/null
+  check "uninstall removed options (B19)" "none" "$(wp option list --search='negaresh*' --format=count | sed 's/^0$/none/')"
+fi
+
+[ "$FAIL" = 0 ] && echo "ALL PASSED" || { echo "SOME CHECKS FAILED"; exit 1; }
