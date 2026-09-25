@@ -1,0 +1,8 @@
+# Everything is LF in the repository and in working copies (the checkout may live on Windows).
+* text=auto eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.mo binary
+*.zip binary

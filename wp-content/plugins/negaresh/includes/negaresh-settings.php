@@ -613,7 +613,7 @@ class Negaresh_Settings
     }
 
     /**
-     * Settings link first in the plugin's row on the Plugins screen (I5).
+     * Settings (I5) and Tools → Negaresh (P3-3) links first in the plugin's row on the Plugins screen.
      *
      * @param array<int|string, string> $links
      * @return array<int|string, string>
@@ -626,7 +626,12 @@ class Negaresh_Settings
             esc_url(admin_url('options-general.php?page=' . self::PAGE)),
             esc_html__('Settings', 'negaresh')
         );
-        array_unshift($links, $settings);
+        $tools = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(admin_url('tools.php?page=negaresh-bulk')),
+            esc_html__('Fix existing posts', 'negaresh')
+        );
+        array_unshift($links, $settings, $tools);
         return $links;
     }
 

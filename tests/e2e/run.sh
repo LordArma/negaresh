@@ -152,6 +152,9 @@ OPT_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
   "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
 wp negaresh fix --all --apply >/dev/null 2>&1
 check "opted out post untouched by a full run (I6)" '<p>نه ...</p>' "$(wp post get "$OPT_ID" --field=post_content)"
+STATUS="$(wp negaresh status --format=json 2>&1)"
+check "wp negaresh status (P3-5)" '"mode":"display"' "$STATUS"
+check "wp negaresh status counts opted out posts (P3-5)" '"opted_out":1' "$STATUS"
 check "wp negaresh text (I6)" 'عدد ۴۵۶…' "$(wp negaresh text 'عدد ٤٥٦ ...' 2>&1)"
 
 # BROWSER=1: drive the settings page in headless Chromium too (tests/e2e/browser.sh, I5)

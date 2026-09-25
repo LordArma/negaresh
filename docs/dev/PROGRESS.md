@@ -25,6 +25,15 @@ panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 
 ---
 
+## 2026-09-25 · Session 3 · Phase 3 slice: P3-1 to P3-5 (easy ones)
+
+Done: `.gitattributes` (LF; every file already LF, nothing renormalized) + `.editorconfig`;
+Dependabot (actions + composer, monthly, grouped); `composer audit` in CI; "Fix existing posts"
+link on the Plugins screen; `wp negaresh status` (+ `Negaresh_Bulk::stats()`).
+Verified: 345 unit tests; e2e on WP 7.1.2 incl. status checks.
+
+---
+
 ## 2026-09-25 · Session 3 · Release 4.4.0
 
 Done: version 4.4.0 (header, constant, readme.txt Stable tag + changelog + upgrade notice),

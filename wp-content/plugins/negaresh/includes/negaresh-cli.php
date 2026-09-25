@@ -21,10 +21,14 @@ class Negaresh_CLI
     /** @var Negaresh */
     private $plugin;
 
-    public function __construct(Negaresh_Bulk $bulk, Negaresh $plugin)
+    /** @var Negaresh_Settings */
+    private $settings;
+
+    public function __construct(Negaresh_Bulk $bulk, Negaresh $plugin, Negaresh_Settings $settings)
     {
         $this->bulk = $bulk;
         $this->plugin = $plugin;
+        $this->settings = $settings;
     }
 
     /**
@@ -155,6 +159,49 @@ class Negaresh_CLI
         } else {
             \WP_CLI::line($summary . ($counts['changed'] ? ' Nothing was saved: run again with --apply.' : ''));
         }
+    }
+
+    /**
+     * Shows the mode and where the posts stand: fixed with the current rules, waiting, opted out.
+     *
+     * ## OPTIONS
+     *
+     * [--post_type=<types>]
+     * : Comma separated post types. Default: every type Negaresh fixes.
+     *
+     * [--format=<format>]
+     * : Output format.
+     * ---
+     * default: table
+     * options:
+     *   - table
+     *   - json
+     * ---
+     *
+     * ## EXAMPLES
+     *
+     *     $ wp negaresh status
+     *
+     * @param list<string> $args
+     * @param array<string, string|bool> $assoc_args
+     */
+    public function status(array $args, array $assoc_args): void
+    {
+        $types = empty($assoc_args['post_type']) ? [] : array_values(array_filter(array_map('trim', explode(',', (string) $assoc_args['post_type']))));
+        $stats = $this->bulk->stats($types);
+        $mode = $this->settings->mode();
+
+        if ('json' === ($assoc_args['format'] ?? 'table')) {
+            \WP_CLI::line((string) wp_json_encode(['mode' => $mode, 'post_types' => $this->bulk->types($types)] + $stats));
+            return;
+        }
+        \WP_CLI::line('Mode: ' . ('save' === $mode ? 'fix when a post is saved' : 'fix when a post is displayed'));
+        \WP_CLI::line('Post types: ' . implode(', ', $this->bulk->types($types)));
+        \WP_CLI\Utils\format_items('table', [
+            ['posts' => 'fixed with the current rules', 'count' => $stats['fixed']],
+            ['posts' => 'waiting (wp negaresh fix --apply)', 'count' => $stats['waiting']],
+            ['posts' => 'opted out (never changed)', 'count' => $stats['opted_out']],
+        ], ['posts', 'count']);
     }
 
     /**

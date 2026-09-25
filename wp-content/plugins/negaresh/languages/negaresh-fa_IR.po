@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T17:07:08+00:00\n"
+"POT-Creation-Date: 2026-09-25T17:18:32+00:00\n"
 "PO-Revision-Date: 2026-09-25 00:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
@@ -361,30 +361,34 @@ msgstr "بازگرداندن قاعده‌ها به پیش‌فرض"
 msgid "Settings"
 msgstr "تنظیمات"
 
-#: includes/negaresh-settings.php:648
+#: includes/negaresh-settings.php:632
+msgid "Fix existing posts"
+msgstr "اصلاح نوشته‌های موجود"
+
+#: includes/negaresh-settings.php:653
 msgid "Working…"
 msgstr "در حال کار…"
 
-#: includes/negaresh-settings.php:649
+#: includes/negaresh-settings.php:654
 msgid "The preview could not be made."
 msgstr "پیش‌نمایش ساخته نشد."
 
-#: includes/negaresh-settings.php:650
+#: includes/negaresh-settings.php:655
 msgid "Set every rule back to its default? Unsaved changes to the rules are lost."
 msgstr "همهٔ قاعده‌ها به حالت پیش‌فرض برگردند؟ تغییرهای ذخیره‌نشدهٔ قاعده‌ها از دست می‌روند."
 
-#: includes/negaresh-settings.php:678
+#: includes/negaresh-settings.php:683
 msgid "When a post is saved: the stored text is corrected, so what you see in the editor is what readers get"
 msgstr "هنگام ذخیرهٔ نوشته: متن ذخیره‌شده اصلاح می‌شود، پس آنچه در ویرایشگر می‌بینید همان است که خوانندگان می‌بینند"
 
-#: includes/negaresh-settings.php:682
+#: includes/negaresh-settings.php:687
 msgid "When a post is displayed: the stored text is never changed"
 msgstr "هنگام نمایش نوشته: متن ذخیره‌شده هرگز تغییر نمی‌کند"
 
-#: includes/negaresh-settings.php:695
+#: includes/negaresh-settings.php:700
 msgid "Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again."
 msgstr "اصلاح هنگام ذخیره نوشته‌ها را تغییر می‌دهد و برگشت‌پذیر نیست. نوشته‌هایی که پیش‌تر ذخیره شده‌اند تا ذخیرهٔ دوباره، هنگام نمایش اصلاح می‌شوند."
 
-#: includes/negaresh-settings.php:716
+#: includes/negaresh-settings.php:721
 msgid "Leave all unchecked to fix every post type."
 msgstr "برای اصلاح همهٔ نوع‌ها، هیچ‌کدام را انتخاب نکنید."

@@ -42,5 +42,5 @@ $GLOBALS['negaresh_bulk_page'] = new Negaresh_Bulk_Page($GLOBALS['negaresh_bulk'
 
 if (defined('WP_CLI') && WP_CLI) {
     require_once __DIR__ . '/includes/negaresh-cli.php';
-    WP_CLI::add_command('negaresh', new Negaresh_CLI($GLOBALS['negaresh_bulk'], $GLOBALS['negaresh']));
+    WP_CLI::add_command('negaresh', new Negaresh_CLI($GLOBALS['negaresh_bulk'], $GLOBALS['negaresh'], $GLOBALS['negaresh_settings']));
 }

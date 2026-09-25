@@ -197,6 +197,22 @@ class BulkTest extends TestCase
         self::assertSame(['page'], $captured['post_type']);
     }
 
+    public function testStatsCountFixedWaitingAndOptedOut(): void
+    {
+        Functions\when('get_posts')->alias(function ($args) {
+            $json = json_encode($args['meta_query']) ?: '';
+            if (false !== strpos($json, '"compare":"="')) {
+                return [9]; // opted out
+            }
+            if (false !== strpos($json, '_negaresh_fixed')) {
+                return [1, 2]; // not fixed with the current rules
+            }
+            return [1, 2, 3, 4, 5]; // every post in scope that is not opted out
+        });
+
+        self::assertSame(['total' => 5, 'fixed' => 3, 'waiting' => 2, 'opted_out' => 1], $this->bulk()->stats());
+    }
+
     public function testLineDiff(): void
     {
         $diff = Negaresh_Bulk::diff("a\nb ...\nc\nd", "a\nb…\nc\nd\ne");

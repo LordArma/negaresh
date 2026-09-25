@@ -1,0 +1,19 @@
+# Keeps CI actions and the dev tooling current. Composer resolves for PHP 7.4
+# (composer.json config.platform), so updates stay compatible with the minimum PHP.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: composer
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      dev-tools:
+        patterns: ['*']

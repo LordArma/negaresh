@@ -3,6 +3,13 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Fix existing posts** link on the Plugins screen (P3-3).
+- **`wp negaresh status`**: how many posts are fixed with the current rules, waiting, or opted
+  out (P3-5).
+
 ## [4.4.0] (2026-09-25)
 
 ### Fixed

@@ -133,6 +133,7 @@ class SettingsPageTest extends TestCase
         $links = (new Negaresh_Settings())->action_links(['deactivate' => '<a>Deactivate</a>']);
 
         self::assertSame('<a href="https://example.com/wp-admin/options-general.php?page=negaresh-options">Settings</a>', $links[0]);
+        self::assertSame('<a href="https://example.com/wp-admin/tools.php?page=negaresh-bulk">Fix existing posts</a>', $links[1], 'P3-3');
         self::assertSame('<a>Deactivate</a>', $links['deactivate']);
     }
 

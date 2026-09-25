@@ -97,6 +97,32 @@ class Negaresh_Bulk
     }
 
     /**
+     * Where the posts in scope stand (P3-5): fixed with the current rules, waiting (never fixed, or
+     * fixed with older rules), and opted out.
+     *
+     * @param list<string> $post_type
+     * @return array{total: int, fixed: int, waiting: int, opted_out: int}
+     */
+    public function stats(array $post_type = []): array
+    {
+        $total = count($this->find(['post_type' => $post_type, 'all' => true]));
+        $waiting = count($this->find(['post_type' => $post_type]));
+
+        $types = $this->types($post_type);
+        $opted_out = $types ? count(get_posts([
+            'post_type' => $types,
+            'post_status' => self::STATUSES,
+            'fields' => 'ids',
+            'posts_per_page' => -1,
+            'no_found_rows' => true,
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+            'meta_query' => [['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '=']],
+        ])) : 0;
+
+        return ['total' => $total, 'fixed' => $total - $waiting, 'waiting' => $waiting, 'opted_out' => $opted_out];
+    }
+
+    /**
      * Fixes one post. With $apply false nothing is written (dry run).
      *
      * @return array{id: int, title: string, type: string, changed: bool, skipped: string|null,

@@ -33,6 +33,10 @@ jobs:
         # The lock file is resolved for PHP 7.4 (composer.json config.platform) and works on 8.x.
         run: composer install --no-interaction --no-progress --prefer-dist
 
+      - name: Known vulnerabilities in dependencies
+        if: matrix.php == '8.3'
+        run: composer audit --no-interaction
+
       - name: Syntax
         run: |
           out="$(composer lint)"; echo "$out"
