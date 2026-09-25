@@ -215,10 +215,13 @@ I10 needs user decisions first.
   username; submit the zip at https://wordpress.org/plugins/developers/add/ (slug `negaresh`);
   after approval add the two SVN secrets to the GitHub repository. The next tag then deploys.
 
-## I10 Stretch ideas (need a user decision before starting)
-- Admin notice / dashboard widget showing how many posts would change.
-- Custom dictionary of words that must not be touched.
-- Multisite: network wide defaults.
+## I10 Stretch ideas ⏳ *(user 2026-09-25: "yes do all I10")*
+- [ ] **I10a** Dashboard widget with the counts (fixed / waiting / opted out) and a link to the bulk
+  tool; a dismissible notice when existing posts are waiting. Counts cached (1 hour).
+- [ ] **I10b** Words to leave alone: a list on the settings page; matches are never changed
+  (treated as boundaries, like shortcodes); the preview uses the list from the page.
+- [ ] **I10c** Multisite: network defaults set in Network Admin; sites that never saved their own
+  settings (and new sites) use them.
 
 ## I11 Replace or rewrite Virastar (decide after I2) ✅ *(done session 3)*
 - The user allowed replacing or rewriting the vendored library (session 3).

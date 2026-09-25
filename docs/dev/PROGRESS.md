@@ -11,11 +11,11 @@ Status snapshot is kept up to date at the top.
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I11 done (I3 not needed); I9 waits for the user; I10 needs decisions |
-| Current version | 5.0.0 (tag `v5.0.0`, commit `ac8cbe6`, released 2026-09-25 by the Release workflow) |
-| Next release target | 5.1.0 |
+| Current version | 5.1.0 (tag `v5.1.0`, commit `bfb2de3`, released 2026-09-25 by the Release workflow) |
+| Next release target | 5.2.0 |
 
-**Next step:** phase 3 list done. Report to the user; open for them: Dependabot pull request #1,
-I9 submission steps, I10 decisions, whether to release 5.1.0 (P3-8/P3-9 are on `phase-2`). Open for the user: Dependabot
+**Next step:** I10 (user: "yes do all I10"): I10a dashboard widget + notice, I10b words to leave
+alone, I10c multisite network defaults. I9: user's submission steps remain. Open for the user: Dependabot
 pull request #1 (actions/checkout 4 → 7, upload-artifact; all checks pass).
 I9: technically done; the user must create/confirm the wordpress.org account, fix `Contributors:`,
 submit, then add SVN secrets. I10 needs user decisions.
@@ -24,6 +24,21 @@ submit, then add SVN secrets. I10 needs user decisions.
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 5.1.0 + pull request #1
+
+Release: version bump, checks all green locally; first CI run on GitHub failed the latest WordPress
+job only: the browser test inserted its paragraph before the block editor had finished setting up
+the new post (slow runner; not reproducible locally in 3 runs, even with the newer image). Test now
+waits for the editor to be ready and for the paragraph to be present. CI green → tag `v5.1.0` →
+published https://github.com/LordArma/negaresh/releases/tag/v5.1.0; 5.0.0 → 5.1.0 zip upgrade clean.
+Pull requests (user: "check pull requests and merge them if they are ok"): only #1 (Dependabot:
+actions/checkout and upload-artifact v4 → v7). Read the release notes: Node 24 and runner 2.327.1+
+(GitHub hosted runners are current), upload-artifact v7 only adds an opt-in unzipped mode. Asked
+Dependabot to rebase onto today's master, all 7 checks passed (each once: the duplicate run fix
+works), squash merged as `d2659be`; CI on master green afterwards.
 
 ---
 
