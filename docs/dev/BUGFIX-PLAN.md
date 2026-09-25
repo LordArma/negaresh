@@ -31,16 +31,19 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   identical to the original on 20 samples. Tests: `tests/Unit/VirastarPreservationTest.php`.
   **Do not release B1 without B2:** with `decode_html_entities` on (plugin default) every entity
   adds a fake HTML placeholder, so tags are restored in the wrong places (`A</p>B`).
-- [ ] **B2 `decode_html_entities` is destructive and unsafe.** *(library half done session 3: `decodeHTMLEntities()` is a no-op; plugin half, removing the setting, is in the plugin refactor slice)* It replaces entities with an HTML
+- [x] **B2 `decode_html_entities` is destructive and unsafe.** *(done session 3: library `decodeHTMLEntities()` is a no-op; setting removed, always passed as `false`, migration drops the old row)* It replaces entities with an HTML
   placeholder instead of decoding; a real decode of `&lt;script&gt;` into `<script>` would be
   an XSS vector. *Fix:* force it off in the plugin, remove the setting (migration drops the
   option), or decode only a safe allow list (never `&lt; &gt; &amp; &quot;`).
   *Decision (session 3, user said "do what you know is best"):* remove the setting and force it off.
-- [ ] **B3 Shortcodes and code are rewritten.** The filter runs before `do_shortcode` and
+- [x] **B3 Shortcodes and code are rewritten.** *(done session 3, plugin refactor slice)* The filter runs before `do_shortcode` and
   brackets are not preserved, so `[gallery ids="1,2"]` becomes `[gallery ids= «1, 2»]`.
   Contents of `<pre>`, `<code>`, `<kbd>`, `<script>`, `<style>`, `<textarea>` are also edited.
   *Fix:* process text nodes only and skip those elements entirely (see I2 for the proper
   approach; minimum for v4.1 is to protect `[...]` and those element blocks before cleanup).
+  *Result:* `Negaresh::fix()` swaps protected elements (with contents) and shortcode tags found
+  between HTML tags for tag shaped placeholders that Virastar preserves, then puts them back.
+  Shortcode names must start with a Latin letter, so Persian text in brackets is still fixed.
 - [x] **B4 Fatal error with GDIC theme** *(done session 3: namespace `Negaresh\Vendor\Virastar`)* (or anything else shipping Virastar): both declare
   `Alirezasedghi\Virastar\Virastar`. *Fix:* move the copy into the plugin namespace
   (`Negaresh\Vendor\Virastar`) or guard with `class_exists()`; prefer the namespace, because
@@ -48,35 +51,47 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
 
 ## 2. High
 
-- [ ] **B5 Defaults never apply on the front end.** `register_setting()` runs only on
+- [x] **B5 Defaults never apply on the front end.** `register_setting()` runs only on
   `admin_init`. *Fix:* one defaults array in code, read with `get_option($key, $default)` or via
   a single options array merged with defaults; seed on activation.
-- [ ] **B6 `nl2br()` after `wpautop()`** doubles line breaks and injects `<br />` into `<pre>`,
+  *Result:* `Negaresh_Settings::get()` merges saved values over code defaults; no seeding needed.
+  ⚠ Behaviour change: sites that never saved the 4.0 settings page ran with every rule off;
+  after upgrading, the default rules apply. Mention in the changelog.
+- [x] **B6 `nl2br()` after `wpautop()`** doubles line breaks and injects `<br />` into `<pre>`,
   lists, tables. *Fix:* remove `nl2br()`; return Virastar output as is.
-- [ ] **B7 Exception message echoed into the page** at an arbitrary position, unescaped.
+- [x] **B7 Exception message echoed into the page** at an arbitrary position, unescaped.
   *Fix:* catch `\Throwable`, return the original `$content`, `error_log()` only when `WP_DEBUG`.
-- [ ] **B8 Global functions `settings()` and `checkboxHTML()`.** Generic names cause
+  *Result:* done, plus: invalid UTF-8 or content without Arabic script letters is returned untouched,
+  and an empty result falls back to the original.
+- [x] **B8 Global functions `settings()` and `checkboxHTML()`.** Generic names cause
   "Cannot redeclare" fatals. *Fix:* make them methods of the settings class.
-- [ ] **B9 Unprefixed option keys** (`fix_dashes`, `normalize_eol`, ... 30 rows in `wp_options`).
+- [x] **B9 Unprefixed option keys** *(done session 3, plugin refactor slice)* (`fix_dashes`, `normalize_eol`, ... 30 rows in `wp_options`).
   *Fix:* store one `negaresh_options` array; migration on upgrade copies old keys then deletes
   them; bump an internal `negaresh_db_version`.
+  *Result:* runs on `plugins_loaded` when `negaresh_db_version` < 2. Legacy `'1'` → `true`, `''` → `false`.
+  Never overwrites an existing `negaresh_options`.
 
 ## 3. Medium
 
-- [ ] **B10 Filter runs everywhere** `the_content` fires: admin list previews, REST
+- [x] **B10 Filter runs everywhere** *(done session 3, plugin refactor slice)* `the_content` fires: admin list previews, REST
   `content.rendered`, feeds, and posts that are not Persian. *Fix:* skip `is_admin()` (except
   AJAX preview), make feeds/REST a setting, allow a per post type list.
-- [ ] **B11 Empty assets enqueued on every page** with handles `yts-*` and a hardcoded
+  *Result:* settings "Where to apply": post types (none checked = all), feeds (on), REST (on).
+- [x] **B11 Empty assets enqueued on every page** with handles `yts-*` and a hardcoded
   `/negaresh/` path. *Fix:* delete `negaresh-scripts.php`, `css/`, `js/` until something needs them.
-- [ ] **B12 Relative `include('Virastar.php')`** depends on `include_path`. *Fix:* `__DIR__ . '/...'`
-  and a `NEGARESH_PATH` constant.
-- [ ] **B13 Copy/paste leftovers**: settings group `wordcountplugin`, section `wcp_first_section`;
+- [x] **B12 Relative `include('Virastar.php')`** depends on `include_path`. *Fix:* `__DIR__ . '/...'`
+  and a `NEGARESH_PATH` constant. *Result:* `__DIR__` everywhere; constants `NEGARESH_VERSION`, `NEGARESH_FILE`.
+- [x] **B13 Copy/paste leftovers**: settings group `wordcountplugin`, section `wcp_first_section`;
   checkbox `name` not escaped. *Fix:* rename to `negaresh`, `esc_attr()`.
-- [ ] **B18 Hidden Virastar rules.** 14 Virastar options are never passed, so
+- [x] **B18 Hidden Virastar rules.** *(done session 3, plugin refactor slice)* 14 Virastar options are never passed, so
   `cleanup_kashidas`, `cleanup_extra_marks`, `markdown_normalize_lists`, `markdown_normalize_braces`,
   `kashidas_as_parenthetic` run on HTML without the admin knowing. *Fix:* pass every option
   explicitly; markdown ones off for HTML.
-- [ ] **B19 No uninstall cleanup.** *Fix:* `uninstall.php` deletes plugin options (old and new keys).
+  *Result:* `cleanup_kashidas`, `kashidas_as_parenthetic`, `cleanup_extra_marks` are now visible
+  settings (default on, as before); the other 12 are fixed in `Negaresh::virastar_options()`
+  (markdown off, preserve on, front matter off, brackets off because `fix()` protects shortcodes).
+- [x] **B19 No uninstall cleanup.** *Fix:* `uninstall.php` deletes plugin options (old and new keys).
+  *Result:* also on every site of a multisite network.
 
 - [x] **B20 Literal `\x{...}` in replacement strings** *(done session 3)* *(found session 2)*. PHP does not expand
   `\x{061F}` in a single quoted replacement, so the text `\x{061F}` is written into the post.
@@ -92,11 +107,19 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
 
 - [x] **B21 Front matter never preserved** *(done session 3)* *(found session 2)*. The PHP port dropped the JS
   `' ' + text + ' '` padding, so `/^ ---/` never matches. Irrelevant for WordPress HTML; fix only
-  if cheap (drop the leading space from the regex). *Result:* regex fixed, test in `VirastarFixesTest`.
+  if cheap (drop the leading space from the regex). *Result:* fixed by B22 (padding restored,
+  upstream regex kept), test in `VirastarFixesTest`.
 
-- [ ] **B14 Untranslatable / meaningless labels.** 12 fields call `__($feild_title)` with the raw
+- [x] **B22 Missing space padding in the PHP port** *(found and done session 3)*. The JS Virastar
+  pads the text with one space each side before the rules and strips it after; the PHP port kept
+  only the stripping. Rules that need a neighbouring space (suffixes ها/تر, hamzeh, Arabic hamzeh)
+  missed the first/last word of every text. Padding restored; only end of text results change.
+
+- [x] **B14 Untranslatable / meaningless labels.** 12 fields call `__($feild_title)` with the raw
   option key (`cleanup_rlm`, `fix_suffix_misc`, ...). *Fix:* literal, descriptive labels.
   Also "It's" → "Its", method `fix_farsi_typoes`, variable `$feild_name` spellings.
+  *Result:* new descriptive labels in five sections, each with a before → after example; every
+  example was checked against the real rule (23/23).
 - [ ] **B15 Stale translations.** Regenerate `negaresh.pot` with `wp i18n make-pot`, update
   `fa_IR.po`, fill every `msgstr`, recompile `.mo`.
 - [ ] **B16 Plugin header**: `Tested up to: 6.1.1`, `Requires PHP: 7.0` (tests will run on 7.4+),
@@ -106,8 +129,7 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
 
 ## Suggested order
 
-~~B0~~ → ~~B1~~ → B2 (half) → ~~B20~~ → ~~B4~~ → B3 → B6 → B7 → B5 + B9 (same refactor) → B8 → B12 → B13 → B18 → B10 → B11 →
-B19 → B14 → B15 → B16 → B17 → ~~B21~~ → tag v4.1.0.
+All done except **B15 → B16 → B17**, then tag v4.1.0 (only when the user asks).
 
 From session 3 the plugin's own code (B2 plugin half, B3, B5 to B19) is done as one refactor
 slice, since every item touches the same three files.

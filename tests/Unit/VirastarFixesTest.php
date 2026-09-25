@@ -76,4 +76,30 @@ class VirastarFixesTest extends TestCase
         self::assertStringContainsString("---\ntitle: یک , دو\n---\n", $out);
         self::assertStringEndsWith('متن اصلی.', $out);
     }
+
+    /**
+     * B22: the PHP port dropped the JS single space padding, so rules that need a space after a
+     * word missed the last word of the text.
+     */
+    public function b22Provider(): array
+    {
+        return [
+            'suffix ها' => [['fix_suffix_spacing' => true], 'کتاب ها', "کتاب\u{200c}ها"],
+            'suffix تر' => [['fix_suffix_spacing' => true], 'بزرگ تر', "بزرگ\u{200c}تر"],
+            'hamzeh' => [[], 'خانه ی', 'خانهٔ'],
+            'arabic hamzeh' => [['fix_hamzeh_arabic' => true], 'مدرسة', 'مدرسهٔ'],
+        ];
+    }
+
+    /** @dataProvider b22Provider */
+    public function testB22RulesSeeTheLastWord(array $options, string $in, string $want): void
+    {
+        self::assertSame($want, (new Virastar($options))->cleanup($in));
+    }
+
+    public function testB22PaddingIsRemoved(): void
+    {
+        self::assertSame('متن', (new Virastar(['cleanup_begin_and_end' => false]))->cleanup('متن'));
+        self::assertSame('<p>متن</p>', (new Virastar(['cleanup_begin_and_end' => false]))->cleanup('<p>متن</p>'));
+    }
 }

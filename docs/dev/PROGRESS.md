@@ -8,15 +8,35 @@ Status snapshot is kept up to date at the top.
 | Phase | State |
 | --- | --- |
 | Analysis | ✅ done (session 1) |
-| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ in progress, 5 of 22 done (B0, B1, B4, B20, B21), B2 half |
+| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ 20 of 23 done; left: B15, B16, B17 |
 | Working branch | `fix/v4.1.0` (local commits, one per slice, not pushed) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⛔ blocked on phase 1 Critical + High |
 | Current version | 4.0.0 (tag `v4.0.0`, commit `cd6f826`) |
 | Next release target | 4.1.0 (bug fixes) |
 
-**Next step:** plugin refactor slice: B2 (remove setting), B3, B5 to B19.
+**Next step:** i18n and release slice: B15 (translations), B16 (header), B17 (README), then an
+end to end check in a real WordPress (Docker), then CHANGELOG.
 
-**Tests:** `composer test` → 23 tests, all pass.
+**Tests:** `composer test` → 61 tests, all pass.
+
+---
+
+## 2026-09-25 · Session 3 · Slice: plugin refactor (B2 rest, B3, B5 to B14, B18, B19, B22)
+
+Done (commit "refactor: rewrite plugin code ..."):
+- Rewrote the plugin's own code (library untouched except B22): `Negaresh_Settings` and
+  `Negaresh` classes, `uninstall.php`; deleted `negaresh-scripts.php`, empty `css/` and `js/`.
+  Version 4.1.0 in the header and `NEGARESH_VERSION`; `Requires PHP: 7.4`, `Requires at least: 5.8`.
+- Settings page: 32 rules in 4 sections with examples + "Where to apply" section.
+- Found and fixed **B22** (missing JS padding in the PHP port) while checking the examples.
+
+Verified:
+- 61 tests pass (new: `NegareshFilterTest` 20, `SettingsTest` 14, B22 tests).
+- All 23 settings examples produce exactly the shown result with only that rule on.
+- Original vs patched library on 32 plain text samples: only 6 differences, all end of text
+  words now fixed (B22), as the JS original does.
+
+Not verified yet: the plugin inside a real WordPress (planned next, Docker images pulled).
 
 ---
 

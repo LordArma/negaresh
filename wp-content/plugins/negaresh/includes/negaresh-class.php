@@ -1,91 +1,175 @@
-
 <?php
+/**
+ * Negaresh: runs post content through Virastar at render time.
+ *
+ * @package Negaresh
+ */
 
 use Negaresh\Vendor\Virastar\Virastar;
 
-include('Virastar.php');
-require_once('negaresh-settings.php');
-
-class Negaresh {
-
-function __construct(){
-    add_action( 'admin_menu', array($this, 'negaresh_menu') );
-    add_filter( 'the_content', array($this, 'fix_farsi_typoes') );
-    add_action('admin_init', 'settings');
-    add_action('init', array($this, 'languages'));
+if (!defined('ABSPATH')) {
+    exit;
 }
 
-function languages(){
-    $root = plugin_basename(dirname(__FILE__, 2));
-    load_plugin_textdomain('negaresh', false, "$root/languages");
-}
+class Negaresh
+{
+    /**
+     * Elements whose contents are never touched (B3). The element and everything inside it is
+     * swapped for a placeholder before Virastar runs.
+     */
+    const PROTECTED_ELEMENTS = ['pre', 'code', 'kbd', 'samp', 'var', 'script', 'style', 'textarea', 'svg', 'math'];
 
-function Have_OPT( $option ){
-    if (get_option($option) == '1')
-        return true;
+    /** @var Negaresh_Settings */
+    private $settings;
 
-    return false;
-}
+    /** @var Virastar|null built once per request, reset when the options change */
+    private $virastar = null;
 
-function fix_farsi_typoes( $content ) {
+    public function __construct(Negaresh_Settings $settings)
+    {
+        $this->settings = $settings;
 
-    $virastar = new Virastar([
-        'normalize_eol' => $this->Have_OPT('normalize_eol'),
-        'decode_html_entities' => $this->Have_OPT('decode_html_entities'),
-        'fix_dashes' => $this->Have_OPT('fix_dashes'),
-        'fix_three_dots' => $this->Have_OPT('fix_three_dots'),
-        'normalize_ellipsis' => $this->Have_OPT('normalize_ellipsis'),
-        'normalize_dates' => $this->Have_OPT('normalize_dates'),
-        'fix_english_quotes_pairs' => $this->Have_OPT('fix_english_quotes_pairs'),
-        'fix_english_quotes' => $this->Have_OPT('fix_english_quotes'),
-        'fix_hamzeh' => $this->Have_OPT('fix_hamzeh'),
-        'fix_hamzeh_arabic' => $this->Have_OPT('fix_hamzeh_arabic'),
-        'cleanup_rlm' => $this->Have_OPT('cleanup_rlm'),
-        'cleanup_zwnj' => $this->Have_OPT('cleanup_zwnj'),
-        'fix_arabic_numbers' => $this->Have_OPT('fix_arabic_numbers'),
-        'fix_english_numbers' => $this->Have_OPT('fix_english_numbers'),
-        'fix_numeral_symbols' => $this->Have_OPT('fix_numeral_symbols'),
-        'fix_misc_non_persian_chars' => $this->Have_OPT('fix_misc_non_persian_chars'),
-        'fix_punctuations' => $this->Have_OPT('fix_punctuations'),
-        'fix_question_mark' => $this->Have_OPT('fix_question_mark'),
-        'fix_prefix_spacing' => $this->Have_OPT('fix_prefix_spacing'),
-        'fix_suffix_spacing' => $this->Have_OPT('fix_suffix_spacing'),
-        'fix_suffix_misc' => $this->Have_OPT('fix_suffix_misc'),
-        'fix_spacing_for_braces_and_quotes' => $this->Have_OPT('fix_spacing_for_braces_and_quotes'),
-        'fix_spacing_for_punctuations' => $this->Have_OPT('fix_spacing_for_punctuations'),
-        'fix_diacritics' => $this->Have_OPT('fix_diacritics'),
-        'remove_diacritics' => $this->Have_OPT('remove_diacritics'),
-        'fix_persian_glyphs' => $this->Have_OPT('fix_persian_glyphs'),
-        'fix_misc_spacing' => $this->Have_OPT('fix_misc_spacing'),
-        'cleanup_spacing' => $this->Have_OPT('cleanup_spacing'),
-        'cleanup_line_breaks' => $this->Have_OPT('cleanup_line_breaks'),
-        'cleanup_begin_and_end' => $this->Have_OPT('cleanup_begin_and_end')
-    ]);
-
-    try {
-        $content = $virastar->cleanup($content);
-    } catch (Exception $e) {
-        echo $e->getMessage();
+        add_action('plugins_loaded', [$settings, 'maybe_migrate']);
+        add_action('init', [$this, 'load_textdomain']);
+        add_action('admin_menu', [$settings, 'add_page']);
+        add_action('admin_init', [$settings, 'register']);
+        add_action('add_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
+        add_action('update_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
+        add_filter('the_content', [$this, 'filter_content']);
     }
 
-    return nl2br($content, true);
-}
+    public function load_textdomain(): void
+    {
+        load_plugin_textdomain('negaresh', false, dirname(plugin_basename(NEGARESH_FILE)) . '/languages');
+    }
 
-function negaresh_menu() {
-    add_options_page( esc_html__('Negaresh Options', 'negaresh') , esc_html__('Negaresh', 'negaresh'), 'manage_options', 'negaresh-options', array($this, 'negaresh_html') );
-}
+    public function reset(): void
+    {
+        $this->virastar = null;
+    }
 
-function negaresh_html() { ?>
-    <div class="wrap">
-    <h1><?php esc_html_e('Negaresh Options', 'negaresh') ?></h1>
-    <form action="options.php" method="POST">
-    <?php
-        settings_fields('wordcountplugin');
-        do_settings_sections('negaresh-options');
-        submit_button();
-    ?>
-    </form>
-    </div>
-<?php }
+    /**
+     * `the_content` callback. Never breaks the page: on any failure the content is returned as is.
+     *
+     * @param mixed $content
+     * @return mixed
+     */
+    public function filter_content($content)
+    {
+        if (!is_string($content) || '' === trim($content) || !$this->should_filter()) {
+            return $content;
+        }
 
+        // Nothing to do without Arabic script letters. preg_match() also returns false on invalid
+        // UTF-8, where Virastar's /u patterns would return null and wipe the post.
+        if (1 !== preg_match('/[\x{0600}-\x{06FF}]/u', $content)) {
+            return $content;
+        }
+
+        try {
+            $fixed = $this->fix($content);
+        } catch (\Throwable $e) {
+            // B7: never print the error into the page.
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Negaresh: ' . $e->getMessage()); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+            }
+            return $content;
+        }
+
+        return (is_string($fixed) && '' !== $fixed) ? $fixed : $content;
+    }
+
+    /**
+     * Fixes a piece of HTML. Protected elements and shortcode tags are held back, then restored.
+     */
+    public function fix(string $html): string
+    {
+        $held = [];
+        $token = 'negaresh-keep-' . substr(md5(uniqid('', true)), 0, 8);
+
+        $hold = function (array $match) use (&$held, $token) {
+            $held[] = $match[0];
+            // Looks like an HTML tag, so Virastar preserves it exactly (B1) and spacing is kept.
+            return '<' . $token . '-' . (count($held) - 1) . '>';
+        };
+
+        $elements = implode('|', self::PROTECTED_ELEMENTS);
+        $html = preg_replace_callback('#<(' . $elements . ')\b[^>]*>.*?</\1\s*>#is', $hold, $html);
+
+        if (!is_string($html)) {
+            throw new \RuntimeException('protecting markup failed: ' . preg_last_error());
+        }
+
+        // Shortcode tags such as [gallery ids="1,2"] or [/caption], looked for between HTML tags
+        // only (tags themselves are preserved whole by Virastar). Names start with a Latin letter,
+        // so Persian text in brackets is still fixed, and so is the content a shortcode encloses.
+        $parts = preg_split('#(<[^>]*>)#', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($parts as $i => $part) {
+            if (0 === $i % 2 && false !== strpos($part, '[')) {
+                $parts[$i] = preg_replace_callback('#\[\[?/?[A-Za-z][\w-]*(?:[\s/=][^\[\]]*)?\]\]?#', $hold, $part);
+            }
+        }
+        $html = implode('', $parts);
+
+        $fixed = $this->virastar()->cleanup($html);
+
+        return preg_replace_callback('#<' . preg_quote($token, '#') . '-(\d+)>#', function (array $m) use ($held) {
+            return $held[(int) $m[1]];
+        }, $fixed);
+    }
+
+    private function should_filter(): bool
+    {
+        $options = $this->settings->get();
+
+        if (is_admin() && !wp_doing_ajax()) {
+            return false;
+        }
+        if (!$options['apply_in_feeds'] && is_feed()) {
+            return false;
+        }
+        if (!$options['apply_in_rest'] && defined('REST_REQUEST') && REST_REQUEST) {
+            return false;
+        }
+        if ($options['post_types']) {
+            $type = get_post_type();
+            if ($type && !in_array($type, $options['post_types'], true)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function virastar(): Virastar
+    {
+        if (null === $this->virastar) {
+            $this->virastar = new Virastar($this->virastar_options());
+        }
+        return $this->virastar;
+    }
+
+    /**
+     * Every Virastar option, explicitly (B18). Admin choices for the rules; fixed values for the
+     * rest, because the input is HTML, not Markdown.
+     */
+    public function virastar_options(): array
+    {
+        $rules = array_intersect_key($this->settings->get(), Negaresh_Settings::RULE_DEFAULTS);
+
+        return $rules + [
+            'decode_html_entities' => false, // B2: unsafe, removed from the settings
+            'markdown_normalize_braces' => false,
+            'markdown_normalize_lists' => false,
+            'skip_markdown_ordered_lists_numbers_conversion' => false,
+            'preserve_HTML' => true,
+            'preserve_comments' => true,
+            'preserve_entities' => true,
+            'preserve_nbsp' => true,
+            'preserve_URIs' => true,
+            'preserve_front_matter' => false, // a post starting with --- is not front matter
+            'preserve_brackets' => false, // shortcodes are held back in fix()
+            'preserve_braces' => false,
+        ];
+    }
 }

@@ -3,6 +3,7 @@
 namespace Negaresh\Tests\Unit;
 
 use Brain\Monkey;
+use Brain\Monkey\Functions;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 abstract class TestCase extends PHPUnitTestCase
@@ -11,6 +12,38 @@ abstract class TestCase extends PHPUnitTestCase
     {
         parent::setUp();
         Monkey\setUp();
+    }
+
+    /** @var array<string,mixed> in-memory wp_options table, see stubOptions() */
+    protected $options = [];
+
+    /**
+     * Stubs get_option / update_option / add_option / delete_option against $this->options.
+     */
+    protected function stubOptions(array $initial = []): void
+    {
+        $this->options = $initial;
+        Functions\when('get_option')->alias(function ($name, $default = false) {
+            return array_key_exists($name, $this->options) ? $this->options[$name] : $default;
+        });
+        Functions\when('update_option')->alias(function ($name, $value) {
+            $this->options[$name] = $value;
+            return true;
+        });
+        Functions\when('delete_option')->alias(function ($name) {
+            $existed = array_key_exists($name, $this->options);
+            unset($this->options[$name]);
+            return $existed;
+        });
+    }
+
+    /** Front end request for a post of the given type. */
+    protected function stubFrontEnd(string $post_type = 'post'): void
+    {
+        Functions\when('is_admin')->justReturn(false);
+        Functions\when('wp_doing_ajax')->justReturn(false);
+        Functions\when('is_feed')->justReturn(false);
+        Functions\when('get_post_type')->justReturn($post_type);
     }
 
     protected function tearDown(): void

@@ -14,6 +14,9 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', '/tmp/wordpress/');
 }
 
-// negaresh-class.php pulls in Virastar.php with a plain include(), so load it
-// exactly once, here, and never require Virastar.php directly (B4, B12).
+define('NEGARESH_FILE', NEGARESH_PLUGIN_DIR . '/negaresh.php');
+
+// Same files, same order as negaresh.php, without instantiating the plugin.
+require_once NEGARESH_PLUGIN_DIR . '/includes/Virastar.php';
+require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-settings.php';
 require_once NEGARESH_PLUGIN_DIR . '/includes/negaresh-class.php';

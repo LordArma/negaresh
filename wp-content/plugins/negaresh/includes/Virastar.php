@@ -230,10 +230,15 @@ class Virastar
 
         $options = $this->getOptions();
 
+        // Negaresh patch (B22): single space paddings around the string, as in the JS original.
+        // Rules that need a following/preceding space now also see the first and last word;
+        // the paddings are removed at the end of cleanup().
+        $text = ' ' . $text . ' ';
+
         // preserves front matter data in the text
         if ($options["preserve_front_matter"]) {
             $front_matter = [];
-            $text = preg_replace_callback('/^---[\S\s]*?---\n/' /* Negaresh patch (B21): text is trimmed, no leading space */, function ($matched) use (&$front_matter) { // Negaresh patch (B1): by reference
+            $text = preg_replace_callback('/^ ---[\S\s]*?---\n/' /* Negaresh patch (B21): matches again thanks to the B22 padding */, function ($matched) use (&$front_matter) { // Negaresh patch (B1): by reference
                 $front_matter[] = $matched[0];
                 return ' __FRONT__MATTER__PRESERVER__ ';
             }, $text);

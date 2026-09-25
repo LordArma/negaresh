@@ -102,7 +102,8 @@ patches upstream as a PR.
 | B4 | namespace | `Alirezasedghi\Virastar` → `Negaresh\Vendor\Virastar` |
 | B20 | `cleanupZWNJ()`, `cleanupRLM()`, `fixQuestionMark()`, `fixSuffixSpacingHamzeh()` | replacement strings use `"\u{...}"` instead of the literal text `'\x{...}'` |
 | B20 | `fixSuffixMisc()` | `$2` pointed at a missing group; trailing check is now a lookahead |
-| B21 | front matter preserver | `/^ ---/` → `/^---/` (text is trimmed before this runs) |
+| B22 | `cleanup()` start | `$text = ' ' . $text . ' ';` restored from the JS original (the end of `cleanup()` already strips it) |
+| B21 | front matter preserver | upstream regex kept; it matches again because of B22 (a session 3 interim change to `/^---/` was reverted) |
 
 To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virastar.php`, and run
 `composer test`; `VirastarPreservationTest` fails without these patches.
@@ -121,7 +122,20 @@ To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virast
 * No tests, no linting, no static analysis; CI only uploads a workflow artifact, while the README
   points users at GitHub Releases (I7).
 
-## 6. Environment notes
+## 6. Architecture after the 4.1 refactor (session 3)
+
+* `negaresh.php`: header, `NEGARESH_VERSION`, `NEGARESH_FILE`, requires the three includes with
+  `__DIR__`, creates `$negaresh = new Negaresh(new Negaresh_Settings())`.
+* `includes/negaresh-settings.php` → `class Negaresh_Settings`: `RULE_DEFAULTS` (32 Virastar rules),
+  `SCOPE_DEFAULTS` (post types, feeds, REST), `LEGACY_OPTIONS` (4.0 rows), `get()`, `sanitize()`,
+  `maybe_migrate()`, `delete_all()`, settings page rendering, `rule_labels()` with examples.
+* `includes/negaresh-class.php` → `class Negaresh`: hooks, `filter_content()` (guards + error
+  handling), `fix()` (protect code elements and shortcodes, run Virastar, restore),
+  `should_filter()` (scope), `virastar_options()` (all 44 options explicitly), one Virastar per request.
+* `uninstall.php`: `Negaresh_Settings::delete_all()` per site.
+* Stored data: `negaresh_options` (array), `negaresh_db_version` (int, 2).
+
+## 7. Environment notes
 
 * The working copy lives under a Syncthing folder (`../.stfolder`) on a Windows drive mounted in WSL:
   file modes show as 777, so ignore mode noise (`git config core.fileMode false` if it appears).
