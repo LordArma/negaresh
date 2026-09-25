@@ -11,10 +11,11 @@ Status snapshot is kept up to date at the top.
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I11 done (I3 not needed); I9 waits for the user; I10 needs decisions |
-| Current version | 4.4.0 (tag `v4.4.0`, commit `1e827c6`, released 2026-09-25 by the Release workflow) |
-| Next release target | 5.0.0 (wordpress.org ready) |
+| Current version | 5.0.0 (tag `v5.0.0`, commit `ac8cbe6`, released 2026-09-25 by the Release workflow) |
+| Next release target | 5.1.0 |
 
-**Next step:** release 5.0.0; then continue phase 3 (P3-8 accessibility, P3-9 caching).
+**Next step:** continue phase 3 (P3-8 accessibility, P3-9 caching). Open for the user: Dependabot
+pull request #1 (actions/checkout 4 → 7, upload-artifact; all checks pass).
 I9: technically done; the user must create/confirm the wordpress.org account, fix `Contributors:`,
 submit, then add SVN secrets. I10 needs user decisions.
 
@@ -22,6 +23,18 @@ submit, then add SVN secrets. I10 needs user decisions.
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 5.0.0
+
+Done: `master` pushed, CI green (7 jobs incl. Plugin Check on GitHub); tag `v5.0.0` → Release
+workflow: `release` published https://github.com/LordArma/negaresh/releases/tag/v5.0.0, the
+`wordpress-org` job skipped with its notice (no SVN secrets yet), as designed.
+Verified: published 4.4.0 zip → published 5.0.0 zip: active, DB 3, mode kept, Persian date stored
+right, `wp negaresh status` works, Plugin Check on the installed zip: no errors, empty debug.log.
+Dependabot opened pull request #1 (actions bump, checks pass); left for the user. CI no longer runs
+twice on pull request branches (push only on master).
 
 ---
 

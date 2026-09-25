@@ -1,8 +1,10 @@
 name: CI
 
 on:
+  # master on push; every other branch through its pull request (a branch with an open pull
+  # request would otherwise be checked twice, as Dependabot's first pull request showed)
   push:
-    branches: ['**']
+    branches: [master]
   pull_request:
 
 permissions:
