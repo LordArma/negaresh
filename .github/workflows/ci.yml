@@ -75,6 +75,11 @@ jobs:
           BROWSER: ${{ matrix.browser }}
         run: tests/e2e/run.sh
 
+      - name: Multisite network defaults
+        env:
+          WP_IMAGE: ${{ matrix.image }}
+        run: tests/e2e/multisite.sh
+
   package:
     name: Plugin zip
     runs-on: ubuntu-latest

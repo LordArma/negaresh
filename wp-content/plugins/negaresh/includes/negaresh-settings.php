@@ -14,6 +14,11 @@ if (!defined('ABSPATH')) {
 class Negaresh_Settings
 {
     public const OPTION = 'negaresh_options';
+
+    /** Multisite: network defaults for sites without their own settings (I10c). */
+    public const NETWORK_OPTION = 'negaresh_network_options';
+    public const NETWORK_ACTION = 'negaresh_network';
+    public const NETWORK_PAGE = 'negaresh-network';
     public const DB_VERSION_OPTION = 'negaresh_db_version';
     public const DB_VERSION = 3;
     public const PAGE = 'negaresh-options';
@@ -91,6 +96,9 @@ class Negaresh_Settings
     public const WORDS_MAX = 500;
     public const WORD_MAX_LENGTH = 100;
 
+    /** @var bool true while the network settings page is being rendered */
+    private $network_form = false;
+
     /** Option names used by Negaresh 4.0 and earlier, removed by the migration (B9). */
     public const LEGACY_OPTIONS = [
         'normalize_eol', 'decode_html_entities', 'fix_dashes', 'fix_three_dots', 'normalize_ellipsis',
@@ -119,14 +127,56 @@ class Negaresh_Settings
      */
     public function get(): array
     {
-        $saved = get_option(self::OPTION, []);
-        if (!is_array($saved)) {
-            $saved = [];
+        if ($this->network_form) {
+            return $this->network_defaults();
         }
+        $saved = get_option(self::OPTION, []);
+        return $this->normalize(is_array($saved) ? $saved : [], $this->network_values());
+    }
 
+    /**
+     * Code defaults with the network's defaults over them (I10c): what a site without its own
+     * settings uses, and what the network settings page shows.
+     *
+     * @return array<string, bool|string|list<string>>
+     */
+    public function network_defaults(): array
+    {
+        return $this->normalize([], $this->network_values());
+    }
+
+    /**
+     * The raw network defaults; empty outside multisite.
+     *
+     * @return array<mixed>
+     */
+    private function network_values(): array
+    {
+        if (!is_multisite()) {
+            return [];
+        }
+        $network = get_site_option(self::NETWORK_OPTION, []);
+        return is_array($network) ? $network : [];
+    }
+
+    /**
+     * Site values over network values over code defaults, each normalized.
+     *
+     * @param array<mixed> $saved
+     * @param array<mixed> $network
+     * @return array<string, bool|string|list<string>>
+     */
+    private function normalize(array $saved, array $network): array
+    {
         $options = [];
         foreach (self::defaults() as $key => $default) {
-            $value = array_key_exists($key, $saved) ? $saved[$key] : $default;
+            if (array_key_exists($key, $saved)) {
+                $value = $saved[$key];
+            } elseif (array_key_exists($key, $network)) {
+                $value = $network[$key];
+            } else {
+                $value = $default;
+            }
             if ('post_types' === $key || 'protected_words' === $key) {
                 $options[$key] = is_array($value) ? array_values(array_map('strval', array_filter($value, 'is_scalar'))) : [];
             } elseif ('mode' === $key) {
@@ -355,6 +405,78 @@ class Negaresh_Settings
             update_option(self::OPTION, $options);
         }
         return false;
+    }
+
+    /**
+     * Stores the network defaults from the network settings form (I10c). The nonce was checked by
+     * handle_network_save().
+     *
+     * @param array<mixed> $input
+     */
+    public function save_network(array $input): void
+    {
+        if (!current_user_can('manage_network_options')) {
+            wp_die(esc_html__('Sorry, you are not allowed to do that.', 'negaresh'), '', ['response' => 403]);
+        }
+        update_site_option(self::NETWORK_OPTION, $this->sanitize($input));
+    }
+
+    /**
+     * network/edit.php?action=negaresh_network: nonce, save, back to the page.
+     */
+    public function handle_network_save(): void
+    {
+        check_admin_referer(self::NETWORK_ACTION);
+        // Sanitized field by field by sanitize() in save_network(); sanitize_text_field over the whole
+        // array would strip the line breaks of the word list.
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $input = isset($_POST[self::OPTION]) && is_array($_POST[self::OPTION]) ? wp_unslash($_POST[self::OPTION]) : [];
+        $this->save_network(is_array($input) ? $input : []);
+        wp_safe_redirect(add_query_arg(['page' => self::NETWORK_PAGE, 'updated' => 'true'], network_admin_url('settings.php')));
+        exit;
+    }
+
+    public function add_network_page(): void
+    {
+        add_submenu_page(
+            'settings.php',
+            esc_html__('Negaresh network defaults', 'negaresh'),
+            esc_html__('Negaresh', 'negaresh'),
+            'manage_network_options',
+            self::NETWORK_PAGE,
+            [$this, 'render_network_page']
+        );
+    }
+
+    public function render_network_page(): void
+    {
+        if (!current_user_can('manage_network_options')) {
+            return;
+        }
+        $this->network_form = true;
+        ?>
+        <div class="wrap negaresh-settings">
+            <h1><?php esc_html_e('Negaresh network defaults', 'negaresh'); ?></h1>
+            <?php if (isset($_GET['updated'])) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display only ?>
+                <div class="notice notice-success"><p><?php esc_html_e('Network defaults saved.', 'negaresh'); ?></p></div>
+            <?php endif; ?>
+            <p><?php esc_html_e('Every site that has not saved its own Negaresh settings uses these, including new sites.', 'negaresh'); ?></p>
+            <form action="<?php echo esc_url(network_admin_url('edit.php?action=' . self::NETWORK_ACTION)); ?>" method="post">
+                <?php
+                wp_nonce_field(self::NETWORK_ACTION);
+                do_settings_sections(self::PAGE);
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
+        $this->network_form = false;
+    }
+
+    /** Removes the network defaults (I10c); uninstall.php calls it on multisite. */
+    public static function delete_network(): void
+    {
+        delete_site_option(self::NETWORK_OPTION);
     }
 
     /** Removes everything Negaresh stores, including 4.0 leftovers (B19). */

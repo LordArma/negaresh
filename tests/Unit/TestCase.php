@@ -23,6 +23,9 @@ abstract class TestCase extends PHPUnitTestCase
     /** @var array<string,mixed> in-memory wp_options table, see stubOptions() */
     protected $options = [];
 
+    /** @var array<string,mixed> in-memory network (site) options, see stubOptions() */
+    protected $network_options = [];
+
     /**
      * Stubs get_option / update_option / delete_option against $this->options.
      *
@@ -36,6 +39,18 @@ abstract class TestCase extends PHPUnitTestCase
         });
         Functions\when('update_option')->alias(function ($name, $value) {
             $this->options[$name] = $value;
+            return true;
+        });
+        Functions\when('is_multisite')->justReturn(false);
+        Functions\when('get_site_option')->alias(function ($name, $default = false) {
+            return array_key_exists($name, $this->network_options) ? $this->network_options[$name] : $default;
+        });
+        Functions\when('update_site_option')->alias(function ($name, $value) {
+            $this->network_options[$name] = $value;
+            return true;
+        });
+        Functions\when('delete_site_option')->alias(function ($name) {
+            unset($this->network_options[$name]);
             return true;
         });
         Functions\when('delete_option')->alias(function ($name) {

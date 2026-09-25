@@ -95,6 +95,8 @@ class Negaresh
         add_action('init', [$this, 'load_textdomain']);
         add_action('admin_menu', [$settings, 'add_page']);
         add_action('admin_init', [$settings, 'register']);
+        add_action('network_admin_menu', [$settings, 'add_network_page']);
+        add_action('network_admin_edit_' . Negaresh_Settings::NETWORK_ACTION, [$settings, 'handle_network_save']);
         add_action('add_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
         add_action('update_option_' . Negaresh_Settings::OPTION, [$this, 'reset']);
         // Priority 9 (B27): after do_blocks (9, registered by WordPress first) and before

@@ -215,7 +215,7 @@ I10 needs user decisions first.
   username; submit the zip at https://wordpress.org/plugins/developers/add/ (slug `negaresh`);
   after approval add the two SVN secrets to the GitHub repository. The next tag then deploys.
 
-## I10 Stretch ideas ⏳ *(user 2026-09-25: "yes do all I10")*
+## I10 Stretch ideas ✅ *(user 2026-09-25: "yes do all I10"; done session 3)*
 - [x] **I10a** Dashboard widget with the counts (fixed / waiting / opted out) and a link to the bulk
   tool; a dismissible notice when existing posts are waiting. Counts cached (1 hour).
   *Result:* `Negaresh_Dashboard` (`includes/negaresh-dashboard.php`): widget for `manage_options`;
@@ -231,8 +231,15 @@ I10 needs user decisions first.
   placeholder does not come back, or the text already contains the placeholder spelling, the
   text is split at the words instead. Tests: `ProtectedWordsTest` (9), e2e (stored post), browser
   (preview with the typed list).
-- [ ] **I10c** Multisite: network defaults set in Network Admin; sites that never saved their own
+- [x] **I10c** Multisite: network defaults set in Network Admin; sites that never saved their own
   settings (and new sites) use them.
+  *Result:* network option `negaresh_network_options`; `get()` layers site values over network
+  values over code defaults, per key. Network Admin → Settings → Negaresh (`manage_network_options`)
+  renders the same fields from the network values and saves through `network_admin_edit_negaresh_network`
+  (nonce with `check_admin_referer`, then the same `sanitize()`). Uninstall deletes it on multisite.
+  Tests: `NetworkTest` (6); `tests/e2e/multisite.sh` (13 checks: page, forged nonce 403, save,
+  new site inherits mode and rules, stored as typed, page fixed, site setting wins, debug.log,
+  network uninstall) on WP 7.1.2 and 5.8.3, in CI after run.sh.
 
 ## I11 Replace or rewrite Virastar (decide after I2) ✅ *(done session 3)*
 - The user allowed replacing or rewriting the vendored library (session 3).

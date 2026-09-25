@@ -13,6 +13,7 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 require_once __DIR__ . '/includes/negaresh-settings.php';
 
 if (is_multisite()) {
+    Negaresh_Settings::delete_network();
     foreach (get_sites(['fields' => 'ids', 'number' => 0]) as $negaresh_site_id) {
         switch_to_blog($negaresh_site_id);
         Negaresh_Settings::delete_all();

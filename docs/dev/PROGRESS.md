@@ -14,8 +14,8 @@ Status snapshot is kept up to date at the top.
 | Current version | 5.1.0 (tag `v5.1.0`, commit `bfb2de3`, released 2026-09-25 by the Release workflow) |
 | Next release target | 5.2.0 |
 
-**Next step:** I10 (user: "yes do all I10"): I10a dashboard widget + notice, I10b words to leave
-alone, I10c multisite network defaults. I9: user's submission steps remain. Open for the user: Dependabot
+**Next step:** I10 done. Ask the user whether to release 5.2.0 (I10a/b/c on `phase-2`). I9: user's
+submission steps remain. Open for the user: Dependabot
 pull request #1 (actions/checkout 4 → 7, upload-artifact; all checks pass).
 I9: technically done; the user must create/confirm the wordpress.org account, fix `Contributors:`,
 submit, then add SVN secrets. I10 needs user decisions.
@@ -24,6 +24,17 @@ submit, then add SVN secrets. I10 needs user decisions.
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · I10c multisite network defaults
+
+Done: see IMPROVEMENT-PLAN I10c; `tests/e2e/multisite.sh` (+ CI step).
+Harness notes: wp-cli must get the same WORDPRESS_CONFIG_EXTRA as the web container or it sees a
+single site ("Could not activate" was that, not the plugin); WordPress 5.8's own update check logs
+a TLS warning in old images, filtered by its exact source file only.
+Verified: 382 unit tests (PHP 7.4 and 8.3), PHPCS, PHPStan; multisite e2e on WP 7.1.2 and 5.8.3;
+single site e2e + browser on both.
 
 ---
 

@@ -12,7 +12,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T19:09:57+00:00\n"
+"POT-Creation-Date: 2026-09-25T19:15:05+00:00\n"
 "PO-Revision-Date: 2026-09-25 00:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
@@ -23,7 +23,8 @@ msgstr ""
 #: includes/negaresh-dashboard.php:75
 #: includes/negaresh-editor.php:57
 #: includes/negaresh-editor.php:179
-#: includes/negaresh-settings.php:379
+#: includes/negaresh-settings.php:441
+#: includes/negaresh-settings.php:498
 msgid "Negaresh"
 msgstr "نگارش"
 
@@ -112,7 +113,7 @@ msgid "Posts marked “Leave this post alone” are never touched."
 msgstr "به نوشته‌هایی که «این نوشته را تغییر نده» دارند هرگز دست زده نمی‌شود."
 
 #: includes/negaresh-bulk-page.php:174
-#: includes/negaresh-settings.php:421
+#: includes/negaresh-settings.php:540
 msgid "Post types"
 msgstr "نوع‌های نوشته"
 
@@ -154,12 +155,12 @@ msgstr "بدون تغییر (به خواست نویسنده)"
 
 #: includes/negaresh-dashboard.php:100
 #: includes/negaresh-dashboard.php:133
-#: includes/negaresh-settings.php:698
+#: includes/negaresh-settings.php:817
 msgid "Fix existing posts"
 msgstr "اصلاح نوشته‌های موجود"
 
 #: includes/negaresh-dashboard.php:106
-#: includes/negaresh-settings.php:693
+#: includes/negaresh-settings.php:812
 msgid "Settings"
 msgstr "تنظیمات"
 
@@ -198,251 +199,268 @@ msgstr "متن اصلاح شد. برای برگرداندن از «واگرد» 
 msgid "The text could not be fixed."
 msgstr "متن اصلاح نشد."
 
-#: includes/negaresh-settings.php:378
-#: includes/negaresh-settings.php:641
+#: includes/negaresh-settings.php:419
+msgid "Sorry, you are not allowed to do that."
+msgstr "متأسفانه اجازهٔ این کار را ندارید."
+
+#: includes/negaresh-settings.php:440
+#: includes/negaresh-settings.php:456
+msgid "Negaresh network defaults"
+msgstr "پیش‌فرض‌های شبکه برای نگارش"
+
+#: includes/negaresh-settings.php:458
+msgid "Network defaults saved."
+msgstr "پیش‌فرض‌های شبکه ذخیره شد."
+
+#: includes/negaresh-settings.php:460
+msgid "Every site that has not saved its own Negaresh settings uses these, including new sites."
+msgstr "هر سایتی که تنظیمات نگارش خودش را ذخیره نکرده از این‌ها استفاده می‌کند، از جمله سایت‌های تازه."
+
+#: includes/negaresh-settings.php:497
+#: includes/negaresh-settings.php:760
 msgid "Negaresh Options"
 msgstr "تنظیمات نگارش"
 
-#: includes/negaresh-settings.php:400
+#: includes/negaresh-settings.php:519
 msgid "When to fix"
 msgstr "زمان اصلاح"
 
-#: includes/negaresh-settings.php:403
+#: includes/negaresh-settings.php:522
 msgid "Words and phrases"
 msgstr "واژه‌ها و عبارت‌ها"
 
-#: includes/negaresh-settings.php:423
+#: includes/negaresh-settings.php:542
 msgid "Fix post titles"
 msgstr "اصلاح عنوان نوشته‌ها"
 
-#: includes/negaresh-settings.php:424
+#: includes/negaresh-settings.php:543
 msgid "Fix excerpts written by hand"
 msgstr "اصلاح خلاصه‌هایی که دستی نوشته شده‌اند"
 
-#: includes/negaresh-settings.php:425
+#: includes/negaresh-settings.php:544
 msgid "Fix comments"
 msgstr "اصلاح دیدگاه‌ها"
 
-#: includes/negaresh-settings.php:426
+#: includes/negaresh-settings.php:545
 msgid "Fix text in RSS feeds"
 msgstr "اصلاح متن در خوراک‌های RSS"
 
-#: includes/negaresh-settings.php:427
+#: includes/negaresh-settings.php:546
 msgid "Fix text in the REST API"
 msgstr "اصلاح متن در REST API"
 
-#: includes/negaresh-settings.php:447
+#: includes/negaresh-settings.php:566
 msgid "Mode"
 msgstr "حالت"
 
-#: includes/negaresh-settings.php:448
+#: includes/negaresh-settings.php:567
 msgid "Letters and numbers"
 msgstr "حروف و اعداد"
 
-#: includes/negaresh-settings.php:449
+#: includes/negaresh-settings.php:568
 msgid "Punctuation"
 msgstr "نشانه‌گذاری"
 
-#: includes/negaresh-settings.php:450
+#: includes/negaresh-settings.php:569
 msgid "Spacing and half spaces"
 msgstr "فاصله و نیم‌فاصله"
 
-#: includes/negaresh-settings.php:451
+#: includes/negaresh-settings.php:570
 msgid "Cleanup"
 msgstr "پاک‌سازی"
 
-#: includes/negaresh-settings.php:452
+#: includes/negaresh-settings.php:571
 msgid "Where to apply"
 msgstr "محدودهٔ اعمال"
 
-#: includes/negaresh-settings.php:453
+#: includes/negaresh-settings.php:572
 msgid "Words to leave alone"
 msgstr "واژه‌هایی که تغییر نمی‌کنند"
 
-#: includes/negaresh-settings.php:468
+#: includes/negaresh-settings.php:587
 msgid "Convert presentation form glyphs to standard Persian letters"
 msgstr "تبدیل شکل‌های نمایشی حروف به حروف استاندارد فارسی"
 
-#: includes/negaresh-settings.php:473
+#: includes/negaresh-settings.php:592
 msgid "Convert Arabic digits to Persian digits"
 msgstr "تبدیل ارقام عربی به ارقام فارسی"
 
-#: includes/negaresh-settings.php:478
+#: includes/negaresh-settings.php:597
 msgid "Convert English digits to Persian digits"
 msgstr "تبدیل ارقام انگلیسی به ارقام فارسی"
 
-#: includes/negaresh-settings.php:483
+#: includes/negaresh-settings.php:602
 msgid "Use Persian percent, decimal and thousands separators"
 msgstr "استفاده از علامت درصد، ممیز و جداکنندهٔ هزارگان فارسی"
 
-#: includes/negaresh-settings.php:488
+#: includes/negaresh-settings.php:607
 msgid "Replace Arabic Kaf, Yeh and Heh with Persian letters"
 msgstr "جایگزینی کاف، یا و های عربی با حروف فارسی"
 
-#: includes/negaresh-settings.php:493
+#: includes/negaresh-settings.php:612
 msgid "Write the ezafe after a final Heh as Hamzeh"
 msgstr "نوشتن کسرهٔ اضافه پس از های پایانی به‌صورت همزه"
 
-#: includes/negaresh-settings.php:498
+#: includes/negaresh-settings.php:617
 msgid "Convert Arabic Teh Marbuta to Heh with Hamzeh (needs the Hamzeh rule)"
 msgstr "تبدیل تای گرد عربی به «هٔ» (نیازمند قاعدهٔ همزه)"
 
-#: includes/negaresh-settings.php:503
+#: includes/negaresh-settings.php:622
 msgid "Clean up spaces and repeats around diacritics"
 msgstr "پاک‌سازی فاصله‌ها و تکرارها در کنار اعراب"
 
-#: includes/negaresh-settings.php:508
+#: includes/negaresh-settings.php:627
 msgid "Remove all diacritics"
 msgstr "حذف همهٔ اعراب"
 
-#: includes/negaresh-settings.php:513
+#: includes/negaresh-settings.php:632
 msgid "Convert double and triple hyphens to en and em dashes"
 msgstr "تبدیل دو و سه خط فاصله به خط تیرهٔ کوتاه و بلند"
 
-#: includes/negaresh-settings.php:518
+#: includes/negaresh-settings.php:637
 msgid "Convert three dots to an ellipsis character"
 msgstr "تبدیل سه نقطه به نویسهٔ سه‌نقطه"
 
-#: includes/negaresh-settings.php:523
+#: includes/negaresh-settings.php:642
 msgid "Merge repeated ellipses and put one space after them"
 msgstr "یکی کردن سه‌نقطه‌های پشت سر هم و گذاشتن یک فاصله پس از آن"
 
-#: includes/negaresh-settings.php:528
+#: includes/negaresh-settings.php:647
 msgid "Remove the space before an ellipsis"
 msgstr "حذف فاصلهٔ پیش از سه‌نقطه"
 
-#: includes/negaresh-settings.php:533
+#: includes/negaresh-settings.php:652
 msgid "Replace curly English quotes with Persian guillemets"
 msgstr "جایگزینی گیومهٔ خمیدهٔ انگلیسی با گیومهٔ فارسی"
 
-#: includes/negaresh-settings.php:538
+#: includes/negaresh-settings.php:657
 msgid "Replace straight quotes with Persian guillemets"
 msgstr "جایگزینی نقل‌قول ساده با گیومهٔ فارسی"
 
-#: includes/negaresh-settings.php:543
+#: includes/negaresh-settings.php:662
 msgid "Use the Persian comma and semicolon"
 msgstr "استفاده از ویرگول و نقطه‌ویرگول فارسی"
 
-#: includes/negaresh-settings.php:548
+#: includes/negaresh-settings.php:667
 msgid "Use the Persian question mark"
 msgstr "استفاده از علامت سؤال فارسی"
 
-#: includes/negaresh-settings.php:553
+#: includes/negaresh-settings.php:672
 msgid "Merge repeated question and exclamation marks"
 msgstr "یکی کردن علامت‌های سؤال و تعجب تکراری"
 
-#: includes/negaresh-settings.php:558
+#: includes/negaresh-settings.php:677
 msgid "Treat a Kashida next to a space as a dash"
 msgstr "تبدیل کشیدهٔ کنار فاصله به خط تیره"
 
-#: includes/negaresh-settings.php:563
+#: includes/negaresh-settings.php:682
 msgid "Reorder dates written with slashes to year/month/day"
 msgstr "مرتب کردن تاریخ‌های اسلش‌دار به ترتیب سال/ماه/روز"
 
-#: includes/negaresh-settings.php:568
+#: includes/negaresh-settings.php:687
 msgid "Join the prefixes می, نمی and بی with a half space"
 msgstr "چسباندن پیشوندهای «می»، «نمی» و «بی» با نیم‌فاصله"
 
-#: includes/negaresh-settings.php:573
+#: includes/negaresh-settings.php:692
 msgid "Join common suffixes with a half space"
 msgstr "چسباندن پسوندهای رایج با نیم‌فاصله"
 
-#: includes/negaresh-settings.php:578
+#: includes/negaresh-settings.php:697
 msgid "Fix the ای suffix after a final Heh"
 msgstr "اصلاح پسوند «ای» پس از های پایانی"
 
-#: includes/negaresh-settings.php:583
+#: includes/negaresh-settings.php:702
 msgid "Fix spaces inside and around brackets and quotes"
 msgstr "اصلاح فاصله‌ها درون و پیرامون پرانتزها و گیومه‌ها"
 
-#: includes/negaresh-settings.php:588
+#: includes/negaresh-settings.php:707
 msgid "Remove the space before punctuation and keep one after it"
 msgstr "حذف فاصلهٔ پیش از نشانه‌ها و گذاشتن یک فاصله پس از آن‌ها"
 
-#: includes/negaresh-settings.php:593
+#: includes/negaresh-settings.php:712
 msgid "Remove the space before honorifics and numbered references"
 msgstr "حذف فاصلهٔ پیش از نشانه‌های احترام و ارجاع‌های شماره‌دار"
 
-#: includes/negaresh-settings.php:598
+#: includes/negaresh-settings.php:717
 msgid "Replace repeated spaces with one space"
 msgstr "جایگزینی فاصله‌های تکراری با یک فاصله"
 
-#: includes/negaresh-settings.php:603
+#: includes/negaresh-settings.php:722
 msgid "Remove extra or misplaced half spaces"
 msgstr "حذف نیم‌فاصله‌های اضافه یا نابه‌جا"
 
-#: includes/negaresh-settings.php:608
+#: includes/negaresh-settings.php:727
 msgid "Replace right to left marks between letters with half spaces"
 msgstr "جایگزینی نشانهٔ راست‌به‌چپ (RLM) میان حروف با نیم‌فاصله"
 
-#: includes/negaresh-settings.php:613
+#: includes/negaresh-settings.php:732
 msgid "Remove Kashidas inside words"
 msgstr "حذف کشیده درون واژه‌ها"
 
-#: includes/negaresh-settings.php:618
+#: includes/negaresh-settings.php:737
 msgid "Use Unix line endings"
 msgstr "استفاده از پایان خط یونیکس"
 
-#: includes/negaresh-settings.php:623
+#: includes/negaresh-settings.php:742
 msgid "Reduce more than two line breaks to two"
 msgstr "کاهش بیش از دو شکست خط پیاپی به دو"
 
-#: includes/negaresh-settings.php:628
+#: includes/negaresh-settings.php:747
 msgid "Trim spaces at the start of lines and of the text"
 msgstr "حذف فاصله‌ها از آغاز خط‌ها و آغاز و پایان متن"
 
-#: includes/negaresh-settings.php:644
+#: includes/negaresh-settings.php:763
 msgid "Try it"
 msgstr "امتحان کنید"
 
-#: includes/negaresh-settings.php:647
+#: includes/negaresh-settings.php:766
 msgid "Type or paste some text (HTML is fine). The result uses the boxes as they are checked on this page, before you save."
 msgstr "متنی بنویسید یا بچسبانید (HTML هم پذیرفته است). نتیجه بر پایهٔ گزینه‌هایی است که همین حالا در این صفحه انتخاب شده‌اند، پیش از ذخیره."
 
-#: includes/negaresh-settings.php:653
+#: includes/negaresh-settings.php:772
 msgid "Text to fix"
 msgstr "متن برای اصلاح"
 
-#: includes/negaresh-settings.php:655
+#: includes/negaresh-settings.php:774
 msgid "Result"
 msgstr "نتیجه"
 
-#: includes/negaresh-settings.php:669
+#: includes/negaresh-settings.php:788
 msgid "Reset rules to defaults"
 msgstr "بازگرداندن قاعده‌ها به پیش‌فرض"
 
-#: includes/negaresh-settings.php:719
+#: includes/negaresh-settings.php:838
 msgid "Working…"
 msgstr "در حال کار…"
 
-#: includes/negaresh-settings.php:720
+#: includes/negaresh-settings.php:839
 msgid "The preview could not be made."
 msgstr "پیش‌نمایش ساخته نشد."
 
-#: includes/negaresh-settings.php:721
+#: includes/negaresh-settings.php:840
 msgid "Set every rule back to its default? Unsaved changes to the rules are lost."
 msgstr "همهٔ قاعده‌ها به حالت پیش‌فرض برگردند؟ تغییرهای ذخیره‌نشدهٔ قاعده‌ها از دست می‌روند."
 
-#: includes/negaresh-settings.php:749
+#: includes/negaresh-settings.php:868
 msgid "When a post is saved: the stored text is corrected, so what you see in the editor is what readers get"
 msgstr "هنگام ذخیرهٔ نوشته: متن ذخیره‌شده اصلاح می‌شود، پس آنچه در ویرایشگر می‌بینید همان است که خوانندگان می‌بینند"
 
-#: includes/negaresh-settings.php:753
+#: includes/negaresh-settings.php:872
 msgid "When a post is displayed: the stored text is never changed"
 msgstr "هنگام نمایش نوشته: متن ذخیره‌شده هرگز تغییر نمی‌کند"
 
-#: includes/negaresh-settings.php:766
+#: includes/negaresh-settings.php:885
 msgid "Saving changes your posts and cannot be undone. Posts saved before are still fixed on display until they are saved again."
 msgstr "اصلاح هنگام ذخیره نوشته‌ها را تغییر می‌دهد و برگشت‌پذیر نیست. نوشته‌هایی که پیش‌تر ذخیره شده‌اند تا ذخیرهٔ دوباره، هنگام نمایش اصلاح می‌شوند."
 
-#: includes/negaresh-settings.php:782
+#: includes/negaresh-settings.php:901
 msgid "One word or phrase per line. Only whole words match."
 msgstr "هر خط یک واژه یا عبارت. فقط واژه‌های کامل پیدا می‌شوند."
 
-#: includes/negaresh-settings.php:783
+#: includes/negaresh-settings.php:902
 msgid "Negaresh never changes them: for example brand names, names spelled in a special way, or quotations."
 msgstr "نگارش هرگز آن‌ها را تغییر نمی‌دهد: مانند نام تجاری، نام‌هایی که به شکل ویژه نوشته می‌شوند یا نقل‌قول‌ها."
 
-#: includes/negaresh-settings.php:800
+#: includes/negaresh-settings.php:919
 msgid "Leave all unchecked to fix every post type."
 msgstr "برای اصلاح همهٔ نوع‌ها، هیچ‌کدام را انتخاب نکنید."
