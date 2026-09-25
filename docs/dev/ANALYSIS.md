@@ -130,7 +130,8 @@ To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virast
   `SCOPE_DEFAULTS` (post types, feeds, REST), `LEGACY_OPTIONS` (4.0 rows), `get()`, `sanitize()`,
   `maybe_migrate()`, `delete_all()`, settings page rendering, `rule_labels()` with examples.
 * `includes/negaresh-class.php` → `class Negaresh`: hooks, `filter_content()` (guards + error
-  handling), `fix()` (protect code elements and shortcodes, run Virastar, restore),
+  handling), `fix()` (since I2: split into markup/text with a quote aware tokenizer, skip protected
+  elements, fix each text piece with Virastar keeping its edge whitespace),
   `should_filter()` (scope), `virastar_options()` (all 44 options explicitly), one Virastar per request.
 * `uninstall.php`: `Negaresh_Settings::delete_all()` per site.
 * Stored data: `negaresh_options` (array), `negaresh_db_version` (int, 2).

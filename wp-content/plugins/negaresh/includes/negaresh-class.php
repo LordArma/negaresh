@@ -15,10 +15,32 @@ if (!defined('ABSPATH')) {
 class Negaresh
 {
     /**
-     * Elements whose contents are never touched (B3). The element and everything inside it is
-     * swapped for a placeholder before Virastar runs.
+     * Elements whose contents are never touched (B3), nesting aware (I2).
      */
     public const PROTECTED_ELEMENTS = ['pre', 'code', 'kbd', 'samp', 'var', 'script', 'style', 'textarea', 'svg', 'math'];
+
+    /**
+     * Elements whose content ends at the first matching end tag, whatever it contains (HTML raw
+     * text and escapable raw text elements), so they never nest.
+     */
+    public const RAW_TEXT_ELEMENTS = ['script', 'style', 'textarea'];
+
+    /**
+     * One piece of markup: a comment, CDATA, a declaration or processing instruction, or a tag whose
+     * quoted attribute values may contain ">" (B24; wp_html_split() stops at the first ">").
+     * An unterminated tag runs to the end of the text and is left alone.
+     */
+    public const MARKUP_PATTERN = '#(<(?:!--[\s\S]*?(?:-->|$)|!\[CDATA\[[\s\S]*?(?:\]\]>|$)|[!?][^>]*>?'
+        . '|/?[A-Za-z][^\s/>]*(?:"[^"]*"|\'[^\']*\'|[^>"\'])*>?))#';
+
+    /**
+     * Shortcode tags such as [gallery ids="1,2"] or [/caption]. Names start with a Latin letter, so
+     * Persian text in brackets is still fixed, and so is the content an enclosing shortcode wraps.
+     */
+    public const SHORTCODE_PATTERN = '#(\[\[?/?[A-Za-z][\w-]*(?:[\s/=][^\[\]]*)?\]\]?)#';
+
+    /** Whitespace a text node may start or end with; kept exactly as it is (B25). */
+    private const EDGE_SPACE = '[\s\x{00A0}\x{200B}-\x{200F}\x{FEFF}]*';
 
     /** @var Negaresh_Settings */
     private $settings;
@@ -81,56 +103,109 @@ class Negaresh
     }
 
     /**
-     * Fixes a piece of HTML. Protected elements and shortcode tags are held back, then restored.
+     * Fixes a piece of HTML (I2). Markup is never handed to Virastar: the HTML is split into markup
+     * and text, protected elements are skipped whole, and every text node is fixed on its own with
+     * its leading and trailing whitespace kept byte for byte, so no tag boundary gains or loses a
+     * space (B25) and no attribute can be mistaken for text (B24).
      */
     public function fix(string $html): string
     {
-        $held = [];
-        $token = 'negaresh-keep-' . substr(md5(uniqid('', true)), 0, 8);
-
-        $hold = function (array $match) use (&$held, $token) {
-            $held[] = $match[0];
-            // Looks like an HTML tag, so Virastar preserves it exactly (B1) and spacing is kept.
-            return '<' . $token . '-' . (count($held) - 1) . '>';
-        };
-
-        // Every regex result is checked: a failed preg_* call returns null/false, and passing that
-        // on would silently drop part of the post. Throwing makes filter_content() fall back.
-        $elements = implode('|', self::PROTECTED_ELEMENTS);
-        $html = self::checked(preg_replace_callback('#<(' . $elements . ')\b[^>]*>.*?</\1\s*>#is', $hold, $html));
-
-        // Shortcode tags such as [gallery ids="1,2"] or [/caption], looked for between HTML tags
-        // only (tags themselves are preserved whole by Virastar). Names start with a Latin letter,
-        // so Persian text in brackets is still fixed, and so is the content a shortcode encloses.
-        $parts = preg_split('#(<[^>]*>)#', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $parts = preg_split(self::MARKUP_PATTERN, $html, -1, PREG_SPLIT_DELIM_CAPTURE);
         if (false === $parts) {
             throw new \RuntimeException('splitting markup failed: ' . (int) preg_last_error());
         }
+
+        $out = '';
+        $protected = null; // name of the protected element we are inside, if any
+        $depth = 0;
+
         foreach ($parts as $i => $part) {
-            if (0 === $i % 2 && false !== strpos($part, '[')) {
-                $parts[$i] = self::checked(preg_replace_callback('#\[\[?/?[A-Za-z][\w-]*(?:[\s/=][^\[\]]*)?\]\]?#', $hold, $part));
+            if (0 === $i % 2) {
+                $out .= null === $protected ? $this->fix_text($part) : $part;
+                continue;
+            }
+
+            $out .= $part;
+            $name = self::tag_name($part);
+            if ('' === $name || self::is_self_closing($part)) {
+                continue;
+            }
+            $closing = '/' === $part[1];
+
+            if (null === $protected) {
+                if (!$closing && in_array($name, self::PROTECTED_ELEMENTS, true)) {
+                    $protected = $name;
+                    $depth = 1;
+                }
+            } elseif ($name === $protected) {
+                if ($closing) {
+                    $depth--;
+                } elseif (!in_array($name, self::RAW_TEXT_ELEMENTS, true)) {
+                    $depth++;
+                }
+                if (0 === $depth) {
+                    $protected = null;
+                }
             }
         }
 
-        $fixed = $this->virastar()->cleanup(implode('', $parts));
+        return $out;
+    }
+
+    /**
+     * Fixes one text node. Shortcode tags are boundaries, like HTML tags.
+     */
+    private function fix_text(string $text): string
+    {
+        if ('' === trim($text)) {
+            return $text;
+        }
+
+        $pieces = preg_split(self::SHORTCODE_PATTERN, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (false === $pieces) {
+            throw new \RuntimeException('splitting shortcodes failed: ' . (int) preg_last_error());
+        }
+
+        $out = '';
+        foreach ($pieces as $i => $piece) {
+            $out .= 0 === $i % 2 ? $this->fix_piece($piece) : $piece;
+        }
+        return $out;
+    }
+
+    /**
+     * Runs Virastar on a piece of plain text, keeping the whitespace around it.
+     */
+    private function fix_piece(string $piece): string
+    {
+        // English only text (Latin letters, no Arabic script) is left alone: quotes and digits in
+        // an English sentence must not become Persian. Neutral text such as "123" is fixed.
+        if (1 !== preg_match('/[\x{0600}-\x{06FF}]/u', $piece) && 1 === preg_match('/[A-Za-z]/', $piece)) {
+            return $piece;
+        }
+        if (1 !== preg_match('/^(' . self::EDGE_SPACE . ')(.*?)(' . self::EDGE_SPACE . ')$/su', $piece, $m) || '' === $m[2]) {
+            return $piece;
+        }
+
+        $fixed = $this->virastar()->cleanup($m[2]);
         if (!is_string($fixed)) {
             throw new \RuntimeException('Virastar returned no text');
         }
 
-        return self::checked(preg_replace_callback('#<' . preg_quote($token, '#') . '-(\d+)>#', function (array $m) use ($held) {
-            return $held[(int) $m[1]];
-        }, $fixed));
+        return $m[1] . $fixed . $m[3];
     }
 
     /**
-     * @param string|null $result return value of a preg_replace* call
+     * Lower case element name of a start or end tag; '' for comments and other markup.
      */
-    private static function checked(?string $result): string
+    private static function tag_name(string $markup): string
     {
-        if (null === $result) {
-            throw new \RuntimeException('regex failed: ' . (int) preg_last_error());
-        }
-        return $result;
+        return 1 === preg_match('#^</?([A-Za-z][^\s/>]*)#', $markup, $m) ? strtolower($m[1]) : '';
+    }
+
+    private static function is_self_closing(string $markup): bool
+    {
+        return '/>' === substr($markup, -2);
     }
 
     private function should_filter(): bool
@@ -184,7 +259,7 @@ class Negaresh
             'preserve_nbsp' => true,
             'preserve_URIs' => true,
             'preserve_front_matter' => false, // a post starting with --- is not front matter
-            'preserve_brackets' => false, // shortcodes are held back in fix()
+            'preserve_brackets' => false, // shortcodes are split off in fix_text()
             'preserve_braces' => false,
         ];
     }

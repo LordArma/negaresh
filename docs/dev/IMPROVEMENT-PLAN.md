@@ -36,13 +36,25 @@ I10 needs user decisions first.
     `main.yml` (zip artifact) stays until I7.
   - Verified locally: all checks on PHP 7.4.33, 8.3.6, 8.4; e2e on WP 7.1.2 and 5.8.3.
 
-## I2 HTML aware processing (the real fix behind B3)
+## I2 HTML aware processing (the real fix behind B3) ✅ *(done session 3, fixes B24 and B25)*
 - Walk the markup and run Virastar on **text nodes only**. Options: `WP_HTML_Tag_Processor`
   (WP 6.2+), `wp_html_split()` (older WP), or `DOMDocument` with UTF-8 handling.
-- Skip subtrees: `pre, code, kbd, samp, script, style, textarea, svg, math` and elements with a
-  `.negaresh-skip` class or `data-negaresh="off"`.
+- Skip subtrees: `pre, code, kbd, samp, script, style, textarea, svg, math`. (`.negaresh-skip` /
+  `data-negaresh="off"` moved to I6.)
 - Handle text split across inline tags (`<strong>` inside a word) without breaking ZWNJ rules.
 - **Done when:** fixtures show markup byte identical outside text nodes.
+- *Result:* chose a small tokenizer over DOMDocument/`WP_HTML_Tag_Processor` (needs WP 6.2; the
+  minimum is 5.8) and over `wp_html_split()` (same first-`>` weakness). `Negaresh::fix()` splits on
+  `MARKUP_PATTERN` (comments, CDATA, declarations, tags with quoted attributes), skips protected
+  elements with nesting (raw text elements `script/style/textarea` end at the first end tag; an
+  unclosed one leaves the rest of the post untouched), splits text on shortcodes, and runs Virastar
+  per text piece keeping edge whitespace (incl. ZWNJ, nbsp, direction marks).
+  Text with Latin letters and no Arabic script is skipped (English sentences keep their quotes and
+  digits); neutral text such as `123` is fixed.
+  Decided against: rules working across inline tags (`کتاب <b>ها</b>` is not joined; the plugin
+  should not restructure markup). The `.negaresh-skip` / `data-negaresh="off"` idea moves to I6.
+  Cost: 156 KB post 34 ms → 55 ms (display mode only; I4 save mode removes display work).
+  Tests: `HtmlProcessingTest` (21). All 13 e2e checks pass on WP 7.1.2 and 5.8.3.
 
 ## I3 Codebase structure
 - Partly done in phase 1 (classes `Negaresh`, `Negaresh_Settings`, constants, own Virastar namespace).

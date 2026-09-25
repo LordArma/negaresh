@@ -14,11 +14,23 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
 | Next release target | 4.2.0 (phase 2 features) |
 
-**Next step:** I2 (HTML aware processing). Open: push `phase-2` so CI and the release workflow
-can be seen running on GitHub (needs the user's OK).
+**Next step:** I4 (fix before saving). Open, needs the user: release B24/B25 fixes (4.1.1 or 4.2.0),
+and push `phase-2` so CI runs on GitHub.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 76 unit tests) clean on PHP 7.4, 8.3, 8.4.
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 98 unit tests) clean.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I2 HTML aware processing (+ B24, B25)
+
+Re-checked I2's premise before building it: probing 4.1.0 with tricky HTML found two real bugs,
+B24 (a `>` inside an attribute breaks the tag when quote rules are on) and B25 (space lost between
+`…` and an inline tag, default rules). Both are in the released 4.1.0.
+Done: `fix()` rewritten around a quote aware tokenizer and per text node processing (details in
+IMPROVEMENT-PLAN I2); `HtmlProcessingTest` (21 tests, 9 failed before the change).
+Verified: 98 unit tests, PHPCS, PHPStan clean; probes all correct; e2e 13/13 on WP 7.1.2 and
+5.8.3; timing 34 → 55 ms on a 156 KB post.
 
 ---
 

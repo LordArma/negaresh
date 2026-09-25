@@ -3,6 +3,18 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+- A `>` inside an HTML attribute (for example `alt="a > b"`) could break the tag when a quote
+  rule was on (B24).
+- The space between an ellipsis and a following link or formatted word was removed, so the words
+  ran together (B25).
+
+### Changed
+- Only the text between HTML tags is fixed now; tags, attributes and the spaces around tags are
+  never changed. Text written only in English (no Persian letters) is left alone (I2).
+
 ## [4.1.0] (2026-09-25)
 
 A bug fix release. Upgrading is strongly recommended: 4.0.0 damaged the displayed HTML of every post

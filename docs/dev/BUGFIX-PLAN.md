@@ -110,6 +110,19 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   if cheap (drop the leading space from the regex). *Result:* fixed by B22 (padding restored,
   upstream regex kept), test in `VirastarFixesTest`.
 
+- [x] **B24 A `>` inside an attribute corrupts the tag** *(High; found session 3 while re-checking I2;
+  in 4.1.0; fixed by I2 on `phase-2`)*. Virastar's tag regex `<\/?[a-z][^>]*?>` stops at the first
+  `>`, so the rest of the tag (`b" src="x.png">`) was treated as text; with a quote rule on it became
+  `«src=» x. png «>` and the HTML broke. *Fix:* the plugin tokenizes markup itself with a quote
+  aware pattern and never hands tags to Virastar. Tests: `HtmlProcessingTest`.
+
+- [x] **B25 Space lost between `…` and a following inline tag** *(High, default rules; found session 3;
+  in 4.1.0; fixed by I2 on `phase-2`)*. `متن ... <em>` became `متن…<em>` (words run together):
+  `normalizeEllipsis` collapsed the real space and Virastar's space padded placeholder, then the
+  restore step ate the remaining one. *Fix:* text nodes are fixed one by one and their leading and
+  trailing whitespace is kept byte for byte. Tests: `HtmlProcessingTest`.
+  **Both B24 and B25 are in the released 4.1.0: ship a 4.1.1 or 4.2.0 soon.**
+
 - [x] **B23 Output before `<?php` breaks logins, redirects and feeds** *(Critical; found in the
   Docker end to end run and already fixed by the refactor, session 3)*. 4.0's `negaresh-class.php`
   starts with a newline before `<?php`. It is sent on every request: `wp-login.php` fails with
