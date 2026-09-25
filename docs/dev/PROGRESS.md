@@ -11,17 +11,29 @@ Status snapshot is kept up to date at the top.
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
 | Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I11 done (I3 not needed); I9 waits for the user; I10 needs decisions |
-| Current version | 4.3.0 (tag `v4.3.0`, commit `d8375a2`, released 2026-09-25 by the Release workflow) |
-| Next release target | 4.4.0 |
+| Current version | 4.4.0 (tag `v4.4.0`, commit `1e827c6`, released 2026-09-25 by the Release workflow) |
+| Next release target | 4.5.0 |
 
-**Next step:** report to the user; recommend releasing 4.4.0 soon (B29 scrambles Persian dates in
-every release). I9 waits for the user (check the wordpress.org username in readme.txt); I10 needs
-user decisions.
+**Next step:** user: "do anything if exist; if not think about what improvements we can have and
+do them, start with easy ones" → phase 3 list in IMPROVEMENT-PLAN.md (P3-*), easy ones first.
+I9 waits for the user (wordpress.org username in readme.txt); I10 needs user decisions.
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 343 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 8.3 and 7.4; e2e + browser (settings page, editor
 panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 4.4.0
+
+Done: version 4.4.0 (header, constant, readme.txt Stable tag + changelog + upgrade notice),
+translations, CHANGELOG dated and its repeated headings merged; checks; `master` pushed, CI green;
+tag → Release workflow published https://github.com/LordArma/negaresh/releases/tag/v4.4.0.
+Verified: published 4.3.0 zip → published 4.4.0 zip on a fresh site: active, DB 3, mode kept.
+A post saved under 4.3.0 kept the scrambled date `۱۳/۱/۳۵۵` (B29 stored in save mode); new saves are
+correct. Not repairable automatically (the typed original was never stored); exposure is tiny:
+save mode exists since 4.2.0, released the same day.
 
 ---
 
