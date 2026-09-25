@@ -128,16 +128,26 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   Also "It's" → "Its", method `fix_farsi_typoes`, variable `$feild_name` spellings.
   *Result:* new descriptive labels in five sections, each with a before → after example; every
   example was checked against the real rule (23/23).
-- [ ] **B15 Stale translations.** Regenerate `negaresh.pot` with `wp i18n make-pot`, update
+- [x] **B15 Stale translations.** *(done session 3)* Regenerate `negaresh.pot` with `wp i18n make-pot`, update
   `fa_IR.po`, fill every `msgstr`, recompile `.mo`.
-- [ ] **B16 Plugin header**: `Tested up to: 6.1.1`, `Requires PHP: 7.0` (tests will run on 7.4+),
+  *Result:* 47 strings, all translated; `I18nTest` keeps source, `.pot`, `.po` and `.mo` in sync;
+  verified in wp-admin with the site language set to fa_IR.
+- [x] **B16 Plugin header** *(done session 3)*: `Tested up to: 6.1.1`, `Requires PHP: 7.0` (tests will run on 7.4+),
   `Author URI` http. Update after the test matrix is decided.
-- [ ] **B17 README mismatch**: says download from Releases, CI only produces a workflow artifact
+  *Result:* Requires at least 5.8, Requires PHP 7.4, Tested up to 7.1, https Author URI, License
+  lines. Backed by `tests/e2e/run.sh` passing on WP 5.8.3/PHP 7.4.27 and WP 7.1.2/PHP 8.3.33,
+  and the unit suite on PHP 7.4.33 and 8.3.6.
+- [x] **B17 README mismatch** *(done session 3)*: says download from Releases, CI only produces a workflow artifact
   (fixed properly by I7; for now correct the README or attach the zip to the v4.1.0 release by hand).
+  *Result:* the v4.0.0 GitHub release does have `negaresh.zip` attached, so the README link is right;
+  README rewritten (requirements, features, development). Until I7, attach the zip by hand when
+  releasing. `CHANGELOG.md` added.
 
 ## Suggested order
 
-All done except **B15 → B16 → B17**, then tag v4.1.0 (only when the user asks).
+**Phase 1 complete.** Release steps, only when the user asks: merge `fix/v4.1.0` into `master`,
+tag `v4.1.0`, push, build the zip from `wp-content/plugins/negaresh` and attach it to a GitHub
+release with the CHANGELOG entry. Consider sending the Virastar patches upstream.
 
 From session 3 the plugin's own code (B2 plugin half, B3, B5 to B19) is done as one refactor
 slice, since every item touches the same three files.

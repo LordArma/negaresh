@@ -6,7 +6,7 @@
  * Version: 4.1.0
  * Requires at least: 5.8
  * Requires PHP: 7.4
- * Tested up to: 6.1.1
+ * Tested up to: 7.1
  * Author: Lord Arma
  * Author URI: https://LordArma.com/
  * License: GPLv3 or later

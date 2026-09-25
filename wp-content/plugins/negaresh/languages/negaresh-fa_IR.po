@@ -1,115 +1,213 @@
+# Persian translation of Negaresh.
+# Copyright (C) 2026 Lord Arma
+# This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Negaresh\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-05 22:41+0000\n"
-"PO-Revision-Date: 2023-04-25 22:50+0000\n"
+"Project-Id-Version: Negaresh 4.1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/LordArma/negaresh/issues\n"
 "Last-Translator: \n"
 "Language-Team: فارسی\n"
-"Language: fa_IR\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
 "MIME-Version: 1.0\n"
+"Language: fa_IR\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Loco https://localise.biz/\n"
-"X-Loco-Version: 2.6.4; wp-6.2\n"
-"X-Domain: negaresh"
+"POT-Creation-Date: 2026-09-25T13:22:01+00:00\n"
+"PO-Revision-Date: 2026-09-25 00:00+0000\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: negaresh\n"
 
-#: negaresh.php:104
-msgid "Cleanup ZWNJ"
-msgstr "اصلاح مشکلات نیم‌فاصله"
-
-#: negaresh.php:188
-msgid "Converts Incorrect Farsi Glyphs to Standard Characters"
-msgstr ""
-
-#: negaresh.php:51
-msgid ""
-"Converts Numeral and Selected HTML Character Sets Into Original Characters"
-msgstr ""
-
-#: negaresh.php:93
-msgid "Fix Arabic Hamzeh"
-msgstr "اصلاح همزه عربی"
-
-#: negaresh.php:88
-msgid "Fix Hamzeh"
-msgstr "اصلاح همزه"
-
-#: negaresh.php:119
-msgid "Fix Numeral Symbols"
-msgstr "اصلاح علایم عددی"
-
-#. Author URI of the plugin
-msgid "http://LordArma.com/"
-msgstr "http://LordArma.com/"
-
-#. URI of the plugin
-msgid "http://wordpress.org/plugins/negaresh/"
-msgstr "http://wordpress.org/plugins/negaresh/"
-
-#. Author of the plugin
-msgid "Lord Arma"
-msgstr "لرد آرما"
-
-#. Name of the plugin
-#: negaresh.php:272
+#. Plugin Name of the plugin
+#: negaresh.php
+#: includes/negaresh-settings.php:173
 msgid "Negaresh"
 msgstr "نگارش"
 
-#: negaresh.php:272 negaresh.php:277
+#. Plugin URI of the plugin
+#: negaresh.php
+msgid "https://github.com/LordArma/negaresh"
+msgstr "https://github.com/LordArma/negaresh"
+
+#. Description of the plugin
+#: negaresh.php
+msgid "Negaresh tries to fix your Farsi (Persian) typos in WordPress."
+msgstr "نگارش تلاش می‌کند غلط‌های نگارشی فارسی را در وردپرس اصلاح کند."
+
+#. Author of the plugin
+#: negaresh.php
+msgid "Lord Arma"
+msgstr "Lord Arma"
+
+#. Author URI of the plugin
+#: negaresh.php
+msgid "https://LordArma.com/"
+msgstr "https://LordArma.com/"
+
+#: includes/negaresh-settings.php:172
+#: includes/negaresh-settings.php:270
 msgid "Negaresh Options"
 msgstr "تنظیمات نگارش"
 
-#. Description of the plugin
-msgid "Negaresh tries to fix your Farsi (Persian) typos in Wordpress."
-msgstr ""
-"نگارش تلاش می‌کند تا در وردپرس شما خطاهای نگارش فارسی را به طور خودکار اصلاح "
-"کند."
+#: includes/negaresh-settings.php:205
+msgid "Post types"
+msgstr "نوع‌های نوشته"
 
-#: negaresh.php:183
-msgid "Removes All Diacritic Characters"
-msgstr ""
+#: includes/negaresh-settings.php:206
+msgid "Fix text in RSS feeds"
+msgstr "اصلاح متن در خوراک‌های RSS"
 
-#: negaresh.php:166
-msgid "Removes Inside Spaces and More Than One Outside Braces and Quotes"
-msgstr ""
+#: includes/negaresh-settings.php:207
+msgid "Fix text in the REST API"
+msgstr "اصلاح متن در REST API"
 
-#: negaresh.php:62
-msgid ""
-"Removes Spaces Between Dots and Replaces Three Dots with Ellipsis Character"
-msgstr ""
+#: includes/negaresh-settings.php:213
+msgid "Letters and numbers"
+msgstr "حروف و اعداد"
 
-#: negaresh.php:73
-msgid "Reorders Date Parts with Slash as Delimiter"
-msgstr "جداسازی صحیح تاریخ"
+#: includes/negaresh-settings.php:214
+msgid "Punctuation"
+msgstr "نشانه‌گذاری"
 
-#: negaresh.php:46
-msgid "Replace Windows End of Lines with Unix EOL"
-msgstr "پایان خط استاندارد"
+#: includes/negaresh-settings.php:215
+msgid "Spacing and half spaces"
+msgstr "فاصله و نیم‌فاصله"
 
-#: negaresh.php:109
-msgid "Replaces Arabic Numbers with Their Farsi Equivalent"
-msgstr "تعویض اعداد عربی با فارسی"
+#: includes/negaresh-settings.php:216
+msgid "Cleanup"
+msgstr "پاک‌سازی"
 
-#: negaresh.php:114
-msgid "Replaces English Numbers with Their Farsi Equivalent"
-msgstr "تعویض اعداد انگلیسی با فارسی"
+#: includes/negaresh-settings.php:217
+msgid "Where to apply"
+msgstr "محدودهٔ اعمال"
 
-#: negaresh.php:83
-msgid "Replaces English Quote Marks with Their Farsi Equivalent"
-msgstr ""
+#: includes/negaresh-settings.php:228
+msgid "Convert presentation form glyphs to standard Persian letters"
+msgstr "تبدیل شکل‌های نمایشی حروف به حروف استاندارد فارسی"
 
-#: negaresh.php:78
-msgid "Replaces English Quote Pairs with Their Farsi Equivalent"
-msgstr ""
+#: includes/negaresh-settings.php:229
+msgid "Convert Arabic digits to Persian digits"
+msgstr "تبدیل ارقام عربی به ارقام فارسی"
 
-#: negaresh.php:67
-msgid ""
-"Replaces More Than One Ellipsis with One and Replaces (space|tab|zwnj) After "
-"Ellipsis with One Space"
-msgstr ""
+#: includes/negaresh-settings.php:230
+msgid "Convert English digits to Persian digits"
+msgstr "تبدیل ارقام انگلیسی به ارقام فارسی"
 
-#: negaresh.php:56
-msgid "Replaces Triple Dash to mdash and Replaces Double Dash to ndash"
-msgstr ""
+#: includes/negaresh-settings.php:231
+msgid "Use Persian percent, decimal and thousands separators"
+msgstr "استفاده از علامت درصد، ممیز و جداکنندهٔ هزارگان فارسی"
+
+#: includes/negaresh-settings.php:232
+msgid "Replace Arabic Kaf, Yeh and Heh with Persian letters"
+msgstr "جایگزینی کاف، یا و های عربی با حروف فارسی"
+
+#: includes/negaresh-settings.php:233
+msgid "Write the ezafe after a final Heh as Hamzeh"
+msgstr "نوشتن کسرهٔ اضافه پس از های پایانی به‌صورت همزه"
+
+#: includes/negaresh-settings.php:234
+msgid "Convert Arabic Teh Marbuta to Heh with Hamzeh (needs the Hamzeh rule)"
+msgstr "تبدیل تای گرد عربی به «هٔ» (نیازمند قاعدهٔ همزه)"
+
+#: includes/negaresh-settings.php:235
+msgid "Clean up spaces and repeats around diacritics"
+msgstr "پاک‌سازی فاصله‌ها و تکرارها در کنار اعراب"
+
+#: includes/negaresh-settings.php:236
+msgid "Remove all diacritics"
+msgstr "حذف همهٔ اعراب"
+
+#: includes/negaresh-settings.php:237
+msgid "Convert double and triple hyphens to en and em dashes"
+msgstr "تبدیل دو و سه خط فاصله به خط تیرهٔ کوتاه و بلند"
+
+#: includes/negaresh-settings.php:238
+msgid "Convert three dots to an ellipsis character"
+msgstr "تبدیل سه نقطه به نویسهٔ سه‌نقطه"
+
+#: includes/negaresh-settings.php:239
+msgid "Merge repeated ellipses and put one space after them"
+msgstr "یکی کردن سه‌نقطه‌های پشت سر هم و گذاشتن یک فاصله پس از آن"
+
+#: includes/negaresh-settings.php:240
+msgid "Replace curly English quotes with Persian guillemets"
+msgstr "جایگزینی گیومهٔ خمیدهٔ انگلیسی با گیومهٔ فارسی"
+
+#: includes/negaresh-settings.php:241
+msgid "Replace straight quotes with Persian guillemets"
+msgstr "جایگزینی نقل‌قول ساده با گیومهٔ فارسی"
+
+#: includes/negaresh-settings.php:242
+msgid "Use the Persian comma and semicolon"
+msgstr "استفاده از ویرگول و نقطه‌ویرگول فارسی"
+
+#: includes/negaresh-settings.php:243
+msgid "Use the Persian question mark"
+msgstr "استفاده از علامت سؤال فارسی"
+
+#: includes/negaresh-settings.php:244
+msgid "Merge repeated question and exclamation marks"
+msgstr "یکی کردن علامت‌های سؤال و تعجب تکراری"
+
+#: includes/negaresh-settings.php:245
+msgid "Treat a Kashida next to a space as a dash"
+msgstr "تبدیل کشیدهٔ کنار فاصله به خط تیره"
+
+#: includes/negaresh-settings.php:246
+msgid "Reorder dates written with slashes to year/month/day"
+msgstr "مرتب کردن تاریخ‌های اسلش‌دار به ترتیب سال/ماه/روز"
+
+#: includes/negaresh-settings.php:247
+msgid "Join the prefixes می, نمی and بی with a half space"
+msgstr "چسباندن پیشوندهای «می»، «نمی» و «بی» با نیم‌فاصله"
+
+#: includes/negaresh-settings.php:248
+msgid "Join common suffixes with a half space"
+msgstr "چسباندن پسوندهای رایج با نیم‌فاصله"
+
+#: includes/negaresh-settings.php:249
+msgid "Fix the ای suffix after a final Heh"
+msgstr "اصلاح پسوند «ای» پس از های پایانی"
+
+#: includes/negaresh-settings.php:250
+msgid "Fix spaces inside and around brackets and quotes"
+msgstr "اصلاح فاصله‌ها درون و پیرامون پرانتزها و گیومه‌ها"
+
+#: includes/negaresh-settings.php:251
+msgid "Remove the space before punctuation and keep one after it"
+msgstr "حذف فاصلهٔ پیش از نشانه‌ها و گذاشتن یک فاصله پس از آن‌ها"
+
+#: includes/negaresh-settings.php:252
+msgid "Remove the space before honorifics and numbered references"
+msgstr "حذف فاصلهٔ پیش از نشانه‌های احترام و ارجاع‌های شماره‌دار"
+
+#: includes/negaresh-settings.php:253
+msgid "Replace repeated spaces with one space"
+msgstr "جایگزینی فاصله‌های تکراری با یک فاصله"
+
+#: includes/negaresh-settings.php:254
+msgid "Remove extra or misplaced half spaces"
+msgstr "حذف نیم‌فاصله‌های اضافه یا نابه‌جا"
+
+#: includes/negaresh-settings.php:255
+msgid "Replace right to left marks between letters with half spaces"
+msgstr "جایگزینی نشانهٔ راست‌به‌چپ (RLM) میان حروف با نیم‌فاصله"
+
+#: includes/negaresh-settings.php:256
+msgid "Remove Kashidas inside words"
+msgstr "حذف کشیده درون واژه‌ها"
+
+#: includes/negaresh-settings.php:257
+msgid "Use Unix line endings"
+msgstr "استفاده از پایان خط یونیکس"
+
+#: includes/negaresh-settings.php:258
+msgid "Reduce more than two line breaks to two"
+msgstr "کاهش بیش از دو شکست خط پیاپی به دو"
+
+#: includes/negaresh-settings.php:259
+msgid "Trim spaces at the start of lines and of the text"
+msgstr "حذف فاصله‌ها از آغاز خط‌ها و آغاز و پایان متن"
+
+#: includes/negaresh-settings.php:310
+msgid "Leave all unchecked to fix every post type."
+msgstr "برای اصلاح همهٔ نوع‌ها، هیچ‌کدام را انتخاب نکنید."

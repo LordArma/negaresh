@@ -43,7 +43,8 @@ wp post create - --post_title=e2e --post_name=e2e --post_status=publish >/dev/nu
 <!-- wp:code --><pre class="wp-block-code"><code>x ... y // 123</code></pre><!-- /wp:code -->
 HTML
 PAGE="$(curl -s "$URL/e2e/")"
-check "page starts with doctype (B23)" "<!DOCTYPE html>" "$(head -c 15 <<<"$PAGE")"
+# themes differ in casing (Twenty Twenty-One writes <!doctype html>)
+check "page starts with doctype (B23)" "<!doctype html>" "$(head -c 15 <<<"$PAGE" | tr 'A-Z' 'a-z')"
 check "link kept (B1)" '<a href="https://example.com/?a=1&amp;b=2">این صفحه</a>' "$PAGE"
 check "entities kept (B1, B2)" 'A&amp;B و &lt;b&gt; متن' "$PAGE"
 check "defaults applied without saving (B5)" 'عدد ۴۵۶' "$PAGE"

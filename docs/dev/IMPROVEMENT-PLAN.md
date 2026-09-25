@@ -4,8 +4,10 @@ Start only after BUGFIX-PLAN Critical and High items are closed (v4.1.0 tagged).
 Each item lists the goal, the approach, and what "done" means. Order is the suggested order.
 
 ## I1 Tooling and quality gates
-- Composer (dev): PHPUnit, Brain Monkey, WPCS (PHPCS), PHPStan with `szepeviktor/phpstan-wordpress`.
-- CI workflow: lint + PHPCS + PHPStan + tests on PHP 7.4, 8.1, 8.3; runs on push and pull requests.
+- Already there (phase 1): Composer, PHPUnit 9.6, Brain Monkey, 74 unit tests, `tests/e2e/run.sh`.
+- To add: WPCS (PHPCS), PHPStan with `szepeviktor/phpstan-wordpress`.
+- CI workflow: lint + PHPCS + PHPStan + tests on PHP 7.4, 8.1, 8.3; runs on push and pull requests;
+  optionally `tests/e2e/run.sh` (GitHub runners have Docker).
 - `.editorconfig`, `.gitattributes` with `export-ignore` for dev files.
 - **Done when:** CI green, commands documented in CLAUDE.md §4.
 
@@ -18,14 +20,15 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - **Done when:** fixtures show markup byte identical outside text nodes.
 
 ## I3 Codebase structure
-- `negaresh.php` defines `NEGARESH_VERSION`, `NEGARESH_FILE`, `NEGARESH_PATH`, then boots `Negaresh\Plugin`.
+- Partly done in phase 1 (classes `Negaresh`, `Negaresh_Settings`, constants, own Virastar namespace).
+- Remaining: namespaced classes under `src/` if the plugin grows; keep this optional.
 - `src/` with `Plugin`, `Settings` (single source of option definitions: key, label, description,
   default, group), `Processor` (wraps Virastar + I2), `Migration`.
 - Composer autoload (classmap, shipped) or a tiny PSR-4 autoloader; Virastar scoped under
   `Negaresh\Vendor` (PHP-Scoper or a documented manual prefix).
 
 ## I4 Performance
-- Build the Virastar instance once per request (options do not change mid request).
+- ~~Build the Virastar instance once per request~~ (done in phase 1).
 - Cache processed output: key = hash(content + options + plugin version), object cache / transient,
   invalidated on `save_post` and option update.
 - Optional "fix on save" mode (`wp_insert_post_data` / `rest_pre_insert_post`) that writes the
@@ -38,7 +41,9 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - Live preview box: paste text, see result with the current (unsaved) toggles (REST endpoint,
   nonce, `manage_options`).
 - "Reset to defaults" button, "Settings" link on the Plugins screen, RTL friendly layout.
-- Scope settings: post types, apply to titles / excerpts / comments / widgets, feeds, REST.
+- Scope settings: ~~post types, feeds, REST~~ (done in phase 1); still open: titles, excerpts,
+  comments, widgets.
+- ~~Sections and examples~~ (done in phase 1); still open: longer descriptions, live preview.
 
 ## I6 Editor integration
 - Per post opt out (post meta + checkbox in Gutenberg sidebar and Classic editor meta box).
@@ -51,12 +56,12 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - On tag `v*`: build zip with only the plugin folder (respecting `export-ignore`), attach to a
   GitHub Release, generate release notes from `CHANGELOG.md`.
 - Keep the existing push artifact for testing builds.
-- `CHANGELOG.md` (Keep a Changelog format), semantic versioning.
+- ~~`CHANGELOG.md`~~ (added in phase 1); keep it updated with every change.
 
 ## I8 Documentation and i18n
 - `readme.txt` in wordpress.org format (description, FAQ, screenshots, changelog).
 - `README.fa.md` for Persian readers; update screenshot.
-- Complete `fa_IR` translation; load via `load_plugin_textdomain` only if WP < 4.6 behaviour needed.
+- ~~Complete `fa_IR` translation~~ (done in phase 1).
 
 ## I9 wordpress.org readiness (optional, decide with the user)
 - Plugin Check (`wp plugin check`) clean, GPL compatible headers, no external calls, sanitisation
