@@ -9,17 +9,30 @@ Status snapshot is kept up to date at the top.
 | --- | --- |
 | Analysis | ✅ done (session 1) |
 | Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ✅ 24 of 24 done, released as 4.1.0 |
-| Working branch | `phase-2` (local commits, one per slice, not pushed); `fix/v4.1.0` is merged |
+| Working branch | `phase-2` (local commits, one per slice; merged into `master` at each release) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⏳ in progress on branch `phase-2` |
-| Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
-| Next release target | 4.2.0 (phase 2 features) |
+| Current version | 4.2.0 (tag `v4.2.0`, commit `92c220b`, released 2026-09-25 by the Release workflow) |
+| Next release target | 4.3.0 |
 
-**Next step:** I5 (settings page UX). Open, needs the user: release 4.2.0 (B24, B25, B27 fixes
-+ save mode), and push `phase-2` so CI runs on GitHub.
+**Next step:** I5 (settings page UX), asked for by the user.
 
 **Checks:** `composer check` (PHPCS + PHPStan level 8 + 122 unit tests) clean; e2e 21/21 on WP
 7.1.2 and 5.8.3.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Release 4.2.0
+
+User: "release the new, merge it as a part of the release", then I5.
+Done: version 4.2.0 (header, constant, translation headers), CHANGELOG dated; `phase-2`
+fast forwarded into `master` and pushed; waited for CI before tagging. First CI run on GitHub
+failed only on the Docker/zip jobs: scripts were not executable in git (`core.fileMode` is off in
+this Windows checkout, so `chmod +x` was never recorded) → `git update-index --chmod=+x`, commit
+`92c220b`, CI all green (PHP 7.4/8.1/8.3/8.4, zip, e2e latest + 5.8). Then tag `v4.2.0`: the
+Release workflow ran every step and published https://github.com/LordArma/negaresh/releases/tag/v4.2.0.
+Verified: downloaded the published zip, installed it over 4.1.0 in a fresh WordPress: active,
+DB 3, mode display kept, empty debug.log.
 
 ---
 
