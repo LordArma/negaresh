@@ -8,15 +8,35 @@ Status snapshot is kept up to date at the top.
 | Phase | State |
 | --- | --- |
 | Analysis | ✅ done (session 1) |
-| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ in progress, 2 of 22 done (B0, B1) |
+| Phase 1 bug fixes (`BUGFIX-PLAN.md`) | ⏳ in progress, 5 of 22 done (B0, B1, B4, B20, B21), B2 half |
+| Working branch | `fix/v4.1.0` (local commits, one per slice, not pushed) |
 | Phase 2 improvements (`IMPROVEMENT-PLAN.md`) | ⛔ blocked on phase 1 Critical + High |
 | Current version | 4.0.0 (tag `v4.0.0`, commit `cd6f826`) |
 | Next release target | 4.1.0 (bug fixes) |
 
-**Next step:** B2 (needs the user's decision: remove the setting, or safe allow list). B1 must not
-be released without B2. Then B20.
+**Next step:** plugin refactor slice: B2 (remove setting), B3, B5 to B19.
 
-**Tests:** `composer test` → 17 tests, 14 pass, 3 incomplete (B20 ×2, B21).
+**Tests:** `composer test` → 23 tests, all pass.
+
+---
+
+## 2026-09-25 · Session 3 · Slice: Virastar library fixes (B2 library half, B4, B20, B21)
+
+User said: do all next items, "do what ever you know is the best way", the library may be replaced
+or rewritten, and "save everything after each slice". Decisions taken:
+- Keep the patched Virastar instead of a rewrite for v4.1 (a rewrite without reference tests is
+  riskier; revisit in phase 2, see IMPROVEMENT-PLAN I11).
+- B2: remove the setting (recommended option). B9: single `negaresh_options` array with migration.
+- Each slice ends with docs updated and a local commit on branch `fix/v4.1.0`. Sessions 1 and 2
+  were committed first as `c38b57e` (B0 + docs) and `688b622` (B1).
+
+Done:
+- Library moved to namespace `Negaresh\Vendor\Virastar` (B4); `decodeHTMLEntities()` is a no-op
+  (B2); five `'\x{...}'` replacement strings fixed and `fixSuffixMisc` group fixed (B20); front
+  matter regex fixed (B21). All listed in ANALYSIS §4.1.
+- `VirastarKnownBugsTest` replaced by `VirastarFixesTest` (9 tests).
+
+Verified: 7 of the new tests fail on the pre-slice library; full suite 23/23 passes.
 
 ---
 

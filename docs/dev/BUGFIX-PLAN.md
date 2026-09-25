@@ -15,7 +15,8 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   Keep `vendor/`, `tests/`, `composer.*` out of the shipped zip.
   *Result:* PHPUnit 9.6 + Brain Monkey 2.6, platform pinned to PHP 7.4, all dev files at the repo
   root (outside the zipped plugin folder). `composer test` runs the suite. Open bugs are kept as
-  real assertions marked incomplete in `tests/Unit/VirastarKnownBugsTest.php`.
+  real assertions marked incomplete in a `...KnownBugsTest.php` file when a bug is found before
+  it is fixed (none open right now).
 
 ## 1. Critical
 
@@ -30,16 +31,17 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   identical to the original on 20 samples. Tests: `tests/Unit/VirastarPreservationTest.php`.
   **Do not release B1 without B2:** with `decode_html_entities` on (plugin default) every entity
   adds a fake HTML placeholder, so tags are restored in the wrong places (`A</p>B`).
-- [ ] **B2 `decode_html_entities` is destructive and unsafe.** **Next.** Blocks releasing B1. It replaces entities with an HTML
+- [ ] **B2 `decode_html_entities` is destructive and unsafe.** *(library half done session 3: `decodeHTMLEntities()` is a no-op; plugin half, removing the setting, is in the plugin refactor slice)* It replaces entities with an HTML
   placeholder instead of decoding; a real decode of `&lt;script&gt;` into `<script>` would be
   an XSS vector. *Fix:* force it off in the plugin, remove the setting (migration drops the
   option), or decode only a safe allow list (never `&lt; &gt; &amp; &quot;`).
+  *Decision (session 3, user said "do what you know is best"):* remove the setting and force it off.
 - [ ] **B3 Shortcodes and code are rewritten.** The filter runs before `do_shortcode` and
   brackets are not preserved, so `[gallery ids="1,2"]` becomes `[gallery ids= «1, 2»]`.
   Contents of `<pre>`, `<code>`, `<kbd>`, `<script>`, `<style>`, `<textarea>` are also edited.
   *Fix:* process text nodes only and skip those elements entirely (see I2 for the proper
   approach; minimum for v4.1 is to protect `[...]` and those element blocks before cleanup).
-- [ ] **B4 Fatal error with GDIC theme** (or anything else shipping Virastar): both declare
+- [x] **B4 Fatal error with GDIC theme** *(done session 3: namespace `Negaresh\Vendor\Virastar`)* (or anything else shipping Virastar): both declare
   `Alirezasedghi\Virastar\Virastar`. *Fix:* move the copy into the plugin namespace
   (`Negaresh\Vendor\Virastar`) or guard with `class_exists()`; prefer the namespace, because
   another copy could be an older, differently behaving version.
@@ -76,19 +78,21 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   explicitly; markdown ones off for HTML.
 - [ ] **B19 No uninstall cleanup.** *Fix:* `uninstall.php` deletes plugin options (old and new keys).
 
-- [ ] **B20 Literal `\x{...}` in replacement strings** *(found session 2)*. PHP does not expand
+- [x] **B20 Literal `\x{...}` in replacement strings** *(done session 3)* *(found session 2)*. PHP does not expand
   `\x{061F}` in a single quoted replacement, so the text `\x{061F}` is written into the post.
   Hits `fixQuestionMark` (every `?`), `cleanupZWNJ` (soft hyphen and repeated ZWNJ),
   `cleanupRLM`, `fixSuffixSpacingHamzeh` (Virastar.php ~590, 592, 702, 768, 801); line ~817 also
   uses `$2` with no second group. The rules are off by default in the plugin, so severity is
   High only for sites that enabled them. *Fix:* use the real characters or `"\u{061F}"`.
-  Tests waiting in `VirastarKnownBugsTest`. Also check the `$entities` name table (same problem, B2).
+  *Result:* all five replacements use `"\u{...}"`; `fixSuffixMisc` uses a lookahead instead of the
+  missing `$2`. The `$entities` name table still holds `'\x{...}'` text but is only used by the
+  disabled decoder (B2). Tests: `tests/Unit/VirastarFixesTest.php`.
 
 ## 4. Low
 
-- [ ] **B21 Front matter never preserved** *(found session 2)*. The PHP port dropped the JS
+- [x] **B21 Front matter never preserved** *(done session 3)* *(found session 2)*. The PHP port dropped the JS
   `' ' + text + ' '` padding, so `/^ ---/` never matches. Irrelevant for WordPress HTML; fix only
-  if cheap (drop the leading space from the regex). Test waiting in `VirastarKnownBugsTest`.
+  if cheap (drop the leading space from the regex). *Result:* regex fixed, test in `VirastarFixesTest`.
 
 - [ ] **B14 Untranslatable / meaningless labels.** 12 fields call `__($feild_title)` with the raw
   option key (`cleanup_rlm`, `fix_suffix_misc`, ...). *Fix:* literal, descriptive labels.
@@ -102,5 +106,8 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
 
 ## Suggested order
 
-~~B0~~ → ~~B1~~ → B2 → B20 → B4 → B3 → B6 → B7 → B5 + B9 (same refactor) → B8 → B12 → B13 → B18 → B10 → B11 →
-B19 → B14 → B15 → B16 → B17 → B21 → tag v4.1.0.
+~~B0~~ → ~~B1~~ → B2 (half) → ~~B20~~ → ~~B4~~ → B3 → B6 → B7 → B5 + B9 (same refactor) → B8 → B12 → B13 → B18 → B10 → B11 →
+B19 → B14 → B15 → B16 → B17 → ~~B21~~ → tag v4.1.0.
+
+From session 3 the plugin's own code (B2 plugin half, B3, B5 to B19) is done as one refactor
+slice, since every item touches the same three files.

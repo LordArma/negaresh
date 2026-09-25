@@ -81,7 +81,7 @@ Additional defects in the same file:
 | Item | Value |
 | --- | --- |
 | File | `wp-content/plugins/negaresh/includes/Virastar.php` |
-| Namespace / class | `Alirezasedghi\Virastar\Virastar` |
+| Namespace / class | upstream `Alirezasedghi\Virastar\Virastar`; ours `Negaresh\Vendor\Virastar\Virastar` (B4) |
 | Upstream | https://github.com/AlirezaSedghi/Virastar (PHP port of JS Virastar) |
 | Upstream version | identical to upstream `master` `ccc38a3` (= v1.0.2 + README change), checked 2026-09-25 |
 | Local patches | see §4.1 (record every patch here; each is marked `// Negaresh patch (Bn)` in the code) |
@@ -98,6 +98,11 @@ patches upstream as a PR.
 | B1 | `cleanup()`, every restore closure | `use (&$x)` and `(string) array_shift($x)` |
 | B1 | `cleanup()`, entity restore | restore from the captured `$entities`, not `$this->entities` (the name table) |
 | B1 | `fixPunctuationSpacing()` | `[ \t\x{200c}]*` → `[ \t\x{200c}]*+` so `(?!\n\|_{2})` actually protects placeholders |
+| B2 | `decodeHTMLEntities()` | returns the text unchanged (upstream injected unstored HTML placeholders; a real decode of `&lt;` is unsafe) |
+| B4 | namespace | `Alirezasedghi\Virastar` → `Negaresh\Vendor\Virastar` |
+| B20 | `cleanupZWNJ()`, `cleanupRLM()`, `fixQuestionMark()`, `fixSuffixSpacingHamzeh()` | replacement strings use `"\u{...}"` instead of the literal text `'\x{...}'` |
+| B20 | `fixSuffixMisc()` | `$2` pointed at a missing group; trailing check is now a lookahead |
+| B21 | front matter preserver | `/^ ---/` → `/^---/` (text is trimmed before this runs) |
 
 To re-apply after an upstream upgrade: `grep -n "Negaresh patch" includes/Virastar.php`, and run
 `composer test`; `VirastarPreservationTest` fails without these patches.

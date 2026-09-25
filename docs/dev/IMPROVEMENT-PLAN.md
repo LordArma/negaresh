@@ -66,3 +66,12 @@ Each item lists the goal, the approach, and what "done" means. Order is the sugg
 - Admin notice / dashboard widget showing how many posts would change.
 - Custom dictionary of words that must not be touched.
 - Multisite: network wide defaults.
+
+## I11 Replace or rewrite Virastar (decide after I2)
+- The user allowed replacing or rewriting the vendored library (session 3).
+- Why not now: ~1000 lines of Persian typography regexes with no upstream tests; a rewrite in the
+  bug fix release would trade known bugs for unknown ones.
+- When: after I2 (text node processing) lands, the preserve/restore placeholder machinery is no
+  longer needed. Then either slim the vendored copy down to the text rules, or rewrite rule by rule
+  with a test per rule (port the JS Virastar test suite as the reference).
+- **Done when:** every rule has tests, and no `Negaresh patch` markers remain because the code is ours.

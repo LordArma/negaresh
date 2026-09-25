@@ -2,7 +2,7 @@
 
 namespace Negaresh\Tests\Unit;
 
-use Alirezasedghi\Virastar\Virastar;
+use Negaresh\Vendor\Virastar\Virastar;
 
 /**
  * B1: Virastar must give back everything it sets aside before cleaning text.

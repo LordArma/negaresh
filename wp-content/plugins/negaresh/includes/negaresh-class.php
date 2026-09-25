@@ -1,7 +1,7 @@
 
 <?php
 
-use Alirezasedghi\Virastar\Virastar;
+use Negaresh\Vendor\Virastar\Virastar;
 
 include('Virastar.php');
 require_once('negaresh-settings.php');

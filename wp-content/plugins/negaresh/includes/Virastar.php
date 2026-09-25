@@ -1,6 +1,8 @@
 <?php
 
-namespace Alirezasedghi\Virastar;
+// Negaresh patch (B4): own namespace, so another copy of Virastar (for example the GDIC theme)
+// can be loaded at the same time without a "Cannot declare class" fatal error.
+namespace Negaresh\Vendor\Virastar;
 
 use Exception;
 
@@ -201,11 +203,10 @@ class Virastar
      */
     public function decodeHTMLEntities($text)
     {
-        return preg_replace_callback('/&(#?[^;\W]+;?)/', function ($matched) {
-            $match = $matched[1] ?? '';
-            // $html[] = $matched;
-            return ' __HTML__PRESERVER__ ';
-        }, $text);
+        // Negaresh patch (B2): upstream replaced every entity with an HTML placeholder it never
+        // stored, which scrambled the restored tags. Decoding `&lt;` into `<` would also turn
+        // escaped text into live markup, so this is a deliberate no-op.
+        return $text;
     }
 
     /**
@@ -232,7 +233,7 @@ class Virastar
         // preserves front matter data in the text
         if ($options["preserve_front_matter"]) {
             $front_matter = [];
-            $text = preg_replace_callback('/^ ---[\S\s]*?---\n/', function ($matched) use (&$front_matter) { // Negaresh patch (B1): by reference
+            $text = preg_replace_callback('/^---[\S\s]*?---\n/' /* Negaresh patch (B21): text is trimmed, no leading space */, function ($matched) use (&$front_matter) { // Negaresh patch (B1): by reference
                 $front_matter[] = $matched[0];
                 return ' __FRONT__MATTER__PRESERVER__ ';
             }, $text);
@@ -588,9 +589,10 @@ class Virastar
     protected function cleanupZWNJ($text)
     {
         // converts all soft hyphens (&shy;) into zwnj
-        return preg_replace('/\x{00ad}/u', '\x{200c}',
+        // Negaresh patch (B20): real characters in the replacements, not the text '\x{200c}'
+        return preg_replace('/\x{00ad}/u', "\u{200c}",
             // removes more than one zwnj
-            preg_replace('/\x{200c}{2,}/u', '\x{200c}',
+            preg_replace('/\x{200c}{2,}/u', "\u{200c}",
                 // cleans zwnj before and after numbers, english words, spaces and punctuations
                 // preg_replace('~\x{200c}([\w\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])~u', '$1', // \w is for any english word character in javascript, but it supports words in any language in php
                 preg_replace('~\x{200c}([\s0-9۰-۹[\](){}«»“”.…,:;?!$%@#*=+\-/\\،؛٫٬×٪؟ـ])~u', '$1',
@@ -700,7 +702,7 @@ class Virastar
     {
         // converts Right-to-left marks followed by persian characters to
         // zero-width non-joiners (ZWNJ)
-        return preg_replace('/([^a-zA-Z\-_])(\x{200f})/u', '$1\x{200c}', $text);
+        return preg_replace('/([^a-zA-Z\-_])(\x{200f})/u', "\$1\u{200c}", $text); // Negaresh patch (B20)
     }
 
     // converts incorrect persian glyphs to standard characters
@@ -766,7 +768,7 @@ class Virastar
     // replaces question marks with its persian equivalent
     protected function fixQuestionMark($text)
     {
-        return preg_replace('/(\?)/', '\x{061F}', $text); // \x{061F} = ؟
+        return preg_replace('/(\?)/', "\u{061F}", $text); // Negaresh patch (B20): \u{061F} = ؟
     }
 
     // puts zwnj between the word and the prefix:
@@ -799,7 +801,7 @@ class Virastar
 
     protected function fixSuffixSpacingHamzeh($text)
     {
-        $replacement = '$1\x{0647}\x{200c}\x{06cc}$3';
+        $replacement = "\$1\u{0647}\u{200c}\u{06cc}\$3"; // Negaresh patch (B20)
         // heh + ye
         return preg_replace('/(\S)(ه[\s\x{200c}]+[یي])([\s\x{200c}])/u', $replacement,
             // heh + standalone hamza
@@ -815,7 +817,8 @@ class Virastar
         // replaces ه followed by ئ or ی, and then by ی, with ه\x{200c}ای,
         // EXAMPLE: خانه‌ئی becomes خانه‌ای
         // preg_replace('/(\S)ه[\x{200c}\x{200e}][ئی]ی([\s\x{200c}\x{200e}])/u', "$1ه\u{200c}ای$2", $text);
-        return preg_replace('/(\S)ه[\x{200c}\x{200e}][ئی]ی/u', "$1ه\u{200c}ای$2", $text);
+        // Negaresh patch (B20): `$2` referred to a group that did not exist; keep the word end check as a lookahead
+        return preg_replace('/(\S)ه[\x{200c}\x{200e}][ئی]ی(?=[\s\x{200c}\x{200e}]|$)/u', "\$1ه\u{200c}ای", $text);
     }
 
     protected function cleanupExtraMarks($text)
