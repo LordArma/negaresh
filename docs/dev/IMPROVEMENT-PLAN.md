@@ -10,13 +10,31 @@ Each item lists the goal, the approach, and what "done" means.
 **Order:** I1 → I7 → I2 → I4 → I5 → I6 → I11 → I8 leftovers → I3 (only if needed) → I9 (when asked).
 I10 needs user decisions first.
 
-## I1 Tooling and quality gates
+## I1 Tooling and quality gates ✅ *(done session 3; CI not yet run on GitHub, see PROGRESS)*
 - Already there (phase 1): Composer, PHPUnit 9.6, Brain Monkey, 74 unit tests, `tests/e2e/run.sh`.
 - To add: WPCS (PHPCS), PHPStan with `szepeviktor/phpstan-wordpress`.
 - CI workflow: lint + PHPCS + PHPStan + tests on PHP 7.4, 8.1, 8.3; runs on push and pull requests;
   optionally `tests/e2e/run.sh` (GitHub runners have Docker).
 - `.editorconfig`, `.gitattributes` with `export-ignore` for dev files.
 - **Done when:** CI green, commands documented in CLAUDE.md §4.
+- *Result:*
+  - PHPCS (`phpcs.xml.dist`): PSR-12 formatting (the existing style; full WordPress formatting was
+    rejected as churn with no gain) + WordPress Security, I18n, PrefixAllGlobals, DB, PHP rules +
+    PHPCompatibilityWP for PHP 7.4+ (vendored Virastar: compatibility only). Clean.
+  - PHPStan level 8 (`phpstan.neon.dist`) with `szepeviktor/phpstan-wordpress`; Virastar only
+    scanned for symbols; `treatPhpDocTypesAsCertain: false` because Virastar's docblocks promise
+    `string` where `preg_*` can return null. Clean.
+  - Findings fixed: `fix()` now checks every `preg_*` result and throws (→ original content) instead
+    of passing null to `implode()`. Not reachable with today's patterns (PCRE auto-possessifies
+    them; a backtrack-limit repro did not trigger), so hardening, not a numbered bug.
+    `Negaresh_Settings::get()` now normalizes stored values (flags → bool, `post_types` → list of
+    strings), new `rules()` and `post_types()` accessors; a corrupt `post_types` string used to
+    reach `in_array()`.
+  - `composer lint | cs | cs:fix | stan | test | check`.
+  - `.github/workflows/ci.yml`: cs + stan + tests on PHP 7.4, 8.1, 8.3, 8.4, then
+    `tests/e2e/run.sh` on the latest WordPress and on 5.8 (minimum). The old
+    `main.yml` (zip artifact) stays until I7.
+  - Verified locally: all checks on PHP 7.4.33, 8.3.6, 8.4; e2e on WP 7.1.2 and 5.8.3.
 
 ## I2 HTML aware processing (the real fix behind B3)
 - Walk the markup and run Virastar on **text nodes only**. Options: `WP_HTML_Tag_Processor`

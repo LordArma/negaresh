@@ -5,21 +5,47 @@
     "license": "GPL-3.0-or-later",
     "require-dev": {
         "php": ">=7.4",
+        "brain/monkey": "^2.6",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^9.6",
-        "brain/monkey": "^2.6"
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "wp-coding-standards/wpcs": "^3.1"
     },
     "config": {
         "platform": {
             "php": "7.4.33"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpstan/extension-installer": true
+        }
     },
     "scripts": {
-        "test": "phpunit"
+        "lint": "find wp-content/plugins/negaresh tests -name \"*.php\" -print0 | xargs -0 -n1 -P4 php -l -d display_errors=1 | grep -v \"^No syntax errors\" || true",
+        "cs": "phpcs",
+        "cs:fix": "phpcbf",
+        "stan": "phpstan analyse --no-progress --memory-limit=1G",
+        "test": "phpunit",
+        "check": [
+            "@cs",
+            "@stan",
+            "@test"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
             "Negaresh\\Tests\\": "tests/"
         }
+    },
+    "scripts-descriptions": {
+        "lint": "PHP syntax check",
+        "cs": "Coding standards (PSR-12 + WordPress security, i18n, prefixes, PHP 7.4 compatibility)",
+        "cs:fix": "Fix what phpcs can fix",
+        "stan": "Static analysis (PHPStan level 8)",
+        "test": "Unit tests",
+        "check": "cs + stan + test, as CI runs them"
     }
 }

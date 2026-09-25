@@ -7,6 +7,9 @@ namespace Negaresh\Tests\Unit;
  */
 class PluginFilesTest extends TestCase
 {
+    /**
+     * @return array<string, array{string}>
+     */
     public function phpFileProvider(): array
     {
         $files = [];
@@ -27,7 +30,7 @@ class PluginFilesTest extends TestCase
      */
     public function testB23NoOutputOutsidePhpTags(string $path): void
     {
-        $code = file_get_contents($path);
+        $code = self::read($path);
 
         self::assertStringStartsWith('<?php', $code, 'nothing (not even a BOM or newline) may precede <?php');
         self::assertDoesNotMatchRegularExpression('/\?>\s*$/', $code, 'omit the closing ?> at the end of the file');
@@ -36,7 +39,7 @@ class PluginFilesTest extends TestCase
     /** @dataProvider phpFileProvider */
     public function testFilesBailOutWhenLoadedDirectly(string $path): void
     {
-        $code = file_get_contents($path);
+        $code = self::read($path);
 
         self::assertMatchesRegularExpression("/defined\\('(ABSPATH|WP_UNINSTALL_PLUGIN)'\\)|^namespace /m", $code);
     }

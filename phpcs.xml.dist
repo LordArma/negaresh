@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<ruleset name="Negaresh">
+    <description>PSR-12 formatting plus the WordPress rules that matter for safety, i18n and wordpress.org.</description>
+
+    <file>wp-content/plugins/negaresh</file>
+    <file>tests</file>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <arg name="parallel" value="8"/>
+
+    <config name="testVersion" value="7.4-"/>
+    <config name="minimum_wp_version" value="5.8"/>
+
+    <!-- Every PHP file, vendored Virastar included, must run on PHP 7.4+ and the supported WordPress. -->
+    <rule ref="PHPCompatibilityWP"/>
+
+    <!-- Formatting: the style the code already uses. -->
+    <rule ref="PSR12">
+        <exclude-pattern>wp-content/plugins/negaresh/includes/Virastar.php</exclude-pattern>
+    </rule>
+    <!-- WordPress naming: classes Negaresh_Settings, methods snake_case, test files PSR-4. -->
+    <rule ref="Squiz.Classes.ValidClassName.NotCamelCaps"><exclude-pattern>*</exclude-pattern></rule>
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps"><exclude-pattern>*</exclude-pattern></rule>
+    <rule ref="PSR1.Classes.ClassDeclaration.MissingNamespace"><exclude-pattern>wp-content/plugins/negaresh/*</exclude-pattern></rule>
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols"><exclude-pattern>*</exclude-pattern></rule>
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses"><exclude-pattern>tests/*</exclude-pattern></rule>
+    <rule ref="Generic.Files.LineLength"><exclude-pattern>tests/*</exclude-pattern><properties><property name="lineLimit" value="160"/><property name="absoluteLineLimit" value="0"/></properties></rule>
+
+    <!-- WordPress rules that catch real bugs, applied to the plugin (not to tests or vendored code). -->
+    <rule ref="WordPress.Security">
+        <exclude-pattern>tests/*</exclude-pattern>
+        <exclude-pattern>wp-content/plugins/negaresh/includes/Virastar.php</exclude-pattern>
+    </rule>
+    <rule ref="WordPress.WP.I18n">
+        <exclude-pattern>tests/*</exclude-pattern>
+        <properties><property name="text_domain" type="array"><element value="negaresh"/></property></properties>
+    </rule>
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <exclude-pattern>tests/*</exclude-pattern>
+        <exclude-pattern>wp-content/plugins/negaresh/includes/Virastar.php</exclude-pattern>
+        <properties><property name="prefixes" type="array"><element value="negaresh"/></property></properties>
+    </rule>
+    <rule ref="WordPress.WP.AlternativeFunctions"><exclude-pattern>tests/*</exclude-pattern><exclude-pattern>wp-content/plugins/negaresh/includes/Virastar.php</exclude-pattern></rule>
+    <rule ref="WordPress.WP.DeprecatedFunctions"/>
+    <rule ref="WordPress.WP.DiscouragedFunctions"/>
+    <rule ref="WordPress.PHP.DevelopmentFunctions"><exclude-pattern>tests/*</exclude-pattern></rule>
+    <rule ref="WordPress.PHP.DontExtract"/>
+    <rule ref="WordPress.PHP.RestrictedPHPFunctions"/>
+    <rule ref="WordPress.DB"><exclude-pattern>tests/*</exclude-pattern></rule>
+    <rule ref="Generic.PHP.BacktickOperator"/>
+    <rule ref="Generic.PHP.ForbiddenFunctions"><properties><property name="forbiddenFunctions" type="array"><element key="eval" value="null"/><element key="create_function" value="null"/></property></properties><exclude-pattern>tests/*</exclude-pattern></rule>
+</ruleset>

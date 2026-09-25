@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Negaresh: runs post content through Virastar at render time.
  *
@@ -17,7 +18,7 @@ class Negaresh
      * Elements whose contents are never touched (B3). The element and everything inside it is
      * swapped for a placeholder before Virastar runs.
      */
-    const PROTECTED_ELEMENTS = ['pre', 'code', 'kbd', 'samp', 'var', 'script', 'style', 'textarea', 'svg', 'math'];
+    public const PROTECTED_ELEMENTS = ['pre', 'code', 'kbd', 'samp', 'var', 'script', 'style', 'textarea', 'svg', 'math'];
 
     /** @var Negaresh_Settings */
     private $settings;
@@ -76,7 +77,7 @@ class Negaresh
             return $content;
         }
 
-        return (is_string($fixed) && '' !== $fixed) ? $fixed : $content;
+        return '' !== $fixed ? $fixed : $content;
     }
 
     /**
@@ -93,29 +94,43 @@ class Negaresh
             return '<' . $token . '-' . (count($held) - 1) . '>';
         };
 
+        // Every regex result is checked: a failed preg_* call returns null/false, and passing that
+        // on would silently drop part of the post. Throwing makes filter_content() fall back.
         $elements = implode('|', self::PROTECTED_ELEMENTS);
-        $html = preg_replace_callback('#<(' . $elements . ')\b[^>]*>.*?</\1\s*>#is', $hold, $html);
-
-        if (!is_string($html)) {
-            throw new \RuntimeException('protecting markup failed: ' . preg_last_error());
-        }
+        $html = self::checked(preg_replace_callback('#<(' . $elements . ')\b[^>]*>.*?</\1\s*>#is', $hold, $html));
 
         // Shortcode tags such as [gallery ids="1,2"] or [/caption], looked for between HTML tags
         // only (tags themselves are preserved whole by Virastar). Names start with a Latin letter,
         // so Persian text in brackets is still fixed, and so is the content a shortcode encloses.
         $parts = preg_split('#(<[^>]*>)#', $html, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (false === $parts) {
+            throw new \RuntimeException('splitting markup failed: ' . (int) preg_last_error());
+        }
         foreach ($parts as $i => $part) {
             if (0 === $i % 2 && false !== strpos($part, '[')) {
-                $parts[$i] = preg_replace_callback('#\[\[?/?[A-Za-z][\w-]*(?:[\s/=][^\[\]]*)?\]\]?#', $hold, $part);
+                $parts[$i] = self::checked(preg_replace_callback('#\[\[?/?[A-Za-z][\w-]*(?:[\s/=][^\[\]]*)?\]\]?#', $hold, $part));
             }
         }
-        $html = implode('', $parts);
 
-        $fixed = $this->virastar()->cleanup($html);
+        $fixed = $this->virastar()->cleanup(implode('', $parts));
+        if (!is_string($fixed)) {
+            throw new \RuntimeException('Virastar returned no text');
+        }
 
-        return preg_replace_callback('#<' . preg_quote($token, '#') . '-(\d+)>#', function (array $m) use ($held) {
+        return self::checked(preg_replace_callback('#<' . preg_quote($token, '#') . '-(\d+)>#', function (array $m) use ($held) {
             return $held[(int) $m[1]];
-        }, $fixed);
+        }, $fixed));
+    }
+
+    /**
+     * @param string|null $result return value of a preg_replace* call
+     */
+    private static function checked(?string $result): string
+    {
+        if (null === $result) {
+            throw new \RuntimeException('regex failed: ' . (int) preg_last_error());
+        }
+        return $result;
     }
 
     private function should_filter(): bool
@@ -131,7 +146,7 @@ class Negaresh
         if (!$options['apply_in_rest'] && defined('REST_REQUEST') && REST_REQUEST) {
             return false;
         }
-        if ($options['post_types']) {
+        if (is_array($options['post_types']) && $options['post_types']) {
             $type = get_post_type();
             if ($type && !in_array($type, $options['post_types'], true)) {
                 return false;
@@ -153,11 +168,12 @@ class Negaresh
      * Every Virastar option, explicitly (B18). Admin choices for the rules; fixed values for the
      * rest, because the input is HTML, not Markdown.
      */
+    /**
+     * @return array<string, bool>
+     */
     public function virastar_options(): array
     {
-        $rules = array_intersect_key($this->settings->get(), Negaresh_Settings::RULE_DEFAULTS);
-
-        return $rules + [
+        return $this->settings->rules() + [
             'decode_html_entities' => false, // B2: unsafe, removed from the settings
             'markdown_normalize_braces' => false,
             'markdown_normalize_lists' => false,

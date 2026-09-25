@@ -13,7 +13,7 @@ class I18nTest extends TestCase
     /** @return array<string,string> msgid => msgstr, single line entries (all ours are) */
     private static function parsePo(string $file): array
     {
-        preg_match_all('/^msgid "(.*)"\nmsgstr "(.*)"$/m', file_get_contents($file), $m, PREG_SET_ORDER);
+        preg_match_all('/^msgid "(.*)"\nmsgstr "(.*)"$/m', self::read($file), $m, PREG_SET_ORDER);
         $entries = [];
         foreach ($m as $entry) {
             if ('' !== $entry[1]) {
@@ -23,12 +23,16 @@ class I18nTest extends TestCase
         return $entries;
     }
 
-    /** Literal strings passed to the translation functions in the plugin source. */
+    /**
+     * Literal strings passed to the translation functions in the plugin source.
+     *
+     * @return list<string>
+     */
     private static function sourceStrings(): array
     {
         $strings = [];
-        foreach (glob(NEGARESH_PLUGIN_DIR . '/{,includes/}*.php', GLOB_BRACE) as $file) {
-            preg_match_all("/\\b(?:__|esc_html__|esc_html_e|esc_attr__|_e)\\(\\s*'((?:[^'\\\\]|\\\\.)*)'\\s*,\\s*'negaresh'/", file_get_contents($file), $m);
+        foreach (self::pluginFiles() as $file) {
+            preg_match_all("/\\b(?:__|esc_html__|esc_html_e|esc_attr__|_e)\\(\\s*'((?:[^'\\\\]|\\\\.)*)'\\s*,\\s*'negaresh'/", self::read($file), $m);
             foreach ($m[1] as $s) {
                 $strings[] = stripcslashes($s);
             }
@@ -58,12 +62,12 @@ class I18nTest extends TestCase
 
     public function testMoMatchesPo(): void
     {
-        $mo = file_get_contents(self::DIR . '/negaresh-fa_IR.mo');
-        $header = unpack('Vmagic/Vrevision/Vcount/Voriginals/Vtranslations', substr($mo, 0, 20));
+        $mo = self::read(self::DIR . '/negaresh-fa_IR.mo');
+        $header = self::unpack('Vmagic/Vrevision/Vcount/Voriginals/Vtranslations', substr($mo, 0, 20));
         $translations = [];
         for ($i = 0; $i < $header['count']; $i++) {
-            $orig = unpack('Vlength/Voffset', substr($mo, $header['originals'] + 8 * $i, 8));
-            $tran = unpack('Vlength/Voffset', substr($mo, $header['translations'] + 8 * $i, 8));
+            $orig = self::unpack('Vlength/Voffset', substr($mo, $header['originals'] + 8 * $i, 8));
+            $tran = self::unpack('Vlength/Voffset', substr($mo, $header['translations'] + 8 * $i, 8));
             $translations[substr($mo, $orig['offset'], $orig['length'])] = substr($mo, $tran['offset'], $tran['length']);
         }
         unset($translations['']);
@@ -73,5 +77,15 @@ class I18nTest extends TestCase
         ksort($po);
         ksort($translations);
         self::assertSame($po, $translations, 'recompile the .mo (wp i18n make-mo)');
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private static function unpack(string $format, string $data): array
+    {
+        $values = unpack($format, $data);
+        self::assertIsArray($values, 'truncated .mo file');
+        return $values;
     }
 }

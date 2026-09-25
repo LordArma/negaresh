@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Negaresh settings: one `negaresh_options` array, defaults in code, the settings page and the
  * migration from the 4.0 option layout (30 unprefixed options).
@@ -12,17 +13,17 @@ if (!defined('ABSPATH')) {
 
 class Negaresh_Settings
 {
-    const OPTION = 'negaresh_options';
-    const DB_VERSION_OPTION = 'negaresh_db_version';
-    const DB_VERSION = 2;
-    const PAGE = 'negaresh-options';
-    const GROUP = 'negaresh';
+    public const OPTION = 'negaresh_options';
+    public const DB_VERSION_OPTION = 'negaresh_db_version';
+    public const DB_VERSION = 2;
+    public const PAGE = 'negaresh-options';
+    public const GROUP = 'negaresh';
 
     /**
      * Virastar rules the admin can toggle, with their defaults.
      * Defaults match the 4.0 settings page; the last three used to run silently (B18).
      */
-    const RULE_DEFAULTS = [
+    public const RULE_DEFAULTS = [
         // characters
         'fix_persian_glyphs' => true,
         'fix_arabic_numbers' => true,
@@ -62,14 +63,14 @@ class Negaresh_Settings
     ];
 
     /** Where the fixes apply (B10). An empty post type list means every post type. */
-    const SCOPE_DEFAULTS = [
+    public const SCOPE_DEFAULTS = [
         'post_types' => [],
         'apply_in_feeds' => true,
         'apply_in_rest' => true,
     ];
 
     /** Option names used by Negaresh 4.0 and earlier, removed by the migration (B9). */
-    const LEGACY_OPTIONS = [
+    public const LEGACY_OPTIONS = [
         'normalize_eol', 'decode_html_entities', 'fix_dashes', 'fix_three_dots', 'normalize_ellipsis',
         'normalize_dates', 'fix_english_quotes_pairs', 'fix_english_quotes', 'fix_hamzeh',
         'fix_hamzeh_arabic', 'cleanup_rlm', 'cleanup_zwnj', 'fix_arabic_numbers', 'fix_english_numbers',
@@ -79,6 +80,9 @@ class Negaresh_Settings
         'fix_misc_spacing', 'cleanup_spacing', 'cleanup_line_breaks', 'cleanup_begin_and_end',
     ];
 
+    /**
+     * @return array<string, bool|list<string>>
+     */
     public static function defaults(): array
     {
         return self::RULE_DEFAULTS + self::SCOPE_DEFAULTS;
@@ -86,6 +90,9 @@ class Negaresh_Settings
 
     /**
      * Saved options merged over the defaults, so the front end always has a full set (B5).
+     * Values are normalized: whatever is stored, flags are bool and post_types a list of strings.
+     *
+     * @return array<string, bool|list<string>>
      */
     public function get(): array
     {
@@ -94,12 +101,52 @@ class Negaresh_Settings
             $saved = [];
         }
 
-        return array_merge(self::defaults(), array_intersect_key($saved, self::defaults()));
+        $options = [];
+        foreach (self::defaults() as $key => $default) {
+            $value = array_key_exists($key, $saved) ? $saved[$key] : $default;
+            if ('post_types' === $key) {
+                $options[$key] = is_array($value) ? array_values(array_map('strval', array_filter($value, 'is_scalar'))) : [];
+            } else {
+                $options[$key] = (bool) $value;
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * Post types to fix; an empty list means every post type.
+     *
+     * @return list<string>
+     */
+    public function post_types(): array
+    {
+        $post_types = $this->get()['post_types'];
+        return is_array($post_types) ? $post_types : [];
+    }
+
+    /**
+     * The Virastar rules only, as the admin set them.
+     *
+     * @return array<string, bool>
+     */
+    public function rules(): array
+    {
+        $options = $this->get();
+        $rules = [];
+        foreach (array_keys(self::RULE_DEFAULTS) as $key) {
+            $rules[$key] = true === $options[$key];
+        }
+        return $rules;
     }
 
     /**
      * Sanitize callback for register_setting(). Unchecked boxes are missing from the input, so
      * every rule not present is off. Idempotent: WordPress may run it twice on the first save.
+     */
+    /**
+     * @param mixed $input raw value from the settings form (or another update_option() call)
+     * @return array<string, bool|list<string>>
      */
     public function sanitize($input): array
     {
@@ -203,10 +250,25 @@ class Negaresh_Settings
         }
 
         add_settings_field('negaresh_post_types', __('Post types', 'negaresh'), [$this, 'render_post_types'], self::PAGE, 'negaresh_scope');
-        add_settings_field('negaresh_apply_in_feeds', __('Fix text in RSS feeds', 'negaresh'), [$this, 'render_checkbox'], self::PAGE, 'negaresh_scope', ['key' => 'apply_in_feeds', 'label_for' => 'negaresh_apply_in_feeds', 'example' => '']);
-        add_settings_field('negaresh_apply_in_rest', __('Fix text in the REST API', 'negaresh'), [$this, 'render_checkbox'], self::PAGE, 'negaresh_scope', ['key' => 'apply_in_rest', 'label_for' => 'negaresh_apply_in_rest', 'example' => '']);
+        $scope_boxes = [
+            'apply_in_feeds' => __('Fix text in RSS feeds', 'negaresh'),
+            'apply_in_rest' => __('Fix text in the REST API', 'negaresh'),
+        ];
+        foreach ($scope_boxes as $key => $label) {
+            add_settings_field(
+                'negaresh_' . $key,
+                $label,
+                [$this, 'render_checkbox'],
+                self::PAGE,
+                'negaresh_scope',
+                ['key' => $key, 'label_for' => 'negaresh_' . $key, 'example' => '']
+            );
+        }
     }
 
+    /**
+     * @return array<string, string> section slug => title
+     */
     public function sections(): array
     {
         return [
@@ -221,42 +283,172 @@ class Negaresh_Settings
     /**
      * Every label is a literal string so it can be translated (B14).
      * Examples are shown as they are and are not translated.
+     *
+     * @return array<string, array{section: string, label: string, example: string}>
      */
     public function rule_labels(): array
     {
         return [
-            'fix_persian_glyphs' => ['section' => 'characters', 'label' => __('Convert presentation form glyphs to standard Persian letters', 'negaresh'), 'example' => 'ﺳﻼﻡ → سلام'],
-            'fix_arabic_numbers' => ['section' => 'characters', 'label' => __('Convert Arabic digits to Persian digits', 'negaresh'), 'example' => '٤٥٦ → ۴۵۶'],
-            'fix_english_numbers' => ['section' => 'characters', 'label' => __('Convert English digits to Persian digits', 'negaresh'), 'example' => '123 → ۱۲۳'],
-            'fix_numeral_symbols' => ['section' => 'characters', 'label' => __('Use Persian percent, decimal and thousands separators', 'negaresh'), 'example' => '۵۰% → ۵۰٪'],
-            'fix_misc_non_persian_chars' => ['section' => 'characters', 'label' => __('Replace Arabic Kaf, Yeh and Heh with Persian letters', 'negaresh'), 'example' => 'كي → کی'],
-            'fix_hamzeh' => ['section' => 'characters', 'label' => __('Write the ezafe after a final Heh as Hamzeh', 'negaresh'), 'example' => 'خانه ی من → خانهٔ من'],
-            'fix_hamzeh_arabic' => ['section' => 'characters', 'label' => __('Convert Arabic Teh Marbuta to Heh with Hamzeh (needs the Hamzeh rule)', 'negaresh'), 'example' => 'مدرسة ما → مدرسهٔ ما'],
-            'fix_diacritics' => ['section' => 'characters', 'label' => __('Clean up spaces and repeats around diacritics', 'negaresh'), 'example' => ''],
-            'remove_diacritics' => ['section' => 'characters', 'label' => __('Remove all diacritics', 'negaresh'), 'example' => 'کِتاب → کتاب'],
-            'fix_dashes' => ['section' => 'punctuation', 'label' => __('Convert double and triple hyphens to en and em dashes', 'negaresh'), 'example' => '-- → –'],
-            'fix_three_dots' => ['section' => 'punctuation', 'label' => __('Convert three dots to an ellipsis character', 'negaresh'), 'example' => '... → …'],
-            'normalize_ellipsis' => ['section' => 'punctuation', 'label' => __('Merge repeated ellipses and put one space after them', 'negaresh'), 'example' => ''],
-            'fix_english_quotes_pairs' => ['section' => 'punctuation', 'label' => __('Replace curly English quotes with Persian guillemets', 'negaresh'), 'example' => '“متن” → «متن»'],
-            'fix_english_quotes' => ['section' => 'punctuation', 'label' => __('Replace straight quotes with Persian guillemets', 'negaresh'), 'example' => '"متن" → «متن»'],
-            'fix_punctuations' => ['section' => 'punctuation', 'label' => __('Use the Persian comma and semicolon', 'negaresh'), 'example' => ', ; → ، ؛'],
-            'fix_question_mark' => ['section' => 'punctuation', 'label' => __('Use the Persian question mark', 'negaresh'), 'example' => '? → ؟'],
-            'cleanup_extra_marks' => ['section' => 'punctuation', 'label' => __('Merge repeated question and exclamation marks', 'negaresh'), 'example' => '!!! → !'],
-            'kashidas_as_parenthetic' => ['section' => 'punctuation', 'label' => __('Treat a Kashida next to a space as a dash', 'negaresh'), 'example' => ''],
-            'normalize_dates' => ['section' => 'punctuation', 'label' => __('Reorder dates written with slashes to year/month/day', 'negaresh'), 'example' => '12/5/1402 → 1402/5/12'],
-            'fix_prefix_spacing' => ['section' => 'spacing', 'label' => __('Join the prefixes می, نمی and بی with a half space', 'negaresh'), 'example' => 'می روم → می‌روم'],
-            'fix_suffix_spacing' => ['section' => 'spacing', 'label' => __('Join common suffixes with a half space', 'negaresh'), 'example' => 'کتاب ها → کتاب‌ها'],
-            'fix_suffix_misc' => ['section' => 'spacing', 'label' => __('Fix the ای suffix after a final Heh', 'negaresh'), 'example' => 'خانه‌ئی → خانه‌ای'],
-            'fix_spacing_for_braces_and_quotes' => ['section' => 'spacing', 'label' => __('Fix spaces inside and around brackets and quotes', 'negaresh'), 'example' => '( متن ) → (متن)'],
-            'fix_spacing_for_punctuations' => ['section' => 'spacing', 'label' => __('Remove the space before punctuation and keep one after it', 'negaresh'), 'example' => 'سلام ، → سلام،'],
-            'fix_misc_spacing' => ['section' => 'spacing', 'label' => __('Remove the space before honorifics and numbered references', 'negaresh'), 'example' => 'محمد (ص) → محمد(ص)'],
-            'cleanup_spacing' => ['section' => 'spacing', 'label' => __('Replace repeated spaces with one space', 'negaresh'), 'example' => ''],
-            'cleanup_zwnj' => ['section' => 'spacing', 'label' => __('Remove extra or misplaced half spaces', 'negaresh'), 'example' => ''],
-            'cleanup_rlm' => ['section' => 'spacing', 'label' => __('Replace right to left marks between letters with half spaces', 'negaresh'), 'example' => ''],
-            'cleanup_kashidas' => ['section' => 'cleanup', 'label' => __('Remove Kashidas inside words', 'negaresh'), 'example' => 'سـلام → سلام'],
-            'normalize_eol' => ['section' => 'cleanup', 'label' => __('Use Unix line endings', 'negaresh'), 'example' => ''],
-            'cleanup_line_breaks' => ['section' => 'cleanup', 'label' => __('Reduce more than two line breaks to two', 'negaresh'), 'example' => ''],
-            'cleanup_begin_and_end' => ['section' => 'cleanup', 'label' => __('Trim spaces at the start of lines and of the text', 'negaresh'), 'example' => ''],
+            'fix_persian_glyphs' => [
+                'section' => 'characters',
+                'label' => __('Convert presentation form glyphs to standard Persian letters', 'negaresh'),
+                'example' => 'ﺳﻼﻡ → سلام',
+            ],
+            'fix_arabic_numbers' => [
+                'section' => 'characters',
+                'label' => __('Convert Arabic digits to Persian digits', 'negaresh'),
+                'example' => '٤٥٦ → ۴۵۶',
+            ],
+            'fix_english_numbers' => [
+                'section' => 'characters',
+                'label' => __('Convert English digits to Persian digits', 'negaresh'),
+                'example' => '123 → ۱۲۳',
+            ],
+            'fix_numeral_symbols' => [
+                'section' => 'characters',
+                'label' => __('Use Persian percent, decimal and thousands separators', 'negaresh'),
+                'example' => '۵۰% → ۵۰٪',
+            ],
+            'fix_misc_non_persian_chars' => [
+                'section' => 'characters',
+                'label' => __('Replace Arabic Kaf, Yeh and Heh with Persian letters', 'negaresh'),
+                'example' => 'كي → کی',
+            ],
+            'fix_hamzeh' => [
+                'section' => 'characters',
+                'label' => __('Write the ezafe after a final Heh as Hamzeh', 'negaresh'),
+                'example' => 'خانه ی من → خانهٔ من',
+            ],
+            'fix_hamzeh_arabic' => [
+                'section' => 'characters',
+                'label' => __('Convert Arabic Teh Marbuta to Heh with Hamzeh (needs the Hamzeh rule)', 'negaresh'),
+                'example' => 'مدرسة ما → مدرسهٔ ما',
+            ],
+            'fix_diacritics' => [
+                'section' => 'characters',
+                'label' => __('Clean up spaces and repeats around diacritics', 'negaresh'),
+                'example' => '',
+            ],
+            'remove_diacritics' => [
+                'section' => 'characters',
+                'label' => __('Remove all diacritics', 'negaresh'),
+                'example' => 'کِتاب → کتاب',
+            ],
+            'fix_dashes' => [
+                'section' => 'punctuation',
+                'label' => __('Convert double and triple hyphens to en and em dashes', 'negaresh'),
+                'example' => '-- → –',
+            ],
+            'fix_three_dots' => [
+                'section' => 'punctuation',
+                'label' => __('Convert three dots to an ellipsis character', 'negaresh'),
+                'example' => '... → …',
+            ],
+            'normalize_ellipsis' => [
+                'section' => 'punctuation',
+                'label' => __('Merge repeated ellipses and put one space after them', 'negaresh'),
+                'example' => '',
+            ],
+            'fix_english_quotes_pairs' => [
+                'section' => 'punctuation',
+                'label' => __('Replace curly English quotes with Persian guillemets', 'negaresh'),
+                'example' => '“متن” → «متن»',
+            ],
+            'fix_english_quotes' => [
+                'section' => 'punctuation',
+                'label' => __('Replace straight quotes with Persian guillemets', 'negaresh'),
+                'example' => '"متن" → «متن»',
+            ],
+            'fix_punctuations' => [
+                'section' => 'punctuation',
+                'label' => __('Use the Persian comma and semicolon', 'negaresh'),
+                'example' => ', ; → ، ؛',
+            ],
+            'fix_question_mark' => [
+                'section' => 'punctuation',
+                'label' => __('Use the Persian question mark', 'negaresh'),
+                'example' => '? → ؟',
+            ],
+            'cleanup_extra_marks' => [
+                'section' => 'punctuation',
+                'label' => __('Merge repeated question and exclamation marks', 'negaresh'),
+                'example' => '!!! → !',
+            ],
+            'kashidas_as_parenthetic' => [
+                'section' => 'punctuation',
+                'label' => __('Treat a Kashida next to a space as a dash', 'negaresh'),
+                'example' => '',
+            ],
+            'normalize_dates' => [
+                'section' => 'punctuation',
+                'label' => __('Reorder dates written with slashes to year/month/day', 'negaresh'),
+                'example' => '12/5/1402 → 1402/5/12',
+            ],
+            'fix_prefix_spacing' => [
+                'section' => 'spacing',
+                'label' => __('Join the prefixes می, نمی and بی with a half space', 'negaresh'),
+                'example' => 'می روم → می‌روم',
+            ],
+            'fix_suffix_spacing' => [
+                'section' => 'spacing',
+                'label' => __('Join common suffixes with a half space', 'negaresh'),
+                'example' => 'کتاب ها → کتاب‌ها',
+            ],
+            'fix_suffix_misc' => [
+                'section' => 'spacing',
+                'label' => __('Fix the ای suffix after a final Heh', 'negaresh'),
+                'example' => 'خانه‌ئی → خانه‌ای',
+            ],
+            'fix_spacing_for_braces_and_quotes' => [
+                'section' => 'spacing',
+                'label' => __('Fix spaces inside and around brackets and quotes', 'negaresh'),
+                'example' => '( متن ) → (متن)',
+            ],
+            'fix_spacing_for_punctuations' => [
+                'section' => 'spacing',
+                'label' => __('Remove the space before punctuation and keep one after it', 'negaresh'),
+                'example' => 'سلام ، → سلام،',
+            ],
+            'fix_misc_spacing' => [
+                'section' => 'spacing',
+                'label' => __('Remove the space before honorifics and numbered references', 'negaresh'),
+                'example' => 'محمد (ص) → محمد(ص)',
+            ],
+            'cleanup_spacing' => [
+                'section' => 'spacing',
+                'label' => __('Replace repeated spaces with one space', 'negaresh'),
+                'example' => '',
+            ],
+            'cleanup_zwnj' => [
+                'section' => 'spacing',
+                'label' => __('Remove extra or misplaced half spaces', 'negaresh'),
+                'example' => '',
+            ],
+            'cleanup_rlm' => [
+                'section' => 'spacing',
+                'label' => __('Replace right to left marks between letters with half spaces', 'negaresh'),
+                'example' => '',
+            ],
+            'cleanup_kashidas' => [
+                'section' => 'cleanup',
+                'label' => __('Remove Kashidas inside words', 'negaresh'),
+                'example' => 'سـلام → سلام',
+            ],
+            'normalize_eol' => [
+                'section' => 'cleanup',
+                'label' => __('Use Unix line endings', 'negaresh'),
+                'example' => '',
+            ],
+            'cleanup_line_breaks' => [
+                'section' => 'cleanup',
+                'label' => __('Reduce more than two line breaks to two', 'negaresh'),
+                'example' => '',
+            ],
+            'cleanup_begin_and_end' => [
+                'section' => 'cleanup',
+                'label' => __('Trim spaces at the start of lines and of the text', 'negaresh'),
+                'example' => '',
+            ],
         ];
     }
 
@@ -279,6 +471,9 @@ class Negaresh_Settings
         <?php
     }
 
+    /**
+     * @param array{key: string, example?: string} $args
+     */
     public function render_checkbox(array $args): void
     {
         $options = $this->get();
@@ -296,7 +491,7 @@ class Negaresh_Settings
 
     public function render_post_types(): void
     {
-        $selected = $this->get()['post_types'];
+        $selected = $this->post_types();
         echo '<fieldset>';
         foreach ($this->public_post_types() as $name => $label) {
             printf(

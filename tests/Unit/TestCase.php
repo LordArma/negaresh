@@ -18,7 +18,9 @@ abstract class TestCase extends PHPUnitTestCase
     protected $options = [];
 
     /**
-     * Stubs get_option / update_option / add_option / delete_option against $this->options.
+     * Stubs get_option / update_option / delete_option against $this->options.
+     *
+     * @param array<string, mixed> $initial
      */
     protected function stubOptions(array $initial = []): void
     {
@@ -54,27 +56,59 @@ abstract class TestCase extends PHPUnitTestCase
 
     protected static function fixture(string $name): string
     {
-        return file_get_contents(NEGARESH_TESTS_DIR . '/fixtures/' . $name);
+        return self::read(NEGARESH_TESTS_DIR . '/fixtures/' . $name);
     }
 
-    /** Every HTML tag, in order. */
+    /** Reads a file the test needs; a missing file fails the test instead of passing false on. */
+    protected static function read(string $path): string
+    {
+        $contents = file_get_contents($path);
+        self::assertIsString($contents, "cannot read $path");
+        return $contents;
+    }
+
+    /**
+     * The plugin's PHP files in the root and includes/.
+     *
+     * @return list<string>
+     */
+    protected static function pluginFiles(): array
+    {
+        $files = glob(NEGARESH_PLUGIN_DIR . '/{,includes/}*.php', GLOB_BRACE);
+        self::assertIsArray($files);
+        return $files;
+    }
+
+    /**
+     * Every HTML tag, in order.
+     *
+     * @return list<string>
+     */
     protected static function tags(string $html): array
     {
         preg_match_all('/<\/?[a-z][^>]*?>/i', $html, $m);
         return $m[0];
     }
 
-    /** Every HTML comment (Gutenberg block delimiters live here), in order. */
+    /**
+     * Every HTML comment (Gutenberg block delimiters live here), in order.
+     *
+     * @return list<string>
+     */
     protected static function comments(string $html): array
     {
         preg_match_all('/<!--[\s\S]*?-->/', $html, $m);
         return $m[0];
     }
 
-    /** Every HTML entity outside tags, in order. */
+    /**
+     * Every HTML entity outside tags, in order.
+     *
+     * @return list<string>
+     */
     protected static function entities(string $html): array
     {
-        $text = preg_replace('/<[^>]*>/', ' ', $html);
+        $text = (string) preg_replace('/<[^>]*>/', ' ', $html);
         preg_match_all('/&#?[a-z0-9]+;/i', $text, $m);
         return $m[0];
     }

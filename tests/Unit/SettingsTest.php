@@ -27,7 +27,11 @@ class SettingsTest extends TestCase
         });
     }
 
-    /** The 30 rows a site that saved the 4.0 settings page has. */
+    /**
+     * The 30 rows a site that saved the 4.0 settings page has.
+     *
+     * @return array<string, string>
+     */
     private function legacyRows(): array
     {
         $rows = array_fill_keys(Negaresh_Settings::LEGACY_OPTIONS, '');
@@ -57,6 +61,32 @@ class SettingsTest extends TestCase
         $this->options['negaresh_options'] = 'not an array';
 
         self::assertSame(Negaresh_Settings::defaults(), (new Negaresh_Settings())->get());
+    }
+
+    public function testGetNormalizesStoredValues(): void
+    {
+        // Written by an older version, another plugin or by hand: types cannot be trusted.
+        $this->options['negaresh_options'] = ['fix_dashes' => '', 'fix_hamzeh' => '1', 'post_types' => 'post', 'apply_in_rest' => 0];
+        $settings = new Negaresh_Settings();
+        $got = $settings->get();
+
+        self::assertFalse($got['fix_dashes']);
+        self::assertTrue($got['fix_hamzeh']);
+        self::assertSame([], $got['post_types']);
+        self::assertFalse($got['apply_in_rest']);
+
+        $this->options['negaresh_options'] = ['post_types' => ['page', ['nested'], 7]];
+        self::assertSame(['page', '7'], $settings->get()['post_types']);
+    }
+
+    public function testRulesReturnsOnlyRuleFlags(): void
+    {
+        $this->options['negaresh_options'] = ['fix_dashes' => false];
+        $rules = (new Negaresh_Settings())->rules();
+
+        self::assertSame(array_keys(Negaresh_Settings::RULE_DEFAULTS), array_keys($rules));
+        self::assertFalse($rules['fix_dashes']);
+        self::assertArrayNotHasKey('post_types', $rules);
     }
 
     public function testSanitizeTurnsMissingBoxesOffAndFiltersPostTypes(): void
@@ -93,6 +123,7 @@ class SettingsTest extends TestCase
         (new Negaresh_Settings())->maybe_migrate();
 
         $migrated = $this->options['negaresh_options'];
+        self::assertIsArray($migrated);
         self::assertTrue($migrated['fix_dashes']);
         self::assertTrue($migrated['fix_english_numbers']);
         self::assertFalse($migrated['fix_three_dots']); // saved unchecked in 4.0
@@ -165,7 +196,7 @@ class SettingsTest extends TestCase
     {
         ob_start();
         (new Negaresh_Settings())->render_checkbox(['key' => 'fix_dashes', 'example' => '-- → –']);
-        $html = ob_get_clean();
+        $html = (string) ob_get_clean();
 
         self::assertStringContainsString('name="negaresh_options[fix_dashes]"', $html);
         self::assertStringContainsString('id="negaresh_fix_dashes"', $html);
@@ -179,8 +210,8 @@ class SettingsTest extends TestCase
         self::assertFalse(function_exists('yts_add_scripts'));
 
         $source = '';
-        foreach (glob(NEGARESH_PLUGIN_DIR . '/{,includes/}*.php', GLOB_BRACE) as $file) {
-            $source .= file_get_contents($file);
+        foreach (self::pluginFiles() as $file) {
+            $source .= self::read($file);
         }
         self::assertStringNotContainsString('wordcountplugin', $source);
         self::assertStringNotContainsString('wcp_first_section', $source);

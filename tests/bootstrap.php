@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHPUnit bootstrap. Unit tests run without WordPress; WordPress functions are
  * mocked per test with Brain Monkey (see tests/Unit/TestCase.php).

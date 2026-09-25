@@ -14,10 +14,22 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.1.0 (tag `v4.1.0`, commit `f19854a`, released 2026-09-25) |
 | Next release target | 4.2.0 (phase 2 features) |
 
-**Next step:** phase 2 in the order in IMPROVEMENT-PLAN.md, starting with I1.
+**Next step:** I7 (release pipeline). Open: push `phase-2` so the new CI runs on GitHub (needs the user's OK).
 
-**Tests:** `composer test` → 74 tests, all pass (PHP 7.4.33 and 8.3.6).
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 76 unit tests) clean on PHP 7.4, 8.3, 8.4.
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I1 quality gates
+
+Done: PHPCS ruleset, PHPStan level 8, composer scripts, CI workflow (details in IMPROVEMENT-PLAN
+I1). PHPStan findings fixed: regex results checked in `fix()` (hardening; a repro attempt showed it
+is not reachable today, so it is not logged as a bug), settings normalized with typed accessors
+(+2 tests), test helpers typed.
+
+Verified: `composer check` clean on PHP 7.4.33, 8.3.6 and 8.4; e2e 13/13 on WP 7.1.2 and 5.8.3.
+Not verified: the workflow on GitHub itself (branch not pushed).
 
 ---
 

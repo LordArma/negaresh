@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Negaresh
  * Plugin URI: https://github.com/LordArma/negaresh

@@ -12,11 +12,17 @@ use Negaresh\Vendor\Virastar\Virastar;
  */
 class VirastarPreservationTest extends TestCase
 {
+    /**
+     * @param array<string, bool> $options
+     */
     private function virastar(array $options = []): Virastar
     {
         return new Virastar(array_merge(['decode_html_entities' => false], $options));
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
     public function fixtureProvider(): array
     {
         return [

@@ -27,8 +27,9 @@ class VirastarFixesTest extends TestCase
             eval('namespace Alirezasedghi\Virastar; class Virastar {}');
         }
 
+        self::assertTrue(class_exists('Alirezasedghi\Virastar\Virastar', false));
         self::assertTrue(class_exists(Virastar::class, false));
-        self::assertNotSame(\Alirezasedghi\Virastar\Virastar::class, Virastar::class);
+        self::assertNotSame('Alirezasedghi\Virastar\Virastar', Virastar::class);
     }
 
     public function testB20QuestionMarkBecomesPersianQuestionMark(): void
@@ -81,6 +82,9 @@ class VirastarFixesTest extends TestCase
      * B22: the PHP port dropped the JS single space padding, so rules that need a space after a
      * word missed the last word of the text.
      */
+    /**
+     * @return array<string, array{array<string, bool>, string, string}>
+     */
     public function b22Provider(): array
     {
         return [
@@ -91,7 +95,10 @@ class VirastarFixesTest extends TestCase
         ];
     }
 
-    /** @dataProvider b22Provider */
+    /**
+     * @dataProvider b22Provider
+     * @param array<string, bool> $options
+     */
     public function testB22RulesSeeTheLastWord(array $options, string $in, string $want): void
     {
         self::assertSame($want, (new Virastar($options))->cleanup($in));

@@ -1,0 +1,18 @@
+parameters:
+    level: 8
+    # Virastar's docblocks promise string where its preg_* chains can return null; keep runtime checks.
+    treatPhpDocTypesAsCertain: false
+    phpVersion:
+        min: 70400
+        max: 80499
+    paths:
+        - wp-content/plugins/negaresh
+        - tests
+    excludePaths:
+        # vendored and untyped; only read for its symbols (see I11 for replacing it)
+        analyseAndScan:
+            - wp-content/plugins/negaresh/includes/Virastar.php
+    scanFiles:
+        - wp-content/plugins/negaresh/includes/Virastar.php
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php

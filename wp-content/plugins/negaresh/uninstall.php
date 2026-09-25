@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Removes every option Negaresh stores, on every site of a network (B19).
  *

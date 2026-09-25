@@ -222,8 +222,12 @@ class NegareshFilterTest extends TestCase
 /** Settings that work for should_filter() and then throw inside the fix. */
 class ThrowingSettings extends Negaresh_Settings
 {
+    /** @var int */
     private $calls = 0;
 
+    /**
+     * @return array<string, bool|list<string>>
+     */
     public function get(): array
     {
         if (++$this->calls > 1) {
