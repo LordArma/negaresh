@@ -42,6 +42,9 @@ class Negaresh
     /** Whitespace a text node may start or end with; kept exactly as it is (B25). */
     private const EDGE_SPACE = '[\s\x{00A0}\x{200B}-\x{200F}\x{FEFF}]*';
 
+    /** Longest text the settings page preview accepts, in bytes (I5). */
+    public const PREVIEW_MAX_LENGTH = 50000;
+
     /** Post meta written when a post is fixed on save (I4). */
     public const FIXED_META = Negaresh_Settings::FIXED_META;
 
@@ -79,6 +82,12 @@ class Negaresh
         add_filter('the_content', [$this, 'filter_content'], 9);
         add_filter('wp_insert_post_data', [$this, 'filter_post_data'], 10, 2);
         add_action('save_post', [$this, 'mark_fixed'], 10, 2);
+        // Titles and hand written excerpts (I5), also before wptexturize (10).
+        add_filter('the_title', [$this, 'filter_title'], 9, 2);
+        add_filter('the_excerpt', [$this, 'filter_excerpt'], 9);
+        add_action('rest_api_init', [$this, 'register_rest_routes']);
+        add_action('admin_enqueue_scripts', [$settings, 'enqueue_assets']);
+        add_filter('plugin_action_links_' . basename(dirname(NEGARESH_FILE)) . '/' . basename(NEGARESH_FILE), [$settings, 'action_links']);
     }
 
     public function load_textdomain(): void
@@ -107,6 +116,97 @@ class Negaresh
     }
 
     /**
+     * `the_title` callback (I5), when "Fix post titles" is on.
+     *
+     * @param mixed $title
+     * @param mixed $post_id
+     * @return mixed
+     */
+    public function filter_title($title, $post_id = 0)
+    {
+        $post_id = is_numeric($post_id) ? (int) $post_id : 0;
+        if (!is_string($title) || !$this->settings->flag('fix_titles') || !$this->should_filter($post_id) || $this->already_fixed($post_id)) {
+            return $title;
+        }
+        return $this->safe_fix($title);
+    }
+
+    /**
+     * `the_excerpt` callback (I5), when "Fix excerpts written by hand" is on. Automatic excerpts
+     * come from the content, which is already fixed.
+     *
+     * @param mixed $excerpt
+     * @return mixed
+     */
+    public function filter_excerpt($excerpt)
+    {
+        if (!is_string($excerpt) || !$this->settings->flag('fix_excerpts') || !$this->should_filter() || $this->already_fixed()) {
+            return $excerpt;
+        }
+        return $this->safe_fix($excerpt);
+    }
+
+    /**
+     * The settings page preview (I5): fixes a text with the rules as they are checked on the page,
+     * not the saved ones. A rule that is missing from $rules is off, like an unchecked box.
+     *
+     * @param array<mixed> $rules
+     */
+    public function preview(string $text, array $rules): string
+    {
+        $normalized = [];
+        foreach (array_keys(Negaresh_Settings::RULE_DEFAULTS) as $key) {
+            $normalized[$key] = !empty($rules[$key]);
+        }
+
+        $saved = $this->virastar;
+        $this->virastar = new Virastar($this->virastar_options($normalized));
+        try {
+            return $this->safe_fix($text);
+        } finally {
+            $this->virastar = $saved;
+        }
+    }
+
+    public function register_rest_routes(): void
+    {
+        register_rest_route('negaresh/v1', '/preview', [
+            'methods' => 'POST',
+            'callback' => [$this, 'rest_preview'],
+            'permission_callback' => static function (): bool {
+                return current_user_can('manage_options');
+            },
+            'args' => [
+                'text' => [
+                    'required' => true,
+                    'validate_callback' => static function ($value): bool {
+                        return is_string($value) && strlen($value) <= self::PREVIEW_MAX_LENGTH;
+                    },
+                ],
+                'rules' => [
+                    'required' => false,
+                    'validate_callback' => static function ($value): bool {
+                        return null === $value || is_array($value);
+                    },
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * POST negaresh/v1/preview {text, rules} → {text}.
+     *
+     * @return array{text: string}
+     */
+    public function rest_preview(\WP_REST_Request $request): array
+    {
+        $text = $request->get_param('text');
+        $rules = $request->get_param('rules');
+
+        return ['text' => $this->preview(is_string($text) ? $text : '', is_array($rules) ? $rules : [])];
+    }
+
+    /**
      * `wp_insert_post_data` callback (I4): in save mode the stored content is corrected.
      * WordPress passes slashed values.
      *
@@ -130,6 +230,17 @@ class Negaresh
             $data['post_content'] = wp_slash($fixed);
         }
         $this->pending_marks[md5($fixed)] = true;
+
+        // Titles and hand written excerpts, when enabled (I5).
+        foreach (['post_title' => 'fix_titles', 'post_excerpt' => 'fix_excerpts'] as $field => $flag) {
+            if (isset($data[$field]) && is_string($data[$field]) && $this->settings->flag($flag)) {
+                $value = wp_unslash($data[$field]);
+                $fixed_value = $this->safe_fix($value);
+                if ($fixed_value !== $value) {
+                    $data[$field] = wp_slash($fixed_value);
+                }
+            }
+        }
 
         return $data;
     }
@@ -172,11 +283,12 @@ class Negaresh
     }
 
     /**
-     * True when the post being displayed was fixed on save with the current rules.
+     * True when the post (the one being displayed by default) was fixed on save with the current
+     * rules.
      */
-    private function already_fixed(): bool
+    private function already_fixed(int $post_id = 0): bool
     {
-        $post = get_post();
+        $post = get_post($post_id ?: null);
         if (!$post instanceof \WP_Post || 0 === $post->ID) {
             return false;
         }
@@ -318,7 +430,11 @@ class Negaresh
         return '/>' === substr($markup, -2);
     }
 
-    private function should_filter(): bool
+    /**
+     * Whether display fixing applies now: not in wp-admin, feeds and REST as configured, and the
+     * post type (of $post_id, or of the current post) in scope.
+     */
+    private function should_filter(int $post_id = 0): bool
     {
         $options = $this->settings->get();
 
@@ -332,7 +448,7 @@ class Negaresh
             return false;
         }
         if (is_array($options['post_types']) && $options['post_types']) {
-            $type = get_post_type();
+            $type = $post_id ? get_post_type($post_id) : get_post_type();
             if ($type && !in_array($type, $options['post_types'], true)) {
                 return false;
             }
@@ -354,11 +470,12 @@ class Negaresh
      * rest, because the input is HTML, not Markdown.
      */
     /**
+     * @param array<string, bool>|null $rules the admin's rules unless given (preview)
      * @return array<string, bool>
      */
-    public function virastar_options(): array
+    public function virastar_options(?array $rules = null): array
     {
-        return $this->settings->rules() + [
+        return ($rules ?? $this->settings->rules()) + [
             'decode_html_entities' => false, // B2: unsafe, removed from the settings
             'markdown_normalize_braces' => false,
             'markdown_normalize_lists' => false,

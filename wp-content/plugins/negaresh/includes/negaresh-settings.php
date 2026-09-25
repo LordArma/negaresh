@@ -75,6 +75,8 @@ class Negaresh_Settings
     public const SCOPE_DEFAULTS = [
         'mode' => 'save',
         'post_types' => [],
+        'fix_titles' => false,
+        'fix_excerpts' => false,
         'apply_in_feeds' => true,
         'apply_in_rest' => true,
     ];
@@ -137,13 +139,26 @@ class Negaresh_Settings
     }
 
     /**
-     * Identifies the current rule set; stored with posts fixed on save.
+     * A true/false option that is not a rule: fix_titles, fix_excerpts, apply_in_feeds, apply_in_rest.
+     */
+    public function flag(string $key): bool
+    {
+        $options = $this->get();
+        return isset($options[$key]) && true === $options[$key];
+    }
+
+    /**
+     * Identifies what a save fixes (the rules, and whether titles and excerpts are included);
+     * stored with posts fixed on save.
      */
     public function rules_hash(): string
     {
         $bits = '';
         foreach ($this->rules() as $key => $on) {
             $bits .= $key . ($on ? '=1;' : '=0;');
+        }
+        foreach (['fix_titles', 'fix_excerpts'] as $key) {
+            $bits .= $key . ($this->flag($key) ? '=1;' : '=0;');
         }
         return md5($bits);
     }
@@ -177,6 +192,8 @@ class Negaresh_Settings
     /**
      * Sanitize callback for register_setting(). Unchecked boxes are missing from the input, so
      * every rule not present is off. Idempotent: WordPress may run it twice on the first save.
+     * The "Reset rules to defaults" button submits the same form with `reset_rules` set: the rules
+     * go back to their defaults, everything else is saved as shown (I5).
      */
     /**
      * @param mixed $input raw value from the settings form (or another update_option() call)
@@ -187,8 +204,9 @@ class Negaresh_Settings
         $input = is_array($input) ? $input : [];
         $clean = [];
 
-        foreach (array_keys(self::RULE_DEFAULTS) as $key) {
-            $clean[$key] = !empty($input[$key]);
+        $reset = !empty($input['reset_rules']);
+        foreach (self::RULE_DEFAULTS as $key => $default) {
+            $clean[$key] = $reset ? $default : !empty($input[$key]);
         }
 
         $clean['mode'] = isset($input['mode']) && in_array($input['mode'], self::MODES, true)
@@ -197,6 +215,9 @@ class Negaresh_Settings
         $post_types = isset($input['post_types']) && is_array($input['post_types']) ? $input['post_types'] : [];
         $post_types = array_map('sanitize_key', array_map('strval', $post_types));
         $clean['post_types'] = array_values(array_intersect($post_types, array_keys($this->public_post_types())));
+
+        $clean['fix_titles'] = !empty($input['fix_titles']);
+        $clean['fix_excerpts'] = !empty($input['fix_excerpts']);
 
         $clean['apply_in_feeds'] = !empty($input['apply_in_feeds']);
         $clean['apply_in_rest'] = !empty($input['apply_in_rest']);
@@ -330,6 +351,8 @@ class Negaresh_Settings
 
         add_settings_field('negaresh_post_types', __('Post types', 'negaresh'), [$this, 'render_post_types'], self::PAGE, 'negaresh_scope');
         $scope_boxes = [
+            'fix_titles' => __('Fix post titles', 'negaresh'),
+            'fix_excerpts' => __('Fix excerpts written by hand', 'negaresh'),
             'apply_in_feeds' => __('Fix text in RSS feeds', 'negaresh'),
             'apply_in_rest' => __('Fix text in the REST API', 'negaresh'),
         ];
@@ -538,17 +561,84 @@ class Negaresh_Settings
             return;
         }
         ?>
-        <div class="wrap">
+        <div class="wrap negaresh-settings">
             <h1><?php esc_html_e('Negaresh Options', 'negaresh'); ?></h1>
+
+            <div class="negaresh-preview card">
+                <h2><?php esc_html_e('Try it', 'negaresh'); ?></h2>
+                <p>
+                    <?php
+                    esc_html_e(
+                        'Type or paste some text (HTML is fine). The result uses the boxes as they are checked on this page, before you save.',
+                        'negaresh'
+                    );
+                    ?>
+                </p>
+                <label for="negaresh-preview-input" class="screen-reader-text"><?php esc_html_e('Text to fix', 'negaresh'); ?></label>
+                <textarea id="negaresh-preview-input" dir="rtl" rows="4" class="large-text"></textarea>
+                <label for="negaresh-preview-output"><?php esc_html_e('Result', 'negaresh'); ?></label>
+                <textarea id="negaresh-preview-output" dir="rtl" rows="4" class="large-text" readonly></textarea>
+                <p class="negaresh-preview-status" aria-live="polite"></p>
+            </div>
+
             <form action="options.php" method="post">
                 <?php
                 settings_fields(self::GROUP);
                 do_settings_sections(self::PAGE);
-                submit_button();
                 ?>
+                <p class="submit">
+                    <?php submit_button('', 'primary', 'submit', false); // empty text: WordPress's own "Save Changes" ?>
+                    <?php
+                    submit_button(
+                        __('Reset rules to defaults', 'negaresh'),
+                        'secondary negaresh-reset',
+                        self::OPTION . '[reset_rules]',
+                        false
+                    );
+                    ?>
+                </p>
             </form>
         </div>
         <?php
+    }
+
+    /**
+     * Settings link first in the plugin's row on the Plugins screen (I5).
+     *
+     * @param array<int|string, string> $links
+     * @return array<int|string, string>
+     */
+    public function action_links($links): array
+    {
+        $links = is_array($links) ? $links : [];
+        $settings = sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(admin_url('options-general.php?page=' . self::PAGE)),
+            esc_html__('Settings', 'negaresh')
+        );
+        array_unshift($links, $settings);
+        return $links;
+    }
+
+    /**
+     * Preview script and styles, on the Negaresh settings page only.
+     *
+     * @param mixed $hook_suffix
+     */
+    public function enqueue_assets($hook_suffix): void
+    {
+        if ('settings_page_' . self::PAGE !== $hook_suffix) {
+            return;
+        }
+        $base = plugins_url('assets/', NEGARESH_FILE);
+        wp_enqueue_style('negaresh-admin', $base . 'admin.css', [], NEGARESH_VERSION);
+        wp_enqueue_script('negaresh-admin', $base . 'admin.js', ['wp-api-fetch'], NEGARESH_VERSION, true);
+        wp_localize_script('negaresh-admin', 'negareshAdmin', [
+            'rules' => array_keys(self::RULE_DEFAULTS),
+            'working' => __('Working…', 'negaresh'),
+            'failed' => __('The preview could not be made.', 'negaresh'),
+            'confirmReset' => __('Set every rule back to its default? Unsaved changes to the rules are lost.', 'negaresh'),
+        ]);
     }
 
     /**
@@ -565,7 +655,9 @@ class Negaresh_Settings
             checked(!empty($options[$key]), true, false)
         );
         if (!empty($args['example'])) {
-            printf(' <code dir="rtl">%s</code>', esc_html($args['example']));
+            // Examples are Persian and shown right to left, so "before" is read first on the right:
+            // the arrow has to point left. Arrows are not mirrored by the browser in RTL text.
+            printf(' <code dir="rtl">%s</code>', esc_html(str_replace(' → ', ' ← ', $args['example'])));
         }
     }
 

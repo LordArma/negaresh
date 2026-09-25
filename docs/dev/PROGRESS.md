@@ -14,11 +14,23 @@ Status snapshot is kept up to date at the top.
 | Current version | 4.2.0 (tag `v4.2.0`, commit `92c220b`, released 2026-09-25 by the Release workflow) |
 | Next release target | 4.3.0 |
 
-**Next step:** I5 (settings page UX), asked for by the user.
+**Next step:** I6 (editor tools: per post opt out, fix this post, bulk tool). Nothing released
+since 4.2.0: I5 is on `phase-2`.
 
-**Checks:** `composer check` (PHPCS + PHPStan level 8 + 122 unit tests) clean; e2e 21/21 on WP
-7.1.2 and 5.8.3.
+**Checks:** `composer check` (PHPCS + PHPStan level 8 + 135 unit tests) clean; e2e 28/28 on WP
+7.1.2 and 5.8.3; browser check passes (English and fa_IR).
 `tests/e2e/run.sh` → 13/13 on WordPress 7.1.2 / PHP 8.3.33 and on WordPress 5.8.3 / PHP 7.4.27.
+
+---
+
+## 2026-09-25 · Session 3 · Phase 2 slice: I5 settings page
+
+Done: live preview (REST route + admin script), reset rules button, Settings link, titles and
+excerpts scope options, RTL example arrows, translations (63 strings), e2e +7 checks, new
+Playwright browser check (`tests/e2e/browser.sh`, also in CI via `BROWSER=1` on the latest WP job).
+Details in IMPROVEMENT-PLAN I5.
+Verified: see status snapshot. Screenshots were checked by eye: the fa_IR page is laid out right
+to left correctly; the example arrows were wrong (fixed).
 
 ---
 

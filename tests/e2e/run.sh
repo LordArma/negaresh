@@ -2,6 +2,7 @@
 # End to end check of Negaresh in a real WordPress (Docker). Usage:
 #   tests/e2e/run.sh            start a fresh site, run the checks, remove everything
 #   KEEP=1 tests/e2e/run.sh     leave the site running at http://127.0.0.1:8089 (admin / admin)
+#   BROWSER=1 tests/e2e/run.sh  also drive the settings page in headless Chromium (Playwright image)
 # Needs Docker. Uses the latest official images unless WP_IMAGE / CLI_IMAGE are set.
 set -euo pipefail
 
@@ -68,6 +69,21 @@ curl -s -b "$JAR" -o /dev/null --data-urlencode option_page=negaresh --data-urle
   --data-urlencode "_wpnonce=$NONCE" --data-urlencode "negaresh_options[fix_english_numbers]=1" \
   --data-urlencode "negaresh_options[post_types][]=bogus" "$URL/wp-admin/options.php"
 check "settings saved and sanitized" '"fix_english_numbers":true,"fix_numeral_symbols":false' "$(wp option get negaresh_options --format=json)"
+
+# I5: the settings page, the Plugins screen link, reset, and the preview endpoint as the page uses it
+SETTINGS="$(curl -s -b "$JAR" "$URL/wp-admin/options-general.php?page=negaresh-options")"
+check "preview box on the settings page (I5)" 'id="negaresh-preview-input"' "$SETTINGS"
+check "admin script loaded on the settings page (I5)" 'negaresh/assets/admin.js' "$SETTINGS"
+check "Settings link on the Plugins screen (I5)" 'options-general.php?page=negaresh-options">Settings</a>' "$(curl -s -b "$JAR" "$URL/wp-admin/plugins.php")"
+NONCE="$(grep -oP "name=['\"]_wpnonce['\"] value=['\"]\K[^'\"]+" <<<"$SETTINGS")"
+curl -s -b "$JAR" -o /dev/null --data-urlencode option_page=negaresh --data-urlencode action=update \
+  --data-urlencode "_wpnonce=$NONCE" --data-urlencode "negaresh_options[reset_rules]=Reset" "$URL/wp-admin/options.php"
+check "reset restores the default rules (I5)" '"fix_english_numbers":false,"fix_numeral_symbols":false,"fix_misc_non_persian_chars":false,"fix_hamzeh":true' "$(wp option get negaresh_options --format=json)"
+REST_NONCE="$(grep -oP 'createNonceMiddleware\(\s*"\K[^"]+' <<<"$SETTINGS")"
+PREVIEW="$(curl -s -b "$JAR" -H "X-WP-Nonce: $REST_NONCE" -H 'Content-Type: application/json' \
+  -d '{"text":"<p>عدد 123 ...</p>","rules":{"fix_english_numbers":true,"fix_three_dots":true}}' "$URL/wp-json/negaresh/v1/preview")"
+check "preview uses the unsaved boxes (I5)" '<p>عدد ۱۲۳…</p>' "$(python3 -c 'import json,sys; print(json.load(sys.stdin)["text"])' <<<"$PREVIEW" 2>&1)"
+check "preview refused without login (I5)" '401' "$(curl -s -o /dev/null -w '%{http_code}' -H 'Content-Type: application/json' -d '{"text":"x"}' "$URL/wp-json/negaresh/v1/preview")"
 rm -f "$JAR"
 
 # Back to the defaults (the form above left only one rule on): save mode, default rules.
@@ -80,12 +96,22 @@ REST_ID="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
   "$URL/wp-json/wp/v2/posts" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
 check "block editor (REST) save is fixed (I4)" '<p>از ویرایشگر بلوک… عدد ۷۸۹</p>' "$(wp post get "$REST_ID" --field=post_content)"
 
+# I5: titles, when enabled, are fixed on save too.
+wp option update negaresh_options '{"fix_titles":true}' --format=json >/dev/null
+TITLE_ID="$(wp post create --post_title='عنوان ...' --post_status=publish --post_content='<p>متن</p>' --porcelain)"
+check "title fixed on save when enabled (I5)" 'عنوان…' "$(wp post get "$TITLE_ID" --field=post_title)"
+
 # Display mode never changes what is stored.
 wp option update negaresh_options '{"mode":"display"}' --format=json >/dev/null
 DISPLAY_ID="$(wp post create --post_title=d --post_name=display-mode --post_status=publish --post_content='<p>حالت نمایش ...</p>' --porcelain)"
 check "display mode leaves stored text alone (I4)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
 # "..." checks B27 too: the fix must run before wptexturize turns "..." into &#8230;
 check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نمایش…' "$(curl -s "$URL/display-mode/")"
+
+# BROWSER=1: drive the settings page in headless Chromium too (tests/e2e/browser.sh, I5)
+if [ "${BROWSER:-0}" = 1 ]; then
+  "$ROOT/tests/e2e/browser.sh" | grep -E '^(PASS|FAIL)' | tee /dev/stderr | grep -q '^FAIL' && FAIL=1
+fi
 
 LOG="$(docker exec "$WEB" sh -c 'cat /var/www/html/wp-content/debug.log 2>/dev/null' || true)"
 if [ -z "$LOG" ]; then echo "PASS  debug.log is empty"; else echo "FAIL  debug.log:"; echo "$LOG" | head -20; FAIL=1; fi

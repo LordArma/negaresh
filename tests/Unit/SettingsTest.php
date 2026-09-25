@@ -242,6 +242,7 @@ class SettingsTest extends TestCase
         self::assertStringContainsString('name="negaresh_options[fix_dashes]"', $html);
         self::assertStringContainsString('id="negaresh_fix_dashes"', $html);
         self::assertStringContainsString("checked='checked'", $html);
+        self::assertStringContainsString('<code dir="rtl">-- ← –</code>', $html, 'RTL example arrow points from before to after');
     }
 
     public function testB8AndB13NoGlobalLeftovers(): void

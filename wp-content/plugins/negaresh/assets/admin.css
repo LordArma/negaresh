@@ -1,0 +1,26 @@
+/* Negaresh settings page (I5). Logical properties keep it right in RTL (fa_IR) and LTR. */
+.negaresh-settings .negaresh-preview {
+    max-width: 50rem;
+    margin-block: 1rem 1.5rem;
+}
+
+.negaresh-settings .negaresh-preview textarea {
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-block-end: 0.5rem;
+}
+
+.negaresh-settings .negaresh-preview-status {
+    min-height: 1.5em;
+    margin: 0;
+    color: #50575e;
+}
+
+.negaresh-settings td code[dir="rtl"] {
+    margin-inline-start: 0.5em;
+    unicode-bidi: isolate;
+}
+
+.negaresh-settings p.submit .button + .button {
+    margin-inline-start: 0.5em;
+}

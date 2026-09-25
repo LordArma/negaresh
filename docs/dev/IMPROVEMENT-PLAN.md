@@ -87,7 +87,7 @@ I10 needs user decisions first.
   REST save, display mode, markers removed on uninstall), 4.1.0 → new upgrade keeps display mode.
 - Still open: caching display output (below), the bulk tool to fix existing posts (I6).
 
-## I5 Settings page UX
+## I5 Settings page UX ✅ *(done session 3)*
 - Group rules into sections (Characters, Numbers, Punctuation, Spacing, Cleanup) with a short
   Persian and English description and a before/after example per rule.
 - Live preview box: paste text, see result with the current (unsaved) toggles (REST endpoint,
@@ -96,6 +96,24 @@ I10 needs user decisions first.
 - Scope settings: ~~post types, feeds, REST~~ (done in phase 1); still open: titles, excerpts,
   comments, widgets.
 - ~~Sections and examples~~ (done in phase 1); still open: longer descriptions, live preview.
+- *Result:*
+  - Live preview ("Try it") at the top of the page: fixes as you type, with the boxes as they are
+    checked on the page (unsaved); REST `POST negaresh/v1/preview` {text, rules}, admins only
+    (`manage_options`), text up to 50 000 bytes; a missing rule counts as off, like an unchecked
+    box. Script `assets/admin.js` (+ `admin.css`) loaded on this page only, `wp.apiFetch` handles
+    the nonce, late answers are dropped.
+  - "Reset rules to defaults": second submit button of the same form, handled in `sanitize()`
+    (keeps mode and "where to apply"); asks for confirmation first.
+  - "Settings" link first on the Plugins screen.
+  - New scope options, off by default: "Fix post titles" (`the_title` at 9 and `post_title` on
+    save) and "Fix excerpts written by hand" (`the_excerpt` at 9 and `post_excerpt` on save;
+    automatic excerpts come from the fixed content). Both are part of the save marker hash.
+  - Examples now show `←` (they are RTL, so "before" is on the right); found in the Persian
+    screenshot.
+  - Not done (not asked): comments and widgets; longer per rule descriptions.
+  - Verified: 135 unit tests (`SettingsPageTest` 13 new); e2e 28/28 on WP 7.1.2 and 5.8.3; real
+    browser (Playwright, headless Chromium): preview while typing, preview follows unsaved boxes,
+    reset asks and dismissing does not submit, no JavaScript errors, in English and in fa_IR.
 
 ## I6 Editor integration
 - Per post opt out (post meta + checkbox in Gutenberg sidebar and Classic editor meta box).

@@ -3,6 +3,18 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+- **Try it** box on the settings page: type or paste text and see it fixed straight away, with
+  the boxes as they are checked, before saving (I5).
+- **Reset rules to defaults** button (asks first; keeps the mode and where to apply) (I5).
+- **Settings** link on the Plugins screen (I5).
+- Optional fixing of **post titles** and of **excerpts written by hand**, off by default (I5).
+
+### Changed
+- The examples next to each rule read right to left with an arrow pointing the right way (I5).
+
 ## [4.2.0] (2026-09-25)
 
 ### Fixed
