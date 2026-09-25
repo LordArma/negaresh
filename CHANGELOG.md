@@ -3,7 +3,7 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [5.2.0] (2026-09-25)
 
 ### Added
 - **Multisite network defaults** (Network Admin → Settings → Negaresh): sites that have not saved

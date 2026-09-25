@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.1.0
+Stable tag: 5.2.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -22,6 +22,9 @@ Negaresh (نگارش) corrects common Persian typing mistakes in WordPress, usin
 * **Fix this post now** button in the block editor; Undo reverts it.
 * **Fix existing posts** in Tools → Negaresh or with `wp negaresh fix`: see the changed lines first, and every change is kept in the post's revisions.
 * Titles, hand written excerpts and comments can be fixed too (off by default).
+* Words to leave alone: brand names, quotations and other words Negaresh must never change.
+* A dashboard widget shows how many posts are fixed or waiting.
+* Multisite: set defaults for the whole network.
 * Persian translation included.
 
 == Installation ==
@@ -56,6 +59,11 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 3. Tools → Negaresh: scan existing posts, see the changed lines, then fix them.
 
 == Changelog ==
+
+= 5.2.0 =
+* Dashboard widget with how many posts are fixed, waiting or left alone, and a dismissible notice when posts are waiting.
+* Words to leave alone: a list of words and phrases Negaresh never changes.
+* Multisite: network defaults for sites without their own settings.
 
 = 5.1.0 =
 * When fixing on display, results are kept in the object cache (faster with Redis or Memcached).
