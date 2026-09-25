@@ -232,8 +232,8 @@ class Virastar
         // preserves front matter data in the text
         if ($options["preserve_front_matter"]) {
             $front_matter = [];
-            $text = preg_replace_callback('/^ ---[\S\s]*?---\n/', function ($matched) use ($front_matter) {
-                $front_matter[] = $matched;
+            $text = preg_replace_callback('/^ ---[\S\s]*?---\n/', function ($matched) use (&$front_matter) { // Negaresh patch (B1): by reference
+                $front_matter[] = $matched[0];
                 return ' __FRONT__MATTER__PRESERVER__ ';
             }, $text);
         }
@@ -242,8 +242,8 @@ class Virastar
         // @props: @wordpress/wordcount
         if ($options["preserve_HTML"]) {
             $html = [];
-            $text = preg_replace_callback('/<\/?[a-z][^>]*?>/i', function ($matched) use ($html) {
-                $html[] = $matched;
+            $text = preg_replace_callback('/<\/?[a-z][^>]*?>/i', function ($matched) use (&$html) { // Negaresh patch (B1): by reference
+                $html[] = $matched[0];
                 return ' __HTML__PRESERVER__ ';
             }, $text);
         }
@@ -252,8 +252,8 @@ class Virastar
         // @props: @wordpress/wordcount
         if ($options["preserve_comments"]) {
             $comments = [];
-            $text = preg_replace_callback('/<!--[\s\S]*?-->/', function ($matched) use ($comments) {
-                $comments[] = $matched;
+            $text = preg_replace_callback('/<!--[\s\S]*?-->/', function ($matched) use (&$comments) { // Negaresh patch (B1): by reference
+                $comments[] = $matched[0];
                 return ' __COMMENT__PRESERVER__ ';
             }, $text);
         }
@@ -261,8 +261,8 @@ class Virastar
         // preserves strings inside square brackets (`[]`)
         if ($options["preserve_brackets"]) {
             $brackets = [];
-            $text = preg_replace_callback('/(\[.*?\])/', function ($matched) use ($brackets) {
-                $brackets[] = $matched;
+            $text = preg_replace_callback('/(\[.*?\])/', function ($matched) use (&$brackets) { // Negaresh patch (B1): by reference
+                $brackets[] = $matched[0];
                 return ' __BRACKETS__PRESERVER__ ';
             }, $text);
         }
@@ -270,8 +270,8 @@ class Virastar
         // preserve strings inside curly braces (`{}`)
         if ($options["preserve_braces"]) {
             $braces = [];
-            $text = preg_replace_callback('/(\{.*?\})/', function ($matched) use ($braces) {
-                $braces[] = $matched;
+            $text = preg_replace_callback('/(\{.*?\})/', function ($matched) use (&$braces) { // Negaresh patch (B1): by reference
+                $braces[] = $matched[0];
                 return ' __BRACES__PRESERVER__ ';
             }, $text);
         }
@@ -282,7 +282,7 @@ class Virastar
             $uris = [];
 
             // stores Markdown links separately
-            $text = preg_replace_callback('/]\((.*?)\)/', function ($matched) use ($md_links) {
+            $text = preg_replace_callback('/]\((.*?)\)/', function ($matched) use (&$md_links) { // Negaresh patch (B1): by reference
                 if (is_string($matched))
                     $matched = [$matched];
                 if (isset($matched[1])) {
@@ -292,8 +292,8 @@ class Virastar
                 return $matched[0];
             }, $text);
 
-            $text = preg_replace_callback($this->patternURI, function ($matched) use ($uris) {
-                $uris[] = $matched;
+            $text = preg_replace_callback($this->patternURI, function ($matched) use (&$uris) { // Negaresh patch (B1): by reference
+                $uris[] = $matched[0];
                 return ' __URI__PRESERVER__ ';
             }, $text);
         }
@@ -301,8 +301,8 @@ class Virastar
         // preserves all no-break space entities in the text
         if ($options["preserve_nbsp"]) {
             $nbsps = [];
-            $text = preg_replace_callback('/&nbsp;|&#160;/iu', function ($matched) use ($nbsps) {
-                $nbsps[] = $matched;
+            $text = preg_replace_callback('/&nbsp;|&#160;/iu', function ($matched) use (&$nbsps) { // Negaresh patch (B1): by reference
+                $nbsps[] = $matched[0];
                 return ' __NBSPS__PRESERVER__ ';
             }, $text);
         }
@@ -315,8 +315,8 @@ class Virastar
         // @props: @substack/node-ent
         if ($options["preserve_entities"]) {
             $entities = [];
-            $text = preg_replace_callback('/&(#?[^;\W]+;?)/', function ($matched) use ($entities) {
-                $entities[] = $matched;
+            $text = preg_replace_callback('/&(#?[^;\W]+;?)/', function ($matched) use (&$entities) { // Negaresh patch (B1): by reference
+                $entities[] = $matched[0];
                 return ' __ENTITIES__PRESERVER__ ';
             }, $text);
         }
@@ -506,17 +506,18 @@ class Virastar
 
         // bringing back entities
         if ($options["preserve_entities"]) {
-            $entities_array = $this->entities;
-            $text = preg_replace_callback('/[ ]?__ENTITIES__PRESERVER__[ ]?/', function () use ($entities_array) {
-                return array_shift($entities_array);
+            // Negaresh patch (B1): restore what was captured, not the entity name table
+            $entities = $entities ?? [];
+            $text = preg_replace_callback('/[ ]?__ENTITIES__PRESERVER__[ ]?/', function () use (&$entities) {
+                return (string) array_shift($entities);
             }, $text);
         }
 
         // bringing back nbsp
         if ($options["preserve_nbsp"]) {
             $nbsps = $nbsps ?? [];
-            $text = preg_replace_callback('/[ ]?__NBSPS__PRESERVER__[ ]?/', function () use ($nbsps) {
-                return array_shift($nbsps);
+            $text = preg_replace_callback('/[ ]?__NBSPS__PRESERVER__[ ]?/', function () use (&$nbsps) { // Negaresh patch (B1): by reference
+                return (string) array_shift($nbsps);
             }, $text);
         }
 
@@ -524,53 +525,53 @@ class Virastar
         if ($options["preserve_URIs"]) {
             $md_links = $md_links ?? [];
             // no padding!
-            $text = preg_replace_callback('/__MD_LINK__PRESERVER__/', function () use ($md_links) {
-                return array_shift($md_links);
+            $text = preg_replace_callback('/__MD_LINK__PRESERVER__/', function () use (&$md_links) { // Negaresh patch (B1): by reference
+                return (string) array_shift($md_links);
             }, $text);
 
             $uris = $uris ?? [];
-            $text = preg_replace_callback('/[ ]?__URI__PRESERVER__[ ]?/', function () use ($uris) {
-                return array_shift($uris);
+            $text = preg_replace_callback('/[ ]?__URI__PRESERVER__[ ]?/', function () use (&$uris) { // Negaresh patch (B1): by reference
+                return (string) array_shift($uris);
             }, $text);
         }
 
         // bringing back braces
         if ($options["preserve_braces"]) {
             $braces = $braces ?? [];
-            $text = preg_replace_callback('/[ ]?__BRACES__PRESERVER__[ ]?/', function () use ($braces) {
-                return array_shift($braces);
+            $text = preg_replace_callback('/[ ]?__BRACES__PRESERVER__[ ]?/', function () use (&$braces) { // Negaresh patch (B1): by reference
+                return (string) array_shift($braces);
             }, $text);
         }
 
         // bringing back brackets
         if ($options["preserve_brackets"]) {
             $brackets = $brackets ?? [];
-            $text = preg_replace_callback('/[ ]?__BRACKETS__PRESERVER__[ ]?/', function () use ($brackets) {
-                return array_shift($brackets);
+            $text = preg_replace_callback('/[ ]?__BRACKETS__PRESERVER__[ ]?/', function () use (&$brackets) { // Negaresh patch (B1): by reference
+                return (string) array_shift($brackets);
             }, $text);
         }
 
         // bringing back HTML comments
         if ($options["preserve_comments"]) {
             $comments = $comments ?? [];
-            $text = preg_replace_callback('/[ ]?__COMMENT__PRESERVER__[ ]?/', function () use ($comments) {
-                return array_shift($comments);
+            $text = preg_replace_callback('/[ ]?__COMMENT__PRESERVER__[ ]?/', function () use (&$comments) { // Negaresh patch (B1): by reference
+                return (string) array_shift($comments);
             }, $text);
         }
 
         // bringing back HTML tags
         if ($options["preserve_HTML"]) {
             $html = $html ?? [];
-            $text = preg_replace_callback('/[ ]?__HTML__PRESERVER__[ ]?/', function () use ($html) {
-                return array_shift($html);
+            $text = preg_replace_callback('/[ ]?__HTML__PRESERVER__[ ]?/', function () use (&$html) { // Negaresh patch (B1): by reference
+                return (string) array_shift($html);
             }, $text);
         }
 
         // bringing back front matter
         if ($options["preserve_front_matter"]) {
             $front_matter = $front_matter ?? [];
-            $text = preg_replace_callback('/[ ]?__FRONT__MATTER__PRESERVER__[ ]?/', function () use ($front_matter) {
-                return array_shift($front_matter);
+            $text = preg_replace_callback('/[ ]?__FRONT__MATTER__PRESERVER__[ ]?/', function () use (&$front_matter) { // Negaresh patch (B1): by reference
+                return (string) array_shift($front_matter);
             }, $text);
         }
 
@@ -854,7 +855,8 @@ class Virastar
         return preg_replace('/[ \t\x{200c}]*([:;,؛،.؟?!]{1})/u', '$1',
             // removes more than one space after punctuations
             // except followed by new-lines (or preservers)
-            preg_replace('/([:;,؛،.؟?!]{1})[ \t\x{200c}]*(?!\n|_{2})/u', '$1 ',
+            // Negaresh patch (B1): possessive `*+` so the lookahead cannot be skipped by backtracking
+            preg_replace('/([:;,؛،.؟?!]{1})[ \t\x{200c}]*+(?!\n|_{2})/u', '$1 ',
                 // removes space after colon that separates time parts
                 preg_replace('/([0-9۰-۹]+):\s+([0-9۰-۹]+)/', '$1:$2',
                     // removes space after dots in numbers
