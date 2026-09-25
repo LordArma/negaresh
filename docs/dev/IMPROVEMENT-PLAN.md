@@ -238,8 +238,11 @@ start with easy ones". Easy first. Each item: done when tests (unit and/or e2e) 
 - [x] **P3-3** "Fix existing posts" link (Tools → Negaresh) next to "Settings" on the Plugins screen.
 - [x] **P3-4** `composer audit` in CI (PHP 8.3 job; clean today).
 - [x] **P3-5** `wp negaresh status`: posts fixed with the current rules, waiting, opted out; mode.
-- [ ] **P3-6** Fix comments too (opt-in scope option): display (`comment_text`) and save
-      (`preprocess_comment`).
+- [x] **P3-6** Fix comments too (opt-in scope option "Fix comments"). Save: `pre_comment_content`
+      at 20 (after kses; covers the comment form, REST and admin edits; slashed value), marked with
+      comment meta `_negaresh_fixed`; any later change that did not go through the filter drops
+      the mark. Display: `comment_text` at 9 (before wptexturize), skips marked comments.
+      Uninstall removes the comment markers. Tests: `CommentsTest` (9), e2e (form, REST, older).
 - [ ] **P3-7** WordPress Plugin Check (`wp plugin check`) in the e2e run; fix its findings (prepares I9).
 - [ ] **P3-8** Accessibility check (axe) of the settings, tools and editor panel in the browser test.
 - [ ] **P3-9** Cache display mode output (content + rules hash; object cache when persistent).

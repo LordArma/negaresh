@@ -81,6 +81,7 @@ class Negaresh_Settings
         'post_types' => [],
         'fix_titles' => false,
         'fix_excerpts' => false,
+        'fix_comments' => false,
         'apply_in_feeds' => true,
         'apply_in_rest' => true,
     ];
@@ -143,7 +144,8 @@ class Negaresh_Settings
     }
 
     /**
-     * A true/false option that is not a rule: fix_titles, fix_excerpts, apply_in_feeds, apply_in_rest.
+     * A true/false option that is not a rule: fix_titles, fix_excerpts, fix_comments, apply_in_feeds,
+     * apply_in_rest.
      */
     public function flag(string $key): bool
     {
@@ -222,6 +224,7 @@ class Negaresh_Settings
 
         $clean['fix_titles'] = !empty($input['fix_titles']);
         $clean['fix_excerpts'] = !empty($input['fix_excerpts']);
+        $clean['fix_comments'] = !empty($input['fix_comments']);
 
         $clean['apply_in_feeds'] = !empty($input['apply_in_feeds']);
         $clean['apply_in_rest'] = !empty($input['apply_in_rest']);
@@ -311,6 +314,7 @@ class Negaresh_Settings
         delete_option(self::DB_VERSION_OPTION);
         delete_post_meta_by_key(self::FIXED_META);
         delete_post_meta_by_key(self::SKIP_META);
+        delete_metadata('comment', 0, self::FIXED_META, '', true);
         foreach (self::LEGACY_OPTIONS as $name) {
             delete_option($name);
         }
@@ -358,6 +362,7 @@ class Negaresh_Settings
         $scope_boxes = [
             'fix_titles' => __('Fix post titles', 'negaresh'),
             'fix_excerpts' => __('Fix excerpts written by hand', 'negaresh'),
+            'fix_comments' => __('Fix comments', 'negaresh'),
             'apply_in_feeds' => __('Fix text in RSS feeds', 'negaresh'),
             'apply_in_rest' => __('Fix text in the REST API', 'negaresh'),
         ];

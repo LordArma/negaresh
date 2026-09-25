@@ -25,6 +25,16 @@ panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 
 ---
 
+## 2026-09-25 · Session 3 · Phase 3 slice: P3-6 comments
+
+Done: "Fix comments" option, save + display paths, comment markers, uninstall, translation.
+Verified: 354 unit tests; e2e on WP 7.1.2 (+ browser) and 5.8.3: comment form, REST, older
+comment on display. (A manual check looked like a 7.1 failure; it was fetched after the script had
+switched the options, and the in-script check lacked `curl -L` for the `?p=` redirect.)
+User then asked: make the plugin publishable on wordpress.org, call it version 5, release on GitHub.
+
+---
+
 ## 2026-09-25 · Session 3 · Phase 3 slice: P3-1 to P3-5 (easy ones)
 
 Done: `.gitattributes` (LF; every file already LF, nothing renormalized) + `.editorconfig`;

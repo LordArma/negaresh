@@ -205,6 +205,7 @@ class SettingsTest extends TestCase
     {
         $this->options = $this->legacyRows() + ['negaresh_options' => [], 'negaresh_db_version' => 2, 'blogname' => 'x'];
         Functions\expect('delete_post_meta_by_key')->twice()->andReturn(true);
+        Functions\expect('delete_metadata')->once()->with('comment', 0, '_negaresh_fixed', '', true)->andReturn(true);
 
         Negaresh_Settings::delete_all();
 

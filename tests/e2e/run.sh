@@ -117,6 +117,20 @@ wp option update negaresh_options '{"fix_titles":true}' --format=json >/dev/null
 TITLE_ID="$(wp post create --post_title='عنوان ...' --post_status=publish --post_content='<p>متن</p>' --porcelain)"
 check "title fixed on save when enabled (I5)" 'عنوان…' "$(wp post get "$TITLE_ID" --field=post_title)"
 
+# P3-6: comments, when enabled: the public comment form, REST, and display of older comments.
+wp option update negaresh_options '{"fix_comments":true}' --format=json >/dev/null
+curl -s -o /dev/null --data-urlencode "comment_post_ID=$POST_ID" --data-urlencode "author=Reader" \
+  --data-urlencode "email=reader@example.com" --data-urlencode "comment=نظر من ... عدد ٤٥٦" "$URL/wp-comments-post.php"
+FORM_COMMENT="$(wp comment list --post_id="$POST_ID" --author=Reader --status=all --field=comment_content)"
+check "comment form: stored comment fixed (P3-6)" 'نظر من… عدد ۴۵۶' "$FORM_COMMENT"
+REST_COMMENT="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' \
+  -d "{\"post\":$POST_ID,\"content\":\"پاسخ ...\"}" "$URL/wp-json/wp/v2/comments" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("id",""))')"
+check "REST comment stored fixed (P3-6)" 'پاسخ…' "$(wp comment get "$REST_COMMENT" --field=comment_content)"
+check "fixed comment is marked (P3-6)" "$(wp eval 'echo (new Negaresh_Settings())->rules_hash();')" "$(wp comment meta get "$REST_COMMENT" _negaresh_fixed)"
+OLD_COMMENT="$(wp comment create --comment_post_ID="$POST_ID" --comment_content='قدیمی ...' --comment_approved=1 --porcelain)"
+check "older comment stored as it was (P3-6)" 'قدیمی ...' "$(wp comment get "$OLD_COMMENT" --field=comment_content)"
+check "older comment fixed on display (P3-6)" 'قدیمی…' "$(curl -sL "$URL/?p=$POST_ID")"
+
 # Display mode never changes what is stored.
 wp option update negaresh_options '{"mode":"display"}' --format=json >/dev/null
 DISPLAY_ID="$(wp post create --post_title=d --post_name=display-mode --post_status=publish --post_content='<p>حالت نمایش ...</p>' --porcelain)"

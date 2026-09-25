@@ -64,6 +64,9 @@ class Negaresh
     /** @var array<string, true> md5 of contents fixed by filter_post_data() and not yet marked */
     private $pending_marks = [];
 
+    /** @var array<string, true> md5 of comments fixed by filter_comment_content(), not yet marked */
+    private $pending_comment_marks = [];
+
     /**
      * Opt out choices sent with the save that is running now, by post ID (0 for a new post):
      * WordPress stores post meta only after the content went through wp_insert_post_data (I6).
@@ -93,6 +96,12 @@ class Negaresh
         // Titles and hand written excerpts (I5), also before wptexturize (10).
         add_filter('the_title', [$this, 'filter_title'], 9, 2);
         add_filter('the_excerpt', [$this, 'filter_excerpt'], 9);
+        // Comments (P3-6): display before wptexturize (10); on save after kses (10). Every way a
+        // comment is saved with filters (form, REST, admin edit) runs pre_comment_content.
+        add_filter('comment_text', [$this, 'filter_comment_text'], 9, 2);
+        add_filter('pre_comment_content', [$this, 'filter_comment_content'], 20);
+        add_action('wp_insert_comment', [$this, 'mark_comment_fixed'], 10, 2);
+        add_action('edit_comment', [$this, 'mark_edited_comment']);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('admin_enqueue_scripts', [$settings, 'enqueue_assets']);
         add_filter('plugin_action_links_' . basename(dirname(NEGARESH_FILE)) . '/' . basename(NEGARESH_FILE), [$settings, 'action_links']);
@@ -158,6 +167,77 @@ class Negaresh
             return $excerpt;
         }
         return $this->safe_fix($excerpt);
+    }
+
+    /**
+     * `comment_text` callback (P3-6), when "Fix comments" is on. Comments fixed on save with the
+     * current rules are passed through.
+     *
+     * @param mixed $text
+     * @param mixed $comment
+     * @return mixed
+     */
+    public function filter_comment_text($text, $comment = null)
+    {
+        if (!is_string($text) || !$this->settings->flag('fix_comments') || !$this->should_filter()) {
+            return $text;
+        }
+        if (
+            $comment instanceof \WP_Comment
+            && get_comment_meta((int) $comment->comment_ID, self::FIXED_META, true) === $this->settings->rules_hash()
+        ) {
+            return $text;
+        }
+        return $this->safe_fix($text);
+    }
+
+    /**
+     * `pre_comment_content` callback (P3-6): in save mode the stored comment is corrected.
+     * WordPress passes the value slashed.
+     *
+     * @param mixed $content
+     * @return mixed
+     */
+    public function filter_comment_content($content)
+    {
+        if (!is_string($content) || !$this->settings->flag('fix_comments') || 'save' !== $this->settings->mode()) {
+            return $content;
+        }
+        $plain = wp_unslash($content);
+        $fixed = $this->safe_fix($plain);
+        $this->pending_comment_marks[md5($fixed)] = true;
+        return $fixed === $plain ? $content : wp_slash($fixed);
+    }
+
+    /**
+     * `wp_insert_comment` and (through mark_edited_comment) `edit_comment`: marks a comment whose
+     * text filter_comment_content() just fixed; any other change removes the mark.
+     *
+     * @param mixed $comment_id
+     * @param mixed $comment
+     */
+    public function mark_comment_fixed($comment_id, $comment): void
+    {
+        if (!$comment instanceof \WP_Comment || !is_numeric($comment_id)) {
+            return;
+        }
+        $key = md5($comment->comment_content);
+        if (isset($this->pending_comment_marks[$key])) {
+            unset($this->pending_comment_marks[$key]);
+            update_comment_meta((int) $comment_id, self::FIXED_META, $this->settings->rules_hash());
+        } else {
+            delete_comment_meta((int) $comment_id, self::FIXED_META);
+        }
+    }
+
+    /**
+     * @param mixed $comment_id
+     */
+    public function mark_edited_comment($comment_id): void
+    {
+        if (is_numeric($comment_id)) {
+            $this->mark_comment_fixed($comment_id, get_comment((int) $comment_id));
+        }
     }
 
     /**

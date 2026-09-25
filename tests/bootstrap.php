@@ -17,6 +17,7 @@ if (!defined('ABSPATH')) {
 
 require_once __DIR__ . '/stubs/WP_Post.php';
 require_once __DIR__ . '/stubs/WP_REST_Request.php';
+require_once __DIR__ . '/stubs/WP_Comment.php';
 
 define('NEGARESH_FILE', NEGARESH_PLUGIN_DIR . '/negaresh.php');
 

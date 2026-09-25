@@ -225,6 +225,7 @@ class EditorTest extends TestCase
     public function testUninstallAlsoRemovesTheOptOuts(): void
     {
         $removed = [];
+        Functions\when('delete_metadata')->justReturn(true);
         Functions\when('delete_post_meta_by_key')->alias(function ($key) use (&$removed) {
             $removed[] = $key;
             return true;

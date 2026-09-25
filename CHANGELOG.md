@@ -7,6 +7,7 @@ versions: [Semantic Versioning](https://semver.org/).
 
 ### Added
 - **Fix existing posts** link on the Plugins screen (P3-3).
+- Optional fixing of **comments** (off by default): on save, or on display for older ones (P3-6).
 - **`wp negaresh status`**: how many posts are fixed with the current rules, waiting, or opted
   out (P3-5).
 
