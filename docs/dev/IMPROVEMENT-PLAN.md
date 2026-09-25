@@ -225,3 +225,21 @@ I10 needs user decisions first.
   New rule "Remove the space before an ellipsis" (JS option, default on) keeps `متن ...` → `متن…`.
   Note: the rules hash changes (new rule), so posts fixed on save by 4.3.0 are checked again on
   display and listed again by the bulk tool; that is wanted, the rules improved.
+
+---
+
+# Phase 3: further improvements (session 3, after 4.4.0)
+
+User: "do anything if exist; if not think about what improvements we can have and then do them;
+start with easy ones". Easy first. Each item: done when tests (unit and/or e2e) cover it.
+
+- [ ] **P3-1** `.gitattributes` (`eol=lf`) and `.editorconfig`: the checkout lives on a Windows drive.
+- [ ] **P3-2** Dependabot for GitHub Actions and Composer (monthly, grouped).
+- [ ] **P3-3** "Fix existing posts" link (Tools → Negaresh) next to "Settings" on the Plugins screen.
+- [ ] **P3-4** `composer audit` in CI.
+- [ ] **P3-5** `wp negaresh status`: posts fixed with the current rules, waiting, opted out; mode.
+- [ ] **P3-6** Fix comments too (opt-in scope option): display (`comment_text`) and save
+      (`preprocess_comment`).
+- [ ] **P3-7** WordPress Plugin Check (`wp plugin check`) in the e2e run; fix its findings (prepares I9).
+- [ ] **P3-8** Accessibility check (axe) of the settings, tools and editor panel in the browser test.
+- [ ] **P3-9** Cache display mode output (content + rules hash; object cache when persistent).
