@@ -125,6 +125,12 @@ check "negaresh-skip markup left alone, the rest fixed (I6)" '<div class="negare
 FIXED="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' -d '{"content":"<p>متن ...</p>","title":"t"}' "$URL/wp-json/negaresh/v1/fix")"
 check "fix this post endpoint (I6)" '<p>متن…</p>' "$(python3 -c 'import json,sys; print(json.load(sys.stdin)["content"])' <<<"$FIXED" 2>&1)"
 
+# I10b: listed words are never changed; the rest of the post is.
+wp option update negaresh_options '{"protected_words":["٤٥٦"]}' --format=json >/dev/null
+WORDS_ID="$(wp post create --post_title=w --post_status=publish --porcelain --post_content='<p>کد ٤٥٦ و ٧٨٩ ...</p>')"
+check "listed word left alone, rest fixed (I10b)" '<p>کد ٤٥٦ و ۷۸۹…</p>' "$(wp post get "$WORDS_ID" --field=post_content)"
+wp option delete negaresh_options >/dev/null
+
 # I5: titles, when enabled, are fixed on save too.
 wp option update negaresh_options '{"fix_titles":true}' --format=json >/dev/null
 TITLE_ID="$(wp post create --post_title='عنوان ...' --post_status=publish --post_content='<p>متن</p>' --porcelain)"

@@ -222,8 +222,15 @@ I10 needs user decisions first.
   notice on Dashboard and Plugins only, dismissed per user (user meta, `check_admin_referer`);
   counts in the `negaresh_stats` transient, cleared on `save_post` and settings changes; uninstall
   removes both. Tests: `DashboardTest` (6), e2e (widget, notice, forged dismiss 403, dismissal).
-- [ ] **I10b** Words to leave alone: a list on the settings page; matches are never changed
+- [x] **I10b** Words to leave alone: a list on the settings page; matches are never changed
   (treated as boundaries, like shortcodes); the preview uses the list from the page.
+  *Result:* option `protected_words` (one per line; trimmed, unique, ≤500 × ≤100 chars), part of
+  the rules hash. Matches are whole words only (no letter, combining mark or ZWNJ on either side).
+  Each match becomes a Latin placeholder word while Virastar runs (so spacing and punctuation
+  rules still work around it; Virastar leaves Latin words alone), then is restored; if a
+  placeholder does not come back, or the text already contains the placeholder spelling, the
+  text is split at the words instead. Tests: `ProtectedWordsTest` (9), e2e (stored post), browser
+  (preview with the typed list).
 - [ ] **I10c** Multisite: network defaults set in Network Admin; sites that never saved their own
   settings (and new sites) use them.
 

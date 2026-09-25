@@ -84,7 +84,12 @@ class Negaresh_Settings
         'fix_comments' => false,
         'apply_in_feeds' => true,
         'apply_in_rest' => true,
+        'protected_words' => [],
     ];
+
+    /** Limits for the words to leave alone (I10b). */
+    public const WORDS_MAX = 500;
+    public const WORD_MAX_LENGTH = 100;
 
     /** Option names used by Negaresh 4.0 and earlier, removed by the migration (B9). */
     public const LEGACY_OPTIONS = [
@@ -122,7 +127,7 @@ class Negaresh_Settings
         $options = [];
         foreach (self::defaults() as $key => $default) {
             $value = array_key_exists($key, $saved) ? $saved[$key] : $default;
-            if ('post_types' === $key) {
+            if ('post_types' === $key || 'protected_words' === $key) {
                 $options[$key] = is_array($value) ? array_values(array_map('strval', array_filter($value, 'is_scalar'))) : [];
             } elseif ('mode' === $key) {
                 $options[$key] = in_array($value, self::MODES, true) ? $value : self::SCOPE_DEFAULTS['mode'];
@@ -166,6 +171,8 @@ class Negaresh_Settings
         foreach (['fix_titles', 'fix_excerpts'] as $key) {
             $bits .= $key . ($this->flag($key) ? '=1;' : '=0;');
         }
+        // Words to leave alone change the result too (I10b).
+        $bits .= 'words=' . implode("\n", $this->words());
         return md5($bits);
     }
 
@@ -178,6 +185,48 @@ class Negaresh_Settings
     {
         $post_types = $this->get()['post_types'];
         return is_array($post_types) ? $post_types : [];
+    }
+
+    /**
+     * Words and phrases never changed (I10b).
+     *
+     * @return list<string>
+     */
+    public function words(): array
+    {
+        $words = $this->get()['protected_words'];
+        return is_array($words) ? $words : [];
+    }
+
+    /**
+     * One word or phrase per line (or a list) → a clean list: trimmed, no empty or repeated
+     * entries, at most WORDS_MAX entries of WORD_MAX_LENGTH characters.
+     *
+     * @param mixed $input
+     * @return list<string>
+     */
+    public static function parse_words($input): array
+    {
+        $lines = is_array($input) ? $input : preg_split('/\R/u', is_string($input) ? $input : '');
+        $words = [];
+        foreach (is_array($lines) ? $lines : [] as $line) {
+            if (!is_scalar($line)) {
+                continue;
+            }
+            $word = trim((string) $line);
+            if ('' === $word) {
+                continue;
+            }
+            $word = trim(sanitize_text_field($word));
+            $word = mb_substr($word, 0, self::WORD_MAX_LENGTH);
+            if (!in_array($word, $words, true)) {
+                $words[] = $word;
+            }
+            if (count($words) >= self::WORDS_MAX) {
+                break;
+            }
+        }
+        return $words;
     }
 
     /**
@@ -228,6 +277,7 @@ class Negaresh_Settings
 
         $clean['apply_in_feeds'] = !empty($input['apply_in_feeds']);
         $clean['apply_in_rest'] = !empty($input['apply_in_rest']);
+        $clean['protected_words'] = self::parse_words($input['protected_words'] ?? '');
 
         return $clean;
     }
@@ -348,6 +398,14 @@ class Negaresh_Settings
         }
 
         add_settings_field('negaresh_mode', __('When to fix', 'negaresh'), [$this, 'render_mode'], self::PAGE, 'negaresh_mode');
+        add_settings_field(
+            'negaresh_protected_words',
+            __('Words and phrases', 'negaresh'),
+            [$this, 'render_words'],
+            self::PAGE,
+            'negaresh_words',
+            ['label_for' => 'negaresh_protected_words']
+        );
 
         foreach ($this->rule_labels() as $key => $field) {
             add_settings_field(
@@ -392,6 +450,7 @@ class Negaresh_Settings
             'spacing' => __('Spacing and half spaces', 'negaresh'),
             'cleanup' => __('Cleanup', 'negaresh'),
             'scope' => __('Where to apply', 'negaresh'),
+            'words' => __('Words to leave alone', 'negaresh'),
         ];
     }
 
@@ -710,6 +769,19 @@ class Negaresh_Settings
             )
             . '</p>';
         echo '</fieldset>';
+    }
+
+    public function render_words(): void
+    {
+        printf(
+            '<textarea id="negaresh_protected_words" name="%1$s" rows="5" cols="50" dir="auto" class="large-text code">%2$s</textarea>',
+            esc_attr(self::OPTION . '[protected_words]'),
+            esc_textarea(implode("\n", $this->words()))
+        );
+        echo '<p class="description">'
+            . esc_html__('One word or phrase per line. Only whole words match.', 'negaresh') . ' '
+            . esc_html__('Negaresh never changes them: for example brand names, names spelled in a special way, or quotations.', 'negaresh')
+            . '</p>';
     }
 
     public function render_post_types(): void

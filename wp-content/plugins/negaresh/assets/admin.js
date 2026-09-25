@@ -22,6 +22,11 @@
         return rules;
     }
 
+    function protectedWords() {
+        var box = document.getElementById('negaresh_protected_words');
+        return box ? box.value : '';
+    }
+
     function preview() {
         if (!input || !output || !window.wp || !window.wp.apiFetch) {
             return;
@@ -37,7 +42,7 @@
         window.wp.apiFetch({
             path: '/negaresh/v1/preview',
             method: 'POST',
-            data: { text: text, rules: checkedRules() }
+            data: { text: text, rules: checkedRules(), words: protectedWords() }
         }).then(function (response) {
             if (request !== latest) {
                 return; // an older answer arriving late
@@ -58,6 +63,10 @@
 
     if (input) {
         input.addEventListener('input', later);
+    }
+    var wordsBox = document.getElementById('negaresh_protected_words');
+    if (wordsBox) {
+        wordsBox.addEventListener('input', later);
     }
     if (form) {
         form.addEventListener('change', function (event) {

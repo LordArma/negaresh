@@ -59,6 +59,17 @@ try {
     fail(`preview did not follow the checkbox: ${await output.inputValue()}`);
   }
 
+  // I10b: the word list as typed on the page (not saved) is used by the preview.
+  await page.locator('#negaresh_protected_words').fill('٤٥٦');
+  await page.locator('#negaresh-preview-input').fill('کد ٤٥٦ و ٧٨٩');
+  try {
+    await page.waitForFunction(() => document.querySelector('#negaresh-preview-output').value === 'کد ٤٥٦ و ۷۸۹', null, { timeout: 10000 });
+    pass('preview leaves the words typed in the list alone (I10b)');
+  } catch (e) {
+    fail(`preview with a word list gave: ${await output.inputValue()}`);
+  }
+  await page.locator('#negaresh_protected_words').fill('');
+
   let asked = false;
   page.once('dialog', async (dialog) => { asked = true; await dialog.dismiss(); });
   await page.locator('.negaresh-reset').click();

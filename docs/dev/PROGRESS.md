@@ -27,6 +27,15 @@ panel, bulk tool) pass on WP 7.1.2 and 5.8.3.
 
 ---
 
+## 2026-09-25 · Session 3 · I10b words to leave alone
+
+Done: see IMPROVEMENT-PLAN I10b. First version split the text at the words (like tags), which
+kept a space before "…" next to a listed word; switched to placeholder words with the split as a
+safety net. 101 translated strings.
+Verified: unit tests, PHPCS, PHPStan; e2e + browser on WP 7.1.2.
+
+---
+
 ## 2026-09-25 · Session 3 · I10a dashboard widget and notice
 
 Done: see IMPROVEMENT-PLAN I10a; 7 new translated strings.

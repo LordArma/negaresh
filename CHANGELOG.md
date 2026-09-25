@@ -6,6 +6,8 @@ versions: [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Words to leave alone**: a list on the settings page of words and phrases Negaresh never
+  changes, such as brand names or quotations; only whole words match (I10b).
 - **Dashboard widget** with how many posts are fixed, waiting or left alone, and a one time,
   dismissible notice when existing posts are waiting to be checked (I10a).
 

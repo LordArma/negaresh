@@ -84,6 +84,9 @@ class Negaresh
     /** @var Virastar|null built once per request, reset when the options change */
     private $virastar = null;
 
+    /** @var string|null pattern matching the words to leave alone; '' when there are none (I10b) */
+    private $words_pattern = null;
+
     public function __construct(Negaresh_Settings $settings)
     {
         $this->settings = $settings;
@@ -125,6 +128,7 @@ class Negaresh
     public function reset(): void
     {
         $this->virastar = null;
+        $this->words_pattern = null;
     }
 
     /**
@@ -255,20 +259,24 @@ class Negaresh
      * not the saved ones. A rule that is missing from $rules is off, like an unchecked box.
      *
      * @param array<mixed> $rules
+     * @param list<string>|null $words words to leave alone as typed on the page (I10b)
      */
-    public function preview(string $text, array $rules): string
+    public function preview(string $text, array $rules, ?array $words = null): string
     {
         $normalized = [];
         foreach (array_keys(Negaresh_Settings::RULE_DEFAULTS) as $key) {
             $normalized[$key] = !empty($rules[$key]);
         }
 
-        $saved = $this->virastar;
+        $saved = [$this->virastar, $this->words_pattern];
         $this->virastar = new Virastar($this->virastar_options($normalized));
+        if (null !== $words) {
+            $this->words_pattern = self::words_pattern(Negaresh_Settings::parse_words($words));
+        }
         try {
             return $this->safe_fix($text);
         } finally {
-            $this->virastar = $saved;
+            [$this->virastar, $this->words_pattern] = $saved;
         }
     }
 
@@ -293,6 +301,12 @@ class Negaresh
                         return null === $value || is_array($value);
                     },
                 ],
+                'words' => [
+                    'required' => false,
+                    'validate_callback' => static function ($value): bool {
+                        return null === $value || is_string($value) || is_array($value);
+                    },
+                ],
             ],
         ]);
     }
@@ -306,8 +320,13 @@ class Negaresh
     {
         $text = $request->get_param('text');
         $rules = $request->get_param('rules');
+        $words = $request->get_param('words');
 
-        return ['text' => $this->preview(is_string($text) ? $text : '', is_array($rules) ? $rules : [])];
+        return ['text' => $this->preview(
+            is_string($text) ? $text : '',
+            is_array($rules) ? $rules : [],
+            null === $words ? null : Negaresh_Settings::parse_words($words)
+        )];
     }
 
     /**
@@ -568,9 +587,76 @@ class Negaresh
 
         $out = '';
         foreach ($pieces as $i => $piece) {
+            $out .= 0 === $i % 2 ? $this->fix_unprotected($piece) : $piece;
+        }
+        return $out;
+    }
+
+    /**
+     * Fixes a text piece while leaving the listed words alone (I10b). Each match is swapped for a
+     * Latin placeholder word, so spacing and punctuation rules still work around it (Virastar does
+     * not convert letters or digits in Latin words), then put back. If a placeholder does not come
+     * back intact, the text is split at the words instead, like at shortcodes.
+     */
+    private function fix_unprotected(string $text): string
+    {
+        if (null === $this->words_pattern) {
+            $this->words_pattern = self::words_pattern($this->settings->words());
+        }
+        if ('' === $this->words_pattern) {
+            return $this->fix_piece($text);
+        }
+
+        $held = [];
+        // Text that already contains the placeholder spelling goes straight to the safe split.
+        $masked = false !== strpos($text, 'NGRSHKEEP') ? null : preg_replace_callback($this->words_pattern, static function (array $m) use (&$held): string {
+            $held[] = $m[0];
+            return 'NGRSHKEEP' . (count($held) - 1) . 'X';
+        }, $text);
+        if (null !== $masked) {
+            if (!$held) {
+                return $this->fix_piece($text);
+            }
+            $fixed = $this->fix_piece($masked);
+            $restored = preg_replace_callback('/NGRSHKEEP(\d+)X/', static function (array $m) use ($held): string {
+                return $held[(int) $m[1]] ?? $m[0];
+            }, $fixed, -1, $count);
+            if (null !== $restored && count($held) === $count) {
+                return $restored;
+            }
+        }
+
+        // Safety net: fix the parts between the words separately.
+        $pieces = preg_split($this->words_pattern, $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        if (false === $pieces) {
+            throw new \RuntimeException('splitting protected words failed: ' . (int) preg_last_error());
+        }
+        $out = '';
+        foreach ($pieces as $i => $piece) {
             $out .= 0 === $i % 2 ? $this->fix_piece($piece) : $piece;
         }
         return $out;
+    }
+
+    /**
+     * Whole word pattern for the given words, longest first; '' for none. A match may not touch
+     * letters, combining marks or a half space on either side, so "کتاب" does not match inside
+     * "کتابخانه".
+     *
+     * @param list<string> $words
+     */
+    private static function words_pattern(array $words): string
+    {
+        if (!$words) {
+            return '';
+        }
+        usort($words, static function (string $a, string $b): int {
+            return mb_strlen($b) <=> mb_strlen($a);
+        });
+        $quoted = array_map(static function (string $word): string {
+            return preg_quote($word, '/');
+        }, $words);
+        return '/(?<![\p{L}\p{M}\x{200C}])(' . implode('|', $quoted) . ')(?![\p{L}\p{M}\x{200C}])/u';
     }
 
     /**
