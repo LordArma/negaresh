@@ -3,7 +3,7 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [4.4.0] (2026-09-25)
 
 ### Fixed
 - **Dates written with Persian or Arabic digits were scrambled** (`۳/۱/۱۳۵۵` became `۱۳/۱/۳۵۵`)
@@ -12,11 +12,6 @@ versions: [Semantic Versioning](https://semver.org/).
   were not merged, a Kashida between numbers was deleted instead of becoming a dash, times got a
   space after the colon, stacked diacritics were removed (B28).
 - `%1$s` style placeholders in text lost their digits (B30).
-
-### Changed
-- The rules now follow Virastar.js 0.22.1 and pass its own test suite (I11). New rule
-  **Remove the space before an ellipsis** (on by default). Posts fixed with the old rules are
-  checked again.
 
 ### Added
 - **Leave this post alone**: a per post choice in the block editor sidebar and in the classic
@@ -33,6 +28,10 @@ versions: [Semantic Versioning](https://semver.org/).
   Additional CSS class) or `data-negaresh="off"` (I6).
 
 ### Changed
+- The rules now follow Virastar.js 0.22.1 and pass its own test suite (I11). New rule
+  **Remove the space before an ellipsis** (on by default). Posts fixed with the old rules are
+  checked again.
+
 - The “Try it” boxes follow the direction of what is typed, so pasted HTML is readable (I8).
 
 ## [4.3.0] (2026-09-25)

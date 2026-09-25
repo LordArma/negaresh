@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 4.3.0
+Stable tag: 4.4.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -55,6 +55,11 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 
 == Changelog ==
 
+= 4.4.0 =
+* Fix: dates written with Persian or Arabic digits were scrambled (۳/۱/۱۳۵۵ became ۱۳/۱/۳۵۵). Upgrade recommended.
+* Fix: rules with several steps ran them in the wrong order (---, repeated !?, Kashida between numbers, times).
+* Leave this post alone, Fix this post now, Tools → Negaresh and wp negaresh fix for existing posts.
+
 = 4.3.0 =
 * Try it box, reset rules to defaults, Settings link, optional titles and excerpts.
 
@@ -67,6 +72,9 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 The full changelog is at https://github.com/LordArma/negaresh/blob/master/CHANGELOG.md
 
 == Upgrade Notice ==
+
+= 4.4.0 =
+Fixes Persian and Arabic digit dates being scrambled. Please upgrade.
 
 = 4.1.0 =
 4.0.0 damaged how posts were displayed and blocked logins. Please upgrade.
