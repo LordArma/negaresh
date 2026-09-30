@@ -3,6 +3,13 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+- wordpress.org review: "Tested up to" is only in readme.txt; translations now come from
+  translate.wordpress.org language packs, so the plugin no longer loads or ships its own
+  `.po`/`.mo` files (the Persian translation is kept in the repository as the source to import).
+
 ## [5.2.0] (2026-09-25)
 
 ### Added

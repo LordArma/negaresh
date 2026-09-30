@@ -3,7 +3,7 @@
 Newest entry on top. Each entry: date, session number, what was done, what was verified, next step.
 Status snapshot is kept up to date at the top.
 
-## Status snapshot (updated end of session 3, 2026-09-25)
+## Status snapshot (updated session 4, 2026-09-30)
 
 | Item | State |
 | --- | --- |
@@ -14,7 +14,7 @@ Status snapshot is kept up to date at the top.
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
 | Branches | `master` = `phase-2` = released 5.2.0, plus this handoff's docs commit on `phase-2` only (not pushed) |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
-| wordpress.org | not submitted; steps in **`WORDPRESS-ORG.md`**; deploy jobs wait for `SVN_USERNAME`/`SVN_PASSWORD` |
+| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; code fixes done (unreleased), owner must prove ownership, re-upload and reply (**`WORDPRESS-ORG.md` §6**) |
 
 **Checks at 5.2.0:** `composer check` (PHPCS, PHPStan level 8, 382 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/e2e/run.sh`
@@ -36,6 +36,18 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
    when relevant), docs + CHANGELOG `[Unreleased]`, one commit per slice on `phase-2`.
 5. Releasing: CLAUDE.md §5 (push `master`, wait for CI, then tag). The GitHub API sometimes times
    out here; retry `gh` calls instead of assuming failure.
+
+---
+
+## 2026-09-30 · Session 4 · wordpress.org pre-review fixes
+
+User forwarded the review email (pended 2026-09-27). Done: `Tested up to` removed from the plugin
+header (PluginFilesTest now fails if it comes back, seen failing); `load_plugin_textdomain()` and
+its `init` hook removed; `bin/build-zip.sh` leaves `languages/*.po|*.mo` out of the zip (kept in the
+repo for translate.wordpress.org); `bin/release-notes.sh` reads `Tested up to` from readme.txt.
+Verified: `composer check` (382 tests). **Not verified: `tests/e2e/run.sh`** (Docker unreachable
+from WSL this session); run it before the next release.
+Next: user's steps in WORDPRESS-ORG.md §6 (ownership, upload zip, reply). Consider 5.2.1 release.
 
 ---
 

@@ -16,7 +16,7 @@ if [ -z "$(tr -d '[:space:]' <<<"$SECTION")" ]; then
 fi
 REQUIRES_WP="$(sed -n 's/^ \* Requires at least: //p' wp-content/plugins/negaresh/negaresh.php)"
 REQUIRES_PHP="$(sed -n 's/^ \* Requires PHP: //p' wp-content/plugins/negaresh/negaresh.php)"
-TESTED="$(sed -n 's/^ \* Tested up to: //p' wp-content/plugins/negaresh/negaresh.php)"
+TESTED="$(sed -n 's/^Tested up to: //p' wp-content/plugins/negaresh/readme.txt)"
 sed -E 's/ \(([BI][0-9]+(, )?)+\)//g' <<<"$SECTION" | sed -e '/./,$!d'
 cat <<NOTES
 

@@ -31,7 +31,6 @@ class NegareshFilterTest extends TestCase
         // B27: before wptexturize (10), which turns "..." and quotes into entities, and after
         // do_blocks (9, registered first).
         self::assertSame(9, has_filter('the_content', [$plugin, 'filter_content']));
-        self::assertNotFalse(has_action('init', [$plugin, 'load_textdomain']));
         self::assertNotFalse(has_action('update_option_negaresh_options', [$plugin, 'reset']));
     }
 

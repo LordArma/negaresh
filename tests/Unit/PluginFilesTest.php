@@ -59,12 +59,15 @@ class PluginFilesTest extends TestCase
 
         // I8: readme.txt (wordpress.org) must describe the same release and requirements.
         $readme = self::read(NEGARESH_PLUGIN_DIR . '/readme.txt');
-        foreach (['Stable tag' => 'Version', 'Requires at least' => 'Requires at least', 'Requires PHP' => 'Requires PHP', 'Tested up to' => 'Tested up to'] as $readme_key => $header_key) {
+        foreach (['Stable tag' => 'Version', 'Requires at least' => 'Requires at least', 'Requires PHP' => 'Requires PHP'] as $readme_key => $header_key) {
             preg_match('/^' . preg_quote($readme_key, '/') . ': (\S+)$/m', $readme, $in_readme);
             preg_match('/^ \* ' . preg_quote($header_key, '/') . ': (\S+)$/m', $main, $in_header);
             self::assertNotEmpty($in_readme, "$readme_key missing from readme.txt");
             self::assertSame($in_header[1] ?? null, $in_readme[1], "readme.txt $readme_key differs from the plugin header");
         }
+        // wordpress.org review: "Tested up to" belongs in readme.txt only, never in the header.
+        self::assertMatchesRegularExpression('/^Tested up to: \\d+\\.\\d+$/m', $readme, 'Tested up to missing from readme.txt');
+        self::assertDoesNotMatchRegularExpression('/^ \\* Tested up to:/m', $main, 'Tested up to must only be in readme.txt');
         self::assertStringContainsString('= ' . $header[1] . ' =', $readme, 'readme.txt changelog has no entry for ' . $header[1]);
 
         $changelog = self::read(dirname(NEGARESH_PLUGIN_DIR, 3) . '/CHANGELOG.md');

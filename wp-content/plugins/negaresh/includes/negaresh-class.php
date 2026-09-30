@@ -92,7 +92,6 @@ class Negaresh
         $this->settings = $settings;
 
         add_action('plugins_loaded', [$settings, 'maybe_migrate']);
-        add_action('init', [$this, 'load_textdomain']);
         add_action('admin_menu', [$settings, 'add_page']);
         add_action('admin_init', [$settings, 'register']);
         add_action('network_admin_menu', [$settings, 'add_network_page']);
@@ -116,15 +115,6 @@ class Negaresh
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('admin_enqueue_scripts', [$settings, 'enqueue_assets']);
         add_filter('plugin_action_links_' . basename(dirname(NEGARESH_FILE)) . '/' . basename(NEGARESH_FILE), [$settings, 'action_links']);
-    }
-
-    public function load_textdomain(): void
-    {
-        // Needed for the translation bundled in languages/ (installs from GitHub): WordPress 5.8 does
-        // not find it on its own (checked: 5.8.3 stays English without this call, 7.1.2 does not
-        // need it). On wordpress.org, language packs take over.
-        // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound
-        load_plugin_textdomain('negaresh', false, dirname(plugin_basename(NEGARESH_FILE)) . '/languages');
     }
 
     public function reset(): void

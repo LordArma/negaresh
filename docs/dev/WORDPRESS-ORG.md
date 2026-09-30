@@ -23,7 +23,8 @@ the owner's wordpress.org account, so only the owner can do it.
 
 `Contributors:` must be real wordpress.org usernames, or the plugin page shows no author and the
 review may ask for it. The other header lines (`Requires at least`, `Tested up to`, `Stable tag`,
-`License`) are kept correct by the release process and a unit test.
+`License`) are kept correct by the release process and a unit test. `Tested up to` is only in
+`readme.txt` (the review asked for it; a unit test keeps it out of the plugin header).
 
 ## 3. Submit
 
@@ -62,6 +63,24 @@ To publish the current version right after approval without a code change, make 
 | Description, Installation, FAQ, Changelog | `readme.txt` sections |
 | Screenshots 1 to 3 and their captions | `.wordpress-org/screenshot-*.png` + `== Screenshots ==` |
 | Icon, banner | `.wordpress-org/icon-*.png`, `banner-*.png` |
-| Translations | translate.wordpress.org language packs take over from the bundled `languages/` |
+| Translations | translate.wordpress.org language packs only: the zip has no `.po`/`.mo` (review of 2026-09-27) |
 
 Regenerate the images with `KEEP=1 tests/e2e/run.sh && tests/e2e/wporg-assets.sh`.
+
+## 6. Review of 2026-09-27 (first submission)
+
+The automatic pre-review asked for three things. Fixed in the code: `Tested up to` removed from the
+plugin header; `load_plugin_textdomain()` removed (WordPress loads language packs by itself since
+4.6); `.po`/`.mo` left out of the zip by `bin/build-zip.sh` (still in the repository).
+
+Owner's steps:
+1. **Ownership**: the account email is `@jangal.co`, the plugin names `LordArma.com`. Either add
+   the DNS TXT record `wordpressorg-lordarma-verification` at the root (`@`) of `lordarma.com` and
+   check it is visible (`dig +short TXT lordarma.com`), or reply that Lord Arma is you and both
+   domains are yours, or change the account email to one `@lordarma.com`.
+2. Upload the new zip (`bin/build-zip.sh HEAD`) at https://wordpress.org/plugins/developers/add/
+   while logged in as `lordarma`, then reply **to the review email thread** (short, no change list).
+3. After approval: import `languages/negaresh-fa_IR.po` at
+   https://translate.wordpress.org/projects/wp-plugins/negaresh/ (Persian); ask the Persian
+   translation editors, or request PTE rights for your plugin, so it is approved and shipped as a
+   language pack.
