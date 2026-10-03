@@ -14,7 +14,7 @@ Status snapshot is kept up to date at the top.
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
 | Branches | `master` = `phase-2` = released 5.2.2 |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
-| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); owner uploads 5.2.2 and replies (**`WORDPRESS-ORG.md` §7**) |
+| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); 5.2.2 uploaded and review answered 2026-10-03; **waiting for the reviewer** (**`WORDPRESS-ORG.md` §7**) |
 
 **Checks at 5.2.2:** `composer check` (PHPCS, PHPStan level 8, 383 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/e2e/run.sh`
@@ -26,8 +26,8 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
 1. Read `CLAUDE.md` (gitignored, local only), then this file, then `IMPROVEMENT-PLAN.md`.
 2. `git switch phase-2`, `composer install` if `vendor/` is missing, `composer check`.
 3. Open items (ask the user first):
-   - **wordpress.org**: the plugin is in manual review. Owner uploads the 5.2.2 zip and replies to
-     the 2026-10-03 review (`WORDPRESS-ORG.md` §7, reply text there). If the reviewers write
+   - **wordpress.org**: the plugin is in manual review; 5.2.2 uploaded and the 2026-10-03 review
+     answered (`WORDPRESS-ORG.md` §7). Waiting for the reviewer. If the reviewers write
      again, fix every case of the issue (not only their example), add a B-numbered regression test,
      release a patch. After approval: SVN secrets, Persian translation import (§6 step 3).
    - Rule for this and every WordPress plugin: anything an output filter or shortcode callback
@@ -54,7 +54,7 @@ tests/e2e/run.sh` on WP 7.1.2 (Plugin Check clean, debug.log empty), `run.sh` on
 `multisite.sh`; CI green; Release workflow published v5.2.2 (Latest, zip checked).
 Git identity set globally to `Alireza Ahmadi (Arma) <arma@jangal.co>` at the end of the session
 (the 5.2.2 commits/tag use the older alirezama@hotmail.com; left as they are).
-Next: owner uploads the 5.2.2 zip and replies to the review (WORDPRESS-ORG.md §7).
+Owner uploaded the 5.2.2 zip and replied to the review the same day. Next: wait for the reviewer.
 
 ---
 
