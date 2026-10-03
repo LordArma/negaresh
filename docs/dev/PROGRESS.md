@@ -12,7 +12,7 @@ Status snapshot is kept up to date at the top.
 | Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B30 all fixed and released |
 | Phase 2 (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I10, I11 done (I3 not needed) · ⏳ I9: plugin ready, submission is the user's step |
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
-| Branches | `master` = `phase-2` = released 5.2.2 |
+| Branches | `master` = `phase-2` (5.2.2 plus handoff docs), both pushed; no local changes |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
 | wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); 5.2.2 uploaded and review answered 2026-10-03; **waiting for the reviewer** (**`WORDPRESS-ORG.md` §7**) |
 
