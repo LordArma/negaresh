@@ -218,6 +218,27 @@ class NegareshFilterTest extends TestCase
 
         self::assertSame('<p>متن ...</p>', $plugin->filter_content('<p>متن ...</p>'));
     }
+
+    /**
+     * B31 (wordpress.org review): what the display filters return is escaped. Every text piece
+     * Virastar changed goes through esc_html(); WordPress's own markup, protected elements and
+     * text Negaresh does not change are returned as they came.
+     */
+    public function testB31DisplayFiltersEscapeTheTextTheyChange(): void
+    {
+        $this->options[Negaresh_Settings::OPTION] = ['fix_titles' => true, 'fix_excerpts' => true, 'fix_comments' => true];
+        Functions\when('get_post_meta')->justReturn('');
+        $plugin = $this->plugin();
+
+        self::assertSame('عنوان 1 &lt; 2 &amp; 3…', $plugin->filter_title('عنوان 1 < 2 & 3...', 5));
+        self::assertSame('<p>خلاصه &lt;b&gt;…</p>', $plugin->filter_excerpt('<p>خلاصه &lt;b&gt;...</p>'));
+        self::assertSame('نظر &gt; پاسخ…', $plugin->filter_comment_text('نظر > پاسخ...', null));
+        // Entities already in the text are not encoded twice.
+        self::assertSame('<p>A&amp;B و C&nbsp;D…</p>', $plugin->filter_content('<p>A&amp;B و C&nbsp;D...</p>'));
+        // Markup, script contents and English only text are WordPress's own and stay as they are.
+        $in = '<p class="a">سلام</p><script>if (a < b && c) {}</script><p>Tom & "Jerry"</p>';
+        self::assertSame($in, $plugin->filter_content($in));
+    }
 }
 
 /** Settings that work for should_filter() and then throw inside the fix. */

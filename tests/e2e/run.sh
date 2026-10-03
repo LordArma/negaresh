@@ -156,6 +156,17 @@ DISPLAY_ID="$(wp post create --post_title=d --post_name=display-mode --post_stat
 check "display mode leaves stored text alone (I4)" '<p>حالت نمایش ...</p>' "$(wp post get "$DISPLAY_ID" --field=post_content)"
 # "..." checks B27 too: the fix must run before wptexturize turns "..." into &#8230;
 check "display mode fixes the page, before wptexturize (I4, B27)" 'حالت نمایش…' "$(curl -s "$URL/display-mode/")"
+# B31 (wordpress.org review): display filters return escaped text; markup such as an iframe stays.
+wp option update negaresh_options '{"mode":"display","fix_titles":true}' --format=json >/dev/null
+ESC_ID="$(wp post create --post_title='عنوان 1 < 2 ...' --post_name=escaped --post_status=publish \
+  --post_content='<p>متن 3 < 4 ...</p><iframe src="https://example.com/embed" width="300"></iframe>' --porcelain)"
+ESC_PAGE="$(curl -s "$URL/escaped/")"
+# REST title.rendered is the_title's output as is (the page's <title> is escaped by core anyway).
+ESC_TITLE="$(curl -s "$URL/wp-json/wp/v2/posts/$ESC_ID" | python3 -c 'import json,sys; print(json.load(sys.stdin)["title"]["rendered"])')"
+check "display mode title is escaped (B31)" 'عنوان 1 &lt; 2…' "$ESC_TITLE"
+check "display mode content is escaped (B31)" 'متن 3 &lt; 4…' "$ESC_PAGE"
+check "display mode keeps the iframe (B31)" '<iframe src="https://example.com/embed" width="300"></iframe>' "$ESC_PAGE"
+wp option update negaresh_options '{"mode":"display"}' --format=json >/dev/null
 
 # I6: the bulk tool's endpoints (admin only) see the stored, unfixed display mode post.
 BULK_FIND="$(curl -s -u "admin:$APP_PASS" -H 'Content-Type: application/json' -d '{}' "$URL/wp-json/negaresh/v1/bulk/find")"

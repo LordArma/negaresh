@@ -87,6 +87,9 @@ class Negaresh
     /** @var string|null pattern matching the words to leave alone; '' when there are none (I10b) */
     private $words_pattern = null;
 
+    /** @var bool true while display_fix() runs: changed text pieces are escaped for output (B31) */
+    private $escape_output = false;
+
     public function __construct(Negaresh_Settings $settings)
     {
         $this->settings = $settings;
@@ -135,7 +138,7 @@ class Negaresh
             return $content;
         }
 
-        return $this->display_fix($content);
+        return $this->display_fix($content); // escaped for output, see display_fix() (B31)
     }
 
     /**
@@ -154,7 +157,7 @@ class Negaresh
         ) {
             return $title;
         }
-        return $this->display_fix($title);
+        return $this->display_fix($title); // escaped for output, see display_fix() (B31)
     }
 
     /**
@@ -172,7 +175,7 @@ class Negaresh
         ) {
             return $excerpt;
         }
-        return $this->display_fix($excerpt);
+        return $this->display_fix($excerpt); // escaped for output, see display_fix() (B31)
     }
 
     /**
@@ -194,7 +197,7 @@ class Negaresh
         ) {
             return $text;
         }
-        return $this->display_fix($text);
+        return $this->display_fix($text); // escaped for output, see display_fix() (B31)
     }
 
     /**
@@ -463,8 +466,23 @@ class Negaresh
      * the rules and the plugin version, so a change of rules or an upgrade never serves an old
      * result. Only the object cache is used (persistent with Redis or Memcached, otherwise per
      * request); caching every post in the database would bloat it.
+     *
+     * The result is safe to output (B31): every text piece Negaresh changed is escaped with
+     * esc_html() (see fix_piece()). Markup, protected elements (script, style, code ...) and text
+     * left unchanged are returned exactly as WordPress passed them; running the whole post through
+     * wp_kses_post() instead would strip embeds, forms and scripts the site added on purpose.
      */
     private function display_fix(string $text): string
+    {
+        $this->escape_output = true;
+        try {
+            return $this->cached_display_fix($text);
+        } finally {
+            $this->escape_output = false;
+        }
+    }
+
+    private function cached_display_fix(string $text): string
     {
         if (1 !== preg_match('/[\x{0600}-\x{06FF}]/u', $text)) {
             return $text; // nothing to fix, nothing worth caching
@@ -668,6 +686,10 @@ class Negaresh
         $fixed = $this->virastar()->cleanup($m[2]);
         if (!is_string($fixed)) {
             throw new \RuntimeException('Virastar returned no text');
+        }
+        if ($this->escape_output) {
+            // B31: display filters return this text to the page. Entities already in it are kept.
+            $fixed = esc_html($fixed);
         }
 
         return $m[1] . $fixed . $m[3];

@@ -123,6 +123,15 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   diacritics removed. *Fix:* rule functions re-ported step by step from Virastar.js 0.22.1 (I11).
   Tests: `VirastarFixesTest::testB28...`, `VirastarReferenceTest`.
 
+- [x] **B31 Display filters returned unescaped text** *(Low; found 2026-10-03 by the wordpress.org
+  plugin review; fixed in 5.2.2)*. `the_title`, `the_content`, `the_excerpt` and `comment_text`
+  returned Virastar's output without escaping. Text nodes come from WordPress, so a lone `<` in a
+  title (`1 < 2`) reached the page as is. *Fix:* `display_fix()` escapes every text piece Virastar
+  changed with `esc_html()` (existing entities kept); markup, protected elements and unchanged text
+  are returned as WordPress passed them. `wp_kses_post()` on the whole post was rejected: it strips
+  embeds, iframes and forms. Tests: `NegareshFilterTest::testB31...`, e2e "display mode ... (B31)"
+  (both seen failing without the fix).
+
 - [x] **B30 sprintf directives lost digits (`%1$s` → `%۱$s`)** *(Low)*: the pattern sat in a PHP
   double quoted string, which ate the backslash of `\$`. Fixed with single quotes.
 

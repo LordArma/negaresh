@@ -18,6 +18,10 @@ abstract class TestCase extends PHPUnitTestCase
         // Cleanup calls used by uninstall; tests that care replace them.
         Functions\when('delete_transient')->justReturn(true);
         Functions\when('delete_metadata')->justReturn(true);
+        // Same result as WordPress's esc_html() for valid UTF-8 (B31).
+        Functions\when('esc_html')->alias(static function ($text): string {
+            return htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8', false);
+        });
     }
 
     /** @var array<string,mixed> in-memory wp_options table, see stubOptions() */
