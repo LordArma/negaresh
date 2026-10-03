@@ -26,9 +26,12 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
 1. Read `CLAUDE.md` (gitignored, local only), then this file, then `IMPROVEMENT-PLAN.md`.
 2. `git switch phase-2`, `composer install` if `vendor/` is missing, `composer check`.
 3. Open items (ask the user first):
-   - **wordpress.org**: user creates/confirms the account, sets `Contributors:` in `readme.txt`,
-     submits, adds the SVN secrets (`WORDPRESS-ORG.md`). After `Contributors:` changes, a patch
-     release (5.2.1) gives wordpress.org the right zip.
+   - **wordpress.org**: the plugin is in manual review. Owner uploads the 5.2.2 zip and replies to
+     the 2026-10-03 review (`WORDPRESS-ORG.md` §7, reply text there). If the reviewers write
+     again, fix every case of the issue (not only their example), add a B-numbered regression test,
+     release a patch. After approval: SVN secrets, Persian translation import (§6 step 3).
+   - Rule for this and every WordPress plugin: anything an output filter or shortcode callback
+     returns must be escaped (B31).
    - Nothing else is planned. Ideas not yet agreed with the user: a "fix now" row action in the
      posts list, bulk tool filters by date/category, per rule descriptions on the settings page,
      REST endpoint for headless sites, Persian digits in the admin counts.
@@ -48,7 +51,9 @@ untouched. Unit test and three e2e checks (REST `title.rendered`, page content, 
 seen failing without the fix. User asked to always escape filter returns in every WordPress plugin
 (saved to memory). Verified: `composer check` (383 tests) on PHP 8.3 and 7.4; `BROWSER=1
 tests/e2e/run.sh` on WP 7.1.2 (Plugin Check clean, debug.log empty), `run.sh` on WP 5.8,
-`multisite.sh`. Released 5.2.2.
+`multisite.sh`; CI green; Release workflow published v5.2.2 (Latest, zip checked).
+Git identity set globally to `Alireza Ahmadi (Arma) <arma@jangal.co>` at the end of the session
+(the 5.2.2 commits/tag use the older alirezama@hotmail.com; left as they are).
 Next: owner uploads the 5.2.2 zip and replies to the review (WORDPRESS-ORG.md §7).
 
 ---
