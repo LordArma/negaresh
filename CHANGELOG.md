@@ -3,6 +3,13 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [5.2.2] (2026-10-03)
+
+### Security
+- When fixing on display, every piece of text Negaresh changes in titles, content, excerpts and
+  comments is escaped with `esc_html()` before WordPress outputs it (wordpress.org review). Markup,
+  embeds and text Negaresh does not change are output exactly as before (B31).
+
 ## [5.2.1] (2026-10-01)
 
 ### Changed

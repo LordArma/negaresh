@@ -4,7 +4,7 @@
  * Plugin Name: Negaresh
  * Plugin URI: https://github.com/LordArma/negaresh
  * Description: Negaresh tries to fix your Farsi (Persian) typos in WordPress.
- * Version: 5.2.1
+ * Version: 5.2.2
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Author: Lord Arma
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('NEGARESH_VERSION', '5.2.1');
+define('NEGARESH_VERSION', '5.2.2');
 define('NEGARESH_FILE', __FILE__);
 
 require_once __DIR__ . '/includes/Virastar.php';

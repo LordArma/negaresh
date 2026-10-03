@@ -3,20 +3,20 @@
 Newest entry on top. Each entry: date, session number, what was done, what was verified, next step.
 Status snapshot is kept up to date at the top.
 
-## Status snapshot (updated session 4, 2026-10-01)
+## Status snapshot (updated session 5, 2026-10-03)
 
 | Item | State |
 | --- | --- |
-| Current version | **5.2.1** (tag `v5.2.1`), published by the Release workflow; Latest on GitHub |
+| Current version | **5.2.2** (tag `v5.2.2`), published by the Release workflow; Latest on GitHub |
 | Releases this session | 4.1.0 → 4.2.0 → 4.3.0 → 4.4.0 → 5.0.0 → 5.1.0 → 5.2.0 (all on 2026-09-25) |
 | Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B30 all fixed and released |
 | Phase 2 (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I10, I11 done (I3 not needed) · ⏳ I9: plugin ready, submission is the user's step |
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
-| Branches | `master` = `phase-2` = released 5.2.0, plus this handoff's docs commit on `phase-2` only (not pushed) |
+| Branches | `master` = `phase-2` = released 5.2.2 |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
-| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added 2026-10-01; owner uploads the zip and replies (**`WORDPRESS-ORG.md` §6**) |
+| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); owner uploads 5.2.2 and replies (**`WORDPRESS-ORG.md` §7**) |
 
-**Checks at 5.2.0:** `composer check` (PHPCS, PHPStan level 8, 382 unit tests incl. 159 Virastar.js
+**Checks at 5.2.2:** `composer check` (PHPCS, PHPStan level 8, 383 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/e2e/run.sh`
 (≈60 checks + browser + axe + Plugin Check) and `tests/e2e/multisite.sh` (13 checks) pass on WordPress
 7.1.2 and 5.8.3; CI (PHP 7.4/8.1/8.3/8.4, zip, e2e + multisite on latest and 5.8) green on GitHub.
@@ -36,6 +36,20 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
    when relevant), docs + CHANGELOG `[Unreleased]`, one commit per slice on `phase-2`.
 5. Releasing: CLAUDE.md §5 (push `master`, wait for CI, then tag). The GitHub API sometimes times
    out here; retry `gh` calls instead of assuming failure.
+
+---
+
+## 2026-10-03 · Session 5 · B31 escaping (wordpress.org review) and release 5.2.2
+
+User forwarded the manual review: callbacks of output filters must return escaped data (example
+`the_title`). Done: B31, `display_fix()` escapes every text piece Virastar changed with
+`esc_html()` (titles, content, excerpts, comments in display mode); markup and unchanged text
+untouched. Unit test and three e2e checks (REST `title.rendered`, page content, iframe kept), both
+seen failing without the fix. User asked to always escape filter returns in every WordPress plugin
+(saved to memory). Verified: `composer check` (383 tests) on PHP 8.3 and 7.4; `BROWSER=1
+tests/e2e/run.sh` on WP 7.1.2 (Plugin Check clean, debug.log empty), `run.sh` on WP 5.8,
+`multisite.sh`. Released 5.2.2.
+Next: owner uploads the 5.2.2 zip and replies to the review (WORDPRESS-ORG.md §7).
 
 ---
 

@@ -84,3 +84,23 @@ Owner's steps:
    https://translate.wordpress.org/projects/wp-plugins/negaresh/ (Persian); ask the Persian
    translation editors, or request PTE rights for your plugin, so it is approved and shipped as a
    language pack.
+
+## 7. Review of 2026-10-03 (manual review, escaping)
+
+The volunteers asked that what output filter callbacks return be escaped (example: `the_title`).
+Fixed in 5.2.2 (B31): every text piece Negaresh changes in `the_title`, `the_content`,
+`the_excerpt` and `comment_text` goes through `esc_html()`. The rest of the input is WordPress's
+own and is returned as it came; `wp_kses_post()` on the whole post would strip embeds and forms.
+
+Owner's steps:
+1. Download `negaresh.zip` from the 5.2.2 GitHub release (or `bin/build-zip.sh HEAD`), upload it at
+   https://wordpress.org/plugins/developers/add/ while logged in as `lordarma`.
+2. Reply to the review email thread, for example:
+
+   > Thanks for the review. Fixed in 5.2.2 (uploaded): the_title, the_content, the_excerpt and
+   > comment_text callbacks now escape every piece of text the plugin changes with esc_html()
+   > (includes/negaresh-class.php, display_fix() and fix_piece()). The plugin only changes text
+   > between HTML tags, so markup is returned as WordPress passed it in; we did not run
+   > wp_kses_post() over the whole post because it would strip embeds and iframes. Tested on a
+   > clean WordPress 7.1 and 5.8 with WP_DEBUG on (empty debug.log) and with Plugin Check (no
+   > errors or warnings).

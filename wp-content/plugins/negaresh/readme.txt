@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.2.1
+Stable tag: 5.2.2
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,6 +59,9 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 3. Tools → Negaresh: scan existing posts, see the changed lines, then fix them.
 
 == Changelog ==
+
+= 5.2.2 =
+* Security hardening: text changed by the display filters (titles, content, excerpts, comments) is escaped before WordPress outputs it.
 
 = 5.2.1 =
 * Translations now come from translate.wordpress.org language packs (wordpress.org guidelines).
