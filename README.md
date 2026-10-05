@@ -12,6 +12,9 @@ Install it from the WordPress plugin directory: **https://wordpress.org/plugins/
 Or download `negaresh.zip` from the latest release on the [releases page](https://github.com/LordArma/negaresh/releases),
 then upload it in *Plugins → Add New → Upload Plugin*.
 
+## Read more
+An article about Negaresh (in Persian) on the author's blog: [افزونهٔ نگارش فارسی](https://lordarma.com/%d8%a7%d9%81%d8%b2%d9%88%d9%86%d9%87-%d9%86%da%af%d8%a7%d8%b1%d8%b4-%d9%81%d8%a7%d8%b1%d8%b3%db%8c/)
+
 ## Requirements
 * WordPress 5.8 or newer (tested up to 7.1)
 * PHP 7.4 or newer

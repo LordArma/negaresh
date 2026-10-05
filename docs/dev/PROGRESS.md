@@ -55,7 +55,7 @@ test zip `build/negaresh.zip` built from the working tree.
 Then B32 (owner found it): rule examples on the settings page were laid out LTR by wp-admin's
 `code` CSS; fixed in admin.css, and the words box dropped class `code`; two browser checks, seen
 failing first; listing images retaken. Released as 5.2.3 (owner: "publish everywhere"), the first wordpress.org SVN deploy; READMEs link
-https://wordpress.org/plugins/negaresh/. Verified: `composer check`, `tests/e2e/run.sh` on latest WP
+https://wordpress.org/plugins/negaresh/ and the owner's blog article (readme.txt too, pushed by the listing workflow). Verified: `composer check`, `tests/e2e/run.sh` on latest WP
 (all passed); on WP 5.8 only core's own update check failed (no TLS to wordpress.org from the
 container, network; CI is the judge).
 Verified: `composer check` (383 tests); `KEEP=1 tests/e2e/run.sh` all passed (site removed after).

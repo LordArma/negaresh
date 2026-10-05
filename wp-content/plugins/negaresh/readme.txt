@@ -27,6 +27,8 @@ Negaresh (نگارش) corrects common Persian typing mistakes in WordPress, usin
 * Multisite: set defaults for the whole network.
 * Persian translation included.
 
+Read more about Negaresh (in Persian) on the author's blog: [افزونهٔ نگارش فارسی](https://lordarma.com/%d8%a7%d9%81%d8%b2%d9%88%d9%86%d9%87-%d9%86%da%af%d8%a7%d8%b1%d8%b4-%d9%81%d8%a7%d8%b1%d8%b3%db%8c/).
+
 == Installation ==
 
 1. Upload the plugin in *Plugins → Add New → Upload Plugin*, or copy the `negaresh` folder to `wp-content/plugins`.
