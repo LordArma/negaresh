@@ -7,14 +7,14 @@ Status snapshot is kept up to date at the top.
 
 | Item | State |
 | --- | --- |
-| Current version | **5.2.2** (tag `v5.2.2`), published by the Release workflow; Latest on GitHub |
+| Current version | **5.2.3** (tag `v5.2.3`), published by the Release workflow; Latest on GitHub |
 | Releases this session | 4.1.0 → 4.2.0 → 4.3.0 → 4.4.0 → 5.0.0 → 5.1.0 → 5.2.0 (all on 2026-09-25) |
-| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B30 all fixed and released |
+| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B31 fixed and released · B32 fixed in 5.2.3 |
 | Phase 2 (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I10, I11 done (I3 not needed) · ⏳ I9: plugin ready, submission is the user's step |
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
 | Branches | `master` = `phase-2` (5.2.2 plus handoff docs), both pushed; no local changes |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
-| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); 5.2.2 uploaded and review answered 2026-10-03; **waiting for the reviewer** (**`WORDPRESS-ORG.md` §7**) |
+| wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); 5.2.2 uploaded and review answered 2026-10-03; **approved 2026-10-04**; 5.2.3 and the listing assets deployed by the Release workflow 2026-10-05 (**`WORDPRESS-ORG.md` §8**) |
 
 **Checks at 5.2.2:** `composer check` (PHPCS, PHPStan level 8, 383 unit tests incl. 159 Virastar.js
 reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/e2e/run.sh`
@@ -39,6 +39,27 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
    when relevant), docs + CHANGELOG `[Unreleased]`, one commit per slice on `phase-2`.
 5. Releasing: CLAUDE.md §5 (push `master`, wait for CI, then tag). The GitHub API sometimes times
    out here; retry `gh` calls instead of assuming failure.
+
+---
+
+## 2026-10-05 · Session 6 · wordpress.org approval, listing assets
+
+The plugin was approved on wordpress.org (2026-10-04). User asked to prepare the listing for their
+review and publish nothing yet. Done: `tests/e2e/wporg-assets.mjs` makes a banner with three more
+examples (all checked with Virastar) and a 4th screenshot (dashboard widget); assets regenerated
+from 5.2.2; Playground blueprint for Live Preview; readme/README 33 rules (was 32), 4th caption;
+`workflow_dispatch` on the listing workflow. Review page `build/wporg-preview.html`.
+Then, on request: Persian listing images (`LANG_FA=1` mode of `wporg-assets.sh`: fa_IR banner and
+screenshots 1–4 for fa.wordpress.org, screenshot-5 = rules in Persian), icon without rounded corners,
+test zip `build/negaresh.zip` built from the working tree.
+Then B32 (owner found it): rule examples on the settings page were laid out LTR by wp-admin's
+`code` CSS; fixed in admin.css, and the words box dropped class `code`; two browser checks, seen
+failing first; listing images retaken. Released as 5.2.3 (owner: "publish everywhere"), the first wordpress.org SVN deploy; READMEs link
+https://wordpress.org/plugins/negaresh/. Verified: `composer check`, `tests/e2e/run.sh` on latest WP
+(all passed); on WP 5.8 only core's own update check failed (no TLS to wordpress.org from the
+container, network; CI is the judge).
+Verified: `composer check` (383 tests); `KEEP=1 tests/e2e/run.sh` all passed (site removed after).
+Not committed. Next: owner approves the images, then `WORDPRESS-ORG.md` §8.
 
 ---
 

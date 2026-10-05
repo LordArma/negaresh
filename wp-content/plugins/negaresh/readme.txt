@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.2.2
+Stable tag: 5.2.3
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -15,7 +15,7 @@ Fixes Persian (Farsi) typography in your posts: half spaces, Persian digits, pun
 Negaresh (نگارش) corrects common Persian typing mistakes in WordPress, using a patched copy of the [Virastar](https://github.com/AlirezaSedghi/Virastar) library.
 
 * **Fix before saving or on display.** Correct the stored text when a post is saved, so the editor shows what readers get, or fix only what is displayed and never change the stored text.
-* **32 rules you choose**, each with an example: Persian digits, half spaces (ZWNJ) for prefixes and suffixes, Persian comma, semicolon and question mark, «guillemets», ellipsis, dashes, Kashida cleanup, spacing and more.
+* **33 rules you choose**, each with an example: Persian digits, half spaces (ZWNJ) for prefixes and suffixes, Persian comma, semicolon and question mark, «guillemets», ellipsis, dashes, Kashida cleanup, spacing and more.
 * **Try it** on the settings page: paste text and see it fixed with the boxes you have checked, before saving.
 * **Only text is changed.** HTML tags, attributes, links, shortcodes and code (`pre`, `code`, `script`, `style` …) are never touched, and neither is text written only in English.
 * **Leave a post alone** from the editor sidebar, or part of a post with the CSS class `negaresh-skip`.
@@ -57,8 +57,13 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 1. Settings → Negaresh: try the rules on your own text before saving, choose when to fix, pick the rules.
 2. The Negaresh panel in the block editor: leave a post alone, or fix it now (Undo reverts it).
 3. Tools → Negaresh: scan existing posts, see the changed lines, then fix them.
+4. The dashboard widget: how many posts are fixed, waiting to be checked or left alone.
+5. The rules and their examples, in Persian (with the Persian language pack).
 
 == Changelog ==
+
+= 5.2.3 =
+* Settings page: the rule examples with numbers or punctuation are shown right to left again (they looked reversed), and the "Words to leave alone" box types Persian right to left.
 
 = 5.2.2 =
 * Security hardening: text changed by the display filters (titles, content, excerpts, comments) is escaped before WordPress outputs it.

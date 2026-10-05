@@ -3,6 +3,13 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [5.2.3] (2026-10-05)
+
+### Fixed
+- Settings page: the before ← after examples of the rules were shown left to right, so examples
+  with numbers or punctuation looked reversed (for example `٤٥٦ ← ۴۵۶`). The "Words to leave
+  alone" box now types Persian right to left (B32).
+
 ## [5.2.2] (2026-10-03)
 
 ### Security
