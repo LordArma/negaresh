@@ -104,3 +104,31 @@ Owner's steps:
    > wp_kses_post() over the whole post because it would strip embeds and iframes. Tested on a
    > clean WordPress 7.1 and 5.8 with WP_DEBUG on (empty debug.log) and with Plugin Check (no
    > errors or warnings).
+
+## 8. Approved (2026-10-04): first SVN publish
+
+The plugin was approved on 2026-10-04 (SVN `https://plugins.svn.wordpress.org/negaresh`, user
+`lordarma`). Prepared 2026-10-05, waiting for the owner's OK on the listing before anything goes out:
+`.wordpress-org/` regenerated from 5.2.2 (banner with three more examples checked with Virastar, a
+4th screenshot of the dashboard widget), `.wordpress-org/blueprints/blueprint.json` for the Live
+Preview button, readme says 33 rules (was 32) and has the 4th caption, and the listing workflow
+can be started by hand (`workflow_dispatch`). Local review page: `build/wporg-preview.html`.
+Persian set (`LANG_FA=1 tests/e2e/wporg-assets.sh`): `banner-*-fa_IR.png` and `screenshot-1..4-fa_IR.png`
+replace the English ones on fa.wordpress.org; `screenshot-5.png` (rules in Persian) is on every
+listing. The icon is full bleed (rounded corners left white edges). Test zip: `build/negaresh.zip`.
+
+Order, once the owner approves the images:
+1. Commit on `phase-2`, fast forward `master`, push both (the listing workflow only leaves a
+   notice: no secrets yet).
+2. Owner adds the GitHub secrets `SVN_USERNAME` = `lordarma` and `SVN_PASSWORD` (§4).
+3. Re-run only the `wordpress-org` job of the v5.2.2 Release run: it deploys 5.2.2 to trunk and
+   `tags/5.2.2`, with the assets of the tag (the old images).
+   `gh run list --workflow=release.yml`, `gh run view <id> --json jobs`, `gh run rerun <id> --job <job id>`.
+4. `gh workflow run "wordpress.org listing"`: pushes the new assets and readme from `master`.
+5. On the plugin's wordpress.org Advanced page, turn on the Live Preview; import the Persian
+   translation (§6 step 3).
+
+**Update (B32, 2026-10-05):** the code changed, so the first SVN publish should be a 5.2.3 release
+instead of steps 3–4 above: the secrets exist, so pushing the `v5.2.3` tag deploys the code, the
+readme and all `.wordpress-org/` assets in one go (CLAUDE.md §5). Pushing `master` before the tag
+also starts the listing workflow; it may fail or no-op while SVN trunk is still empty, which is harmless.

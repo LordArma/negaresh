@@ -6,7 +6,10 @@ digits, punctuation, quotes and more. [فارسی](README.fa.md)
 ![Settings → Negaresh in Persian: the “Try it” box fixes the text as you type](screenshot.png "نگارش")
 
 ## Download
-Download `negaresh.zip` from the latest release on the [releases page](https://github.com/LordArma/negaresh/releases),
+Install it from the WordPress plugin directory: **https://wordpress.org/plugins/negaresh/**
+(in WordPress: *Plugins → Add New*, search for "Negaresh").
+
+Or download `negaresh.zip` from the latest release on the [releases page](https://github.com/LordArma/negaresh/releases),
 then upload it in *Plugins → Add New → Upload Plugin*.
 
 ## Requirements
@@ -18,7 +21,7 @@ Built on [Virastar](https://github.com/AlirezaSedghi/Virastar) (a patched copy s
 
 * **Fix before saving or on display.** Correct the stored text when a post is saved (the default
   for new installs), or fix only what is displayed and never change the stored text.
-* **32 rules** to switch on or off at *Settings → Negaresh*, each with an example, and a
+* **33 rules** to switch on or off at *Settings → Negaresh*, each with an example, and a
   **Try it** box that fixes your own text with the boxes as they are checked.
 * **Only text is changed**: HTML tags, attributes, links, entities, shortcodes and code
   (`pre`, `code`, `script`, `style`, ...) are left exactly as they are; so is English only text.

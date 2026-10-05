@@ -3,6 +3,7 @@ name: wordpress.org listing
 # Updates only the readme and the listing assets (.wordpress-org/) on wordpress.org between
 # releases. Does nothing until the SVN_USERNAME / SVN_PASSWORD secrets exist.
 on:
+  workflow_dispatch:
   push:
     branches: [master]
     paths:
