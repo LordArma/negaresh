@@ -16,8 +16,10 @@
     color: #50575e;
 }
 
+/* wp-admin sets `code { direction: ltr }`, which beats dir="rtl": examples were swapped (B32). */
 .negaresh-settings td code[dir="rtl"] {
     margin-inline-start: 0.5em;
+    direction: rtl;
     unicode-bidi: isolate;
 }
 

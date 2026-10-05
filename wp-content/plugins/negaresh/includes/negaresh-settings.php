@@ -896,7 +896,7 @@ class Negaresh_Settings
     public function render_words(): void
     {
         printf(
-            '<textarea id="negaresh_protected_words" name="%1$s" rows="5" cols="50" dir="auto" class="large-text code">%2$s</textarea>',
+            '<textarea id="negaresh_protected_words" name="%1$s" rows="5" cols="50" dir="auto" class="large-text">%2$s</textarea>',
             esc_attr(self::OPTION . '[protected_words]'),
             esc_textarea(implode("\n", $this->words()))
         );

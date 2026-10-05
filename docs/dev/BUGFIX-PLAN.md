@@ -123,6 +123,14 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   diacritics removed. *Fix:* rule functions re-ported step by step from Virastar.js 0.22.1 (I11).
   Tests: `VirastarFixesTest::testB28...`, `VirastarReferenceTest`.
 
+- [x] **B32 Rule examples on the settings page shown left to right** *(Low; found 2026-10-05 by the
+  owner)*: wp-admin's `code { direction: ltr; unicode-bidi: embed }` beats the `dir="rtl"`
+  attribute, so "before ← after" was laid out left to right: before on the left, the arrow pointing
+  back at it. Persian-only examples looked fine, numbers and punctuation were swapped
+  (`٤٥٦ ← ۴۵۶`, `۵۰% ← ۵۰٪`, dates). Same cause: the "words to leave alone" box (class `code`)
+  ignored its `dir="auto"`. *Fix:* `direction: rtl` on the examples in `admin.css`; class `code`
+  dropped from the textarea. Tests: two browser checks in `tests/e2e/browser.mjs` (every example's
+  "before" is right of its "after"; the box is RTL for Persian), both seen failing first.
 - [x] **B31 Display filters returned unescaped text** *(Low; found 2026-10-03 by the wordpress.org
   plugin review; fixed in 5.2.2)*. `the_title`, `the_content`, `the_excerpt` and `comment_text`
   returned Virastar's output without escaping. Text nodes come from WordPress, so a lone `<` in a

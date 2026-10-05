@@ -41,6 +41,26 @@ try {
   await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
   await page.goto(`${url}/wp-admin/options-general.php?page=negaresh-options`);
 
+  // B32: every rule example reads right to left, "before" on the right and the arrow pointing left
+  // to "after". wp-admin's `code { direction: ltr }` used to override dir="rtl" (numbers swapped).
+  const swapped = await page.evaluate(() => [...document.querySelectorAll('.negaresh-settings td code[dir="rtl"]')]
+    .filter((code) => {
+      const text = code.firstChild;
+      const at = text.data.indexOf(' ← ');
+      const range = document.createRange();
+      range.setStart(text, 0); range.setEnd(text, at);
+      const before = range.getBoundingClientRect().left;
+      range.setStart(text, at + 3); range.setEnd(text, text.data.length);
+      return getComputedStyle(code).direction !== 'rtl' || before <= range.getBoundingClientRect().left;
+    }).map((code) => code.textContent));
+  swapped.length === 0 ? pass('rule examples read right to left (B32)') : fail(`rule examples shown left to right (B32): ${swapped.join(' | ')}`);
+
+  // B32: the "words to leave alone" box follows its text (dir="auto"); wp-admin's .code forced LTR.
+  await page.locator('#negaresh_protected_words').fill('کتاب‌خانه');
+  const wordsDir = await page.locator('#negaresh_protected_words').evaluate((el) => getComputedStyle(el).direction);
+  wordsDir === 'rtl' ? pass('words to leave alone: Persian is typed right to left (B32)') : fail(`words to leave alone box is ${wordsDir} for Persian (B32)`);
+  await page.locator('#negaresh_protected_words').fill('');
+
   const output = page.locator('#negaresh-preview-output');
   await page.locator('#negaresh-preview-input').fill('<p>سلام ... عدد ٤٥٦</p>');
   try {
