@@ -175,30 +175,63 @@ try {
   await a11y(page, '.negaresh-skip-toggle, .negaresh-fix-now', 'editor panel');
   await page.screenshot({ path: `${shots}/editor-${process.env.SHOT_NAME || 'page'}.png` });
 
-  // I6: Tools → Negaresh, scan then fix.
-  await page.goto(`${url}/wp-admin/tools.php?page=negaresh-bulk`);
-  await page.locator('.negaresh-scan').click();
-  const row = page.locator('.negaresh-bulk-results tr', { hasText: process.env.BULK_TITLE || 'bulk-target' });
+  // I6, B33: Tools → Negaresh, a list like the posts list; check, fix selected, fix all waiting.
+  const bulkTitle = process.env.BULK_TITLE || 'bulk-target';
+  const bulkUrl = `${url}/wp-admin/tools.php?page=negaresh-bulk`;
+  const waitingCount = async () => Number((await page.locator('.subsubsub .waiting .count').textContent()).replace(/\D/g, ''));
+  await page.goto(bulkUrl);
+  const row = page.locator('#the-list tr', { has: page.locator('.row-title', { hasText: new RegExp(`^${bulkTitle}$`) }) });
+  const correctRow = page.locator('#the-list tr', { hasText: `${bulkTitle}-correct-1` });
+  (await row.count()) === 1 && (await correctRow.count()) === 1
+    ? pass('bulk list shows the waiting posts, also those already correct (B33)') : fail('bulk list is missing waiting posts');
+  (await page.locator('.displaying-num').first().textContent()).replace(/\D/g, '') === String(await waitingCount())
+    ? pass('bulk list counts every waiting post (B33)') : fail('bulk list count differs from the Waiting view');
   try {
-    await row.waitFor({ timeout: 30000 });
-    pass('bulk scan lists the unfixed post');
+    await row.locator('.negaresh-changes details').waitFor({ timeout: 30000 });
+    await row.locator('summary').click();
+    (await row.locator('.negaresh-added').first().textContent())?.includes('<p>گروهی…</p>')
+      ? pass('bulk list shows the changed line') : fail('bulk diff missing');
   } catch (e) {
-    fail(`bulk scan did not list the post: ${await page.locator('.negaresh-bulk-status').textContent()}`);
+    fail(`bulk check did not finish: ${await row.locator('.negaresh-changes').textContent()}`);
   }
-  await row.locator('summary').click();
-  (await row.locator('.negaresh-added').first().textContent())?.includes('<p>گروهی…</p>')
-    ? pass('bulk scan shows the changed line') : fail('bulk diff missing');
+  await correctRow.locator('.negaresh-no-change').waitFor({ timeout: 30000 })
+    .then(() => pass('a post already correct is shown as such (B33)'), () => fail('no "already correct" note'));
   const idOf = await row.getAttribute('data-id');
   const stored = async () => page.evaluate(async (id) => (await wp.apiFetch({ path: `/wp/v2/posts/${id}?context=edit` })).content.raw, idOf);
-  (await stored()) === '<p>گروهی ...</p>' ? pass('scanning saved nothing') : fail(`scan changed the post: ${await stored()}`);
+  (await stored()) === '<p>گروهی ...</p>' ? pass('checking saved nothing') : fail(`check changed the post: ${await stored()}`);
+
+  // Screen Options: posts per page, and pagination when there are more.
+  await page.locator('#show-settings-link').click();
+  await page.locator('#negaresh_bulk_per_page').fill('2');
+  await Promise.all([page.waitForNavigation(), page.locator('#screen-options-apply').click()]);
+  (await page.locator('#the-list tr').count()) === 2 && Number(await page.locator('.tablenav.top .total-pages').textContent()) > 1
+    ? pass('bulk list is paginated by the per page screen option (B33)') : fail('bulk list pagination missing');
+  await page.locator('#show-settings-link').click();
+  await page.locator('#negaresh_bulk_per_page').fill('50');
+  await Promise.all([page.waitForNavigation(), page.locator('#screen-options-apply').click()]);
+
+  // Bulk action "Fix" on the selected post only.
+  const before = await waitingCount();
+  await row.locator('input[name="post[]"]').check();
+  await page.locator('#bulk-action-selector-top').selectOption('negaresh_fix');
   page.once('dialog', (dialog) => dialog.accept());
-  await page.locator('.negaresh-apply').click();
-  try {
-    await page.waitForFunction(() => document.querySelectorAll('.negaresh-bulk-results tr.negaresh-done').length > 0, null, { timeout: 30000 });
-    (await stored()) === '<p>گروهی…</p>' ? pass('"Fix all listed posts" fixes the stored post') : fail(`after fix: ${await stored()}`);
-  } catch (e) {
-    fail(`bulk fix did not finish: ${await page.locator('.negaresh-bulk-status').textContent()}`);
-  }
+  await Promise.all([page.waitForURL(/negaresh_fixed=1/, { timeout: 30000 }), page.locator('#doaction').click()]);
+  (await stored()) === '<p>گروهی…</p>' ? pass('bulk action "Fix" fixes the selected post') : fail(`after fix: ${await stored()}`);
+  (await waitingCount()) === before - 1 && (await row.count()) === 0
+    ? pass('the fixed post leaves the Waiting view') : fail(`waiting ${before} → ${await waitingCount()}`);
+  await page.locator('.notice-success').waitFor({ timeout: 5000 })
+    .then(() => pass('a notice reports the fix'), () => fail('no notice after the fix'));
+
+  // "Fix all waiting posts": every waiting post is checked, also those already correct (B33:
+  // they used to stay waiting for ever, the count never reached zero).
+  await page.goto(bulkUrl);
+  page.once('dialog', (dialog) => dialog.accept());
+  await Promise.all([page.waitForURL(/negaresh_checked=/, { timeout: 120000 }), page.locator('.negaresh-fix-all').click()]);
+  (await waitingCount()) === 0 && (await page.locator('.negaresh-fix-all').count()) === 0
+    ? pass('"Fix all waiting posts" leaves no post waiting (B33)') : fail(`still waiting: ${await waitingCount()}`);
+  await page.goto(`${bulkUrl}&view=fixed`);
+  (await page.locator('#the-list tr', { hasText: `${bulkTitle}-correct-2` }).count()) === 1
+    ? pass('posts already correct are now in the Fixed view (B33)') : fail('already correct post not marked');
   await a11y(page, '.negaresh-bulk', 'tools page');
   await page.screenshot({ path: `${shots}/bulk-${process.env.SHOT_NAME || 'page'}.png`, fullPage: true });
   errors.length ? fail(`browser errors: ${errors.join(' | ')}`) : pass('no JavaScript errors');

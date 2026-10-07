@@ -213,6 +213,88 @@ class BulkTest extends TestCase
         self::assertSame(['total' => 5, 'fixed' => 3, 'waiting' => 2, 'opted_out' => 1], $this->bulk()->stats());
     }
 
+    /**
+     * B33: a post already correct is only marked, which fires no save_post; the dashboard counts
+     * ("posts waiting") must still be refreshed, or they stay stale for an hour.
+     */
+    public function testB33CheckingAPostRefreshesTheDashboardCounts(): void
+    {
+        $forgotten = [];
+        Functions\when('delete_transient')->alias(function ($name) use (&$forgotten) {
+            $forgotten[] = $name;
+            return true;
+        });
+        $this->add(5, '<p>متن درست</p>');
+
+        $this->bulk()->process(5, false);
+        self::assertSame([], $forgotten, 'a check saves nothing');
+
+        $this->bulk()->process(5, true);
+        self::assertSame([\Negaresh_Dashboard::STATS_TRANSIENT], $forgotten);
+    }
+
+    public function testB33StateOfAPost(): void
+    {
+        $bulk = $this->bulk();
+        $states = [$bulk->state(1)];
+        $this->meta[1][Negaresh_Settings::FIXED_META] = 'older-rules';
+        $states[] = $bulk->state(1);
+        $this->meta[1][Negaresh_Settings::FIXED_META] = (new Negaresh_Settings())->rules_hash();
+        $states[] = $bulk->state(1);
+        $this->meta[1][Negaresh_Settings::SKIP_META] = '1';
+        $states[] = $bulk->state(1);
+
+        self::assertSame(['waiting', 'waiting', 'fixed', 'opted_out'], $states);
+    }
+
+    /**
+     * B33: the list of the bulk tool page is paginated, filtered by view, type and search.
+     */
+    public function testB33ListingIsOnePageOfAView(): void
+    {
+        $this->add(3, '<p>یک</p>');
+        $this->add(4, '<p>دو</p>');
+        \WP_Query::$next = [$this->posts[3], $this->posts[4]];
+        \WP_Query::$next_found = 120;
+
+        $page = $this->bulk()->listing(['paged' => 3, 'per_page' => 50]);
+
+        self::assertSame([3, 4], array_map(static function ($post) {
+            return $post->ID;
+        }, $page['posts']));
+        self::assertSame(120, $page['total']);
+        $query = \WP_Query::$last;
+        self::assertSame(50, $query['posts_per_page']);
+        self::assertSame(3, $query['paged']);
+        self::assertSame(['post', 'page', 'wp_block'], $query['post_type']);
+        self::assertSame('date', $query['orderby']);
+        self::assertSame('DESC', $query['order']);
+        self::assertArrayNotHasKey('s', $query);
+        $waiting = json_encode($query['meta_query']) ?: '';
+        self::assertStringContainsString('"key":"_negaresh_fixed","compare":"NOT EXISTS"', $waiting, 'waiting is the default view');
+
+        $this->bulk()->listing(['view' => 'fixed', 'post_type' => 'page', 'search' => ' سلام ', 'orderby' => 'title', 'order' => 'asc']);
+        $query = \WP_Query::$last;
+        self::assertSame(['page'], $query['post_type']);
+        self::assertSame('سلام', $query['s']);
+        self::assertSame('title', $query['orderby']);
+        self::assertSame('ASC', $query['order']);
+        self::assertStringContainsString('"compare":"="', json_encode($query['meta_query']) ?: '');
+        self::assertStringNotContainsString('NOT EXISTS","relation', json_encode($query['meta_query']) ?: '');
+
+        $this->bulk()->listing(['view' => 'opted_out']);
+        self::assertSame([['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '=']], \WP_Query::$last['meta_query']);
+
+        $this->bulk()->listing(['view' => 'all', 'orderby' => 'post_content; DROP', 'order' => 'sideways']);
+        self::assertArrayNotHasKey('meta_query', \WP_Query::$last);
+        self::assertSame('date', \WP_Query::$last['orderby']);
+        self::assertSame('DESC', \WP_Query::$last['order']);
+
+        \WP_Query::$last = [];
+        self::assertSame(['posts' => [], 'total' => 0], $this->bulk()->listing(['post_type' => 'attachment']));
+        self::assertSame([], \WP_Query::$last, 'a type out of scope is not queried');
+    }
+
     public function testLineDiff(): void
     {
         $diff = Negaresh_Bulk::diff("a\nb ...\nc\nd", "a\nb…\nc\nd\ne");

@@ -136,4 +136,63 @@ class BulkPageTest extends TestCase
         self::assertSame('manage_options', $added[2]);
         self::assertSame(Negaresh_Bulk_Page::PAGE, $added[3]);
     }
+
+    /**
+     * B33: fixing marks every post, also those already correct: before, only the posts that would
+     * change were fixed, so the others stayed "waiting" for ever and the count never went down.
+     */
+    public function testB33FixMarksPostsThatNeedNoChangeToo(): void
+    {
+        $page = $this->page();
+        $this->add(1, '<p>یک ...</p>');
+        $this->add(2, '<p>درست</p>');
+        $this->add(3, '<p>سه ...</p>');
+        $meta = [];
+        Functions\when('update_post_meta')->alias(function ($id, $key, $value) use (&$meta) {
+            $meta[$id][$key] = $value;
+            return true;
+        });
+        Functions\when('wp_save_post_revision')->justReturn(1);
+        Functions\when('has_filter')->justReturn(false);
+        Functions\when('wp_slash')->alias('addslashes');
+        Functions\when('wp_update_post')->alias(function ($data) {
+            return $data['ID'];
+        });
+        Functions\when('current_user_can')->alias(function ($cap, $id = null) {
+            return 'edit_post' === $cap && 3 !== $id;
+        });
+
+        $counts = $page->fix([1, 2, 3]);
+
+        self::assertSame(['negaresh_fixed' => 1, 'negaresh_checked' => 1, 'negaresh_failed' => 1], $counts);
+        self::assertSame([1, 2], array_keys($meta), 'the post already correct is marked as checked too');
+    }
+
+    public function testB33FixingSendsNoDiff(): void
+    {
+        $page = $this->page();
+        $this->add(1, '<p>یک ...</p>');
+        Functions\when('current_user_can')->justReturn(true);
+        Functions\when('update_post_meta')->justReturn(true);
+        Functions\when('wp_save_post_revision')->justReturn(1);
+        Functions\when('has_filter')->justReturn(false);
+        Functions\when('wp_slash')->alias('addslashes');
+        Functions\when('wp_update_post')->justReturn(1);
+
+        $out = $page->rest_process(new \WP_REST_Request(['ids' => [1], 'apply' => true]));
+
+        self::assertTrue($out['results'][0]['changed']);
+        self::assertSame([], $out['results'][0]['diff']);
+    }
+
+    public function testB33PerPageScreenOptionIsKeptInRange(): void
+    {
+        $page = $this->page();
+
+        self::assertSame(200, $page->save_per_page(false, Negaresh_Bulk_Page::PER_PAGE_OPTION, '200'));
+        self::assertSame(999, $page->save_per_page(false, Negaresh_Bulk_Page::PER_PAGE_OPTION, '5000'));
+        self::assertSame(1, $page->save_per_page(false, Negaresh_Bulk_Page::PER_PAGE_OPTION, '-3'));
+        self::assertFalse($page->save_per_page(false, 'edit_post_per_page', '20'), 'other screen options are not ours');
+        self::assertGreaterThanOrEqual(50, Negaresh_Bulk_Page::PER_PAGE, 'many more posts than the old scan showed at once');
+    }
 }

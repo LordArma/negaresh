@@ -19,4 +19,10 @@ final class WP_Post
 
     /** @var string */
     public $post_excerpt = '';
+
+    /** @var string */
+    public $post_status = 'publish';
+
+    /** @var string */
+    public $post_date = '';
 }

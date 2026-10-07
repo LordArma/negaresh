@@ -3,7 +3,7 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Negaresh 5.2.0\n"
+"Project-Id-Version: Negaresh 5.3.0\n"
 "Report-Msgid-Bugs-To: https://github.com/LordArma/negaresh/issues\n"
 "Last-Translator: \n"
 "Language-Team: فارسی\n"
@@ -13,13 +13,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "POT-Creation-Date: 2026-09-25T19:28:10+00:00\n"
-"PO-Revision-Date: 2026-09-25 00:00+0000\n"
+"PO-Revision-Date: 2026-10-07 00:00+0000\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
 
 #. Plugin Name of the plugin
 #: negaresh.php
-#: includes/negaresh-bulk-page.php:36
+#: includes/negaresh-bulk-page.php:67
 #: includes/negaresh-dashboard.php:75
 #: includes/negaresh-editor.php:57
 #: includes/negaresh-editor.php:179
@@ -48,90 +48,203 @@ msgstr "Lord Arma"
 msgid "https://LordArma.com/"
 msgstr "https://LordArma.com/"
 
-#: includes/negaresh-bulk-page.php:35
-#: includes/negaresh-bulk-page.php:167
+#: includes/negaresh-bulk-page.php:66
+#: includes/negaresh-bulk-page.php:300
 msgid "Negaresh: fix existing posts"
 msgstr "نگارش: اصلاح نوشته‌های موجود"
 
-#. translators: 1: posts checked so far, 2: posts to check.
-#: includes/negaresh-bulk-page.php:142
-#, php-format
-msgid "Checking posts: %1$d of %2$d"
-msgstr "بررسی نوشته‌ها: %1$d از %2$d"
+#: includes/negaresh-bulk-page.php:101
+msgid "Number of items per page:"
+msgstr "تعداد موارد در هر برگه:"
 
-#. translators: 1: posts fixed so far, 2: posts to fix.
-#: includes/negaresh-bulk-page.php:144
+#: includes/negaresh-bulk-page.php:265
+msgid "Checking…"
+msgstr "در حال بررسی…"
+
+#: includes/negaresh-bulk-page.php:266
+msgid "Already correct: fixing only marks it as checked."
+msgstr "درست است: اصلاح فقط آن را بررسی‌شده علامت می‌زند."
+
+#: includes/negaresh-bulk-page.php:267
+msgid "Nothing to change."
+msgstr "چیزی برای تغییر نیست."
+
+#. translators: %d: changed lines.
+#: includes/negaresh-bulk-page.php:269
+#, php-format
+msgid "Show changes (%d lines)"
+msgstr "نمایش تغییرها (%d خط)"
+
+#. translators: %s: error message.
+#: includes/negaresh-bulk-page.php:271
+#, php-format
+msgid "Could not be checked: %s"
+msgstr "بررسی نشد: %s"
+
+#: includes/negaresh-bulk-page.php:272
+msgid "You may not edit this post."
+msgstr "اجازهٔ ویرایش این نوشته را ندارید."
+
+#. translators: 1: posts done so far, 2: posts to fix.
+#: includes/negaresh-bulk-page.php:274
 #, php-format
 msgid "Fixing posts: %1$d of %2$d"
 msgstr "اصلاح نوشته‌ها: %1$d از %2$d"
 
-#. translators: 1: posts that would change, 2: posts checked.
-#: includes/negaresh-bulk-page.php:146
+#. translators: %d: posts to fix.
+#: includes/negaresh-bulk-page.php:276
 #, php-format
-msgid "Posts that would change: %1$d of %2$d. Nothing has been saved yet."
-msgstr "نوشته‌هایی که تغییر می‌کنند: %1$d از %2$d. هنوز چیزی ذخیره نشده است."
-
-#: includes/negaresh-bulk-page.php:147
-msgid "Nothing to fix: every post checked is already correct."
-msgstr "چیزی برای اصلاح نیست: همهٔ نوشته‌های بررسی‌شده درست‌اند."
-
-#. translators: %d: posts fixed.
-#: includes/negaresh-bulk-page.php:149
-#, php-format
-msgid "Done. Posts fixed: %d. The text before each change is kept in the post's revisions."
-msgstr "انجام شد. نوشته‌های اصلاح‌شده: %d. متن پیش از هر تغییر در نسخه‌های ذخیره‌شدهٔ همان نوشته نگه داشته می‌شود."
+msgid "Fix the selected posts (%d)? This changes the stored posts; each one can be restored from its revisions."
+msgstr "نوشته‌های برگزیده (%d) اصلاح شوند؟ متن ذخیره‌شده تغییر می‌کند؛ هر نوشته را می‌توان از نسخه‌های پیشینش بازگرداند."
 
 #. translators: %d: posts to fix.
-#: includes/negaresh-bulk-page.php:151
+#: includes/negaresh-bulk-page.php:278
 #, php-format
-msgid "Fix the listed posts now (%d)? This changes the stored posts; each one can be restored from its revisions."
-msgstr "نوشته‌های فهرست همین حالا اصلاح شوند (%d)؟ این کار نوشته‌های ذخیره‌شده را تغییر می‌دهد؛ هر کدام را می‌توان از نسخه‌هایش برگرداند."
+msgid "Fix every waiting post (%d)? This changes the stored posts; each one can be restored from its revisions."
+msgstr "همهٔ نوشته‌های در انتظار (%d) اصلاح شوند؟ متن ذخیره‌شده تغییر می‌کند؛ هر نوشته را می‌توان از نسخه‌های پیشینش بازگرداند."
 
-#: includes/negaresh-bulk-page.php:152
+#: includes/negaresh-bulk-page.php:279
+msgid "Select at least one post."
+msgstr "دست‌کم یک نوشته را برگزینید."
+
+#: includes/negaresh-bulk-page.php:280
+msgid "No posts are waiting."
+msgstr "هیچ نوشته‌ای در انتظار نیست."
+
+#: includes/negaresh-bulk-page.php:281
 msgid "Something went wrong; the list shows what was done."
 msgstr "مشکلی پیش آمد؛ فهرست نشان می‌دهد چه کاری انجام شده است."
 
-#: includes/negaresh-bulk-page.php:153
-msgid "You may not edit this post."
-msgstr "اجازهٔ ویرایش این نوشته را ندارید."
+#. translators: %s: number of posts waiting.
+#: includes/negaresh-bulk-page.php:306
+#, php-format
+msgid "Fix all waiting posts (%s)"
+msgstr "اصلاح همهٔ نوشته‌های در انتظار (%s)"
 
-#: includes/negaresh-bulk-page.php:154
-msgid "Edit"
-msgstr "ویرایش"
+#: includes/negaresh-bulk-page.php:313
+msgid "Posts are checked with the saved rules."
+msgstr "نوشته‌ها با قاعده‌های ذخیره‌شده بررسی می‌شوند."
 
-#: includes/negaresh-bulk-page.php:155
-#: includes/negaresh-bulk-page.php:201
-msgid "Changes"
-msgstr "تغییرها"
+#: includes/negaresh-bulk-page.php:314
+msgid "The Changes column shows what fixing would change; nothing is saved until you fix."
+msgstr "ستون «تغییرها» نشان می‌دهد اصلاح چه چیزی را تغییر می‌دهد؛ تا اصلاح نکنید چیزی ذخیره نمی‌شود."
 
-#: includes/negaresh-bulk-page.php:169
-msgid "Check the posts you already have with the saved rules, see what would change, then fix them."
-msgstr "نوشته‌های موجود را با قاعده‌های ذخیره‌شده بررسی کنید، ببینید چه چیزی تغییر می‌کند و سپس اصلاحشان کنید."
-
-#: includes/negaresh-bulk-page.php:170
+#: includes/negaresh-bulk-page.php:315
 msgid "Posts marked “Leave this post alone” are never touched."
 msgstr "به نوشته‌هایی که «این نوشته را تغییر نده» دارند هرگز دست زده نمی‌شود."
 
-#: includes/negaresh-bulk-page.php:174
-#: includes/negaresh-settings.php:543
-msgid "Post types"
-msgstr "نوع‌های نوشته"
+#: includes/negaresh-bulk-page.php:322
+msgid "Search posts"
+msgstr "جست‌وجوی نوشته‌ها"
 
-#: includes/negaresh-bulk-page.php:186
-msgid "Also check posts already fixed with the current rules"
-msgstr "نوشته‌هایی را هم که با قاعده‌های کنونی اصلاح شده‌اند بررسی کن"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:344
+#, php-format
+msgid "Posts fixed: %s."
+msgstr "نوشته‌های اصلاح‌شده: %s."
 
-#: includes/negaresh-bulk-page.php:191
-msgid "Scan (nothing is saved)"
-msgstr "بررسی (چیزی ذخیره نمی‌شود)"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:346
+#, php-format
+msgid "Posts already correct, now marked as checked: %s."
+msgstr "نوشته‌هایی که درست بودند و اکنون بررسی‌شده علامت خوردند: %s."
 
-#: includes/negaresh-bulk-page.php:193
-msgid "Fix all listed posts"
-msgstr "اصلاح همهٔ نوشته‌های فهرست"
+#: includes/negaresh-bulk-page.php:349
+msgid "The text before each change is kept in the post's revisions."
+msgstr "متن پیش از هر تغییر در نسخه‌های نوشته نگه داشته می‌شود."
 
-#: includes/negaresh-bulk-page.php:200
-msgid "Post"
-msgstr "نوشته"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:353
+#, php-format
+msgid "Posts that could not be fixed: %s."
+msgstr "نوشته‌هایی که اصلاح نشدند: %s."
+
+#: includes/negaresh-bulk-table.php:120
+msgid "Title"
+msgstr "عنوان"
+
+#: includes/negaresh-bulk-table.php:121
+msgid "Type"
+msgstr "نوع"
+
+#: includes/negaresh-bulk-table.php:122
+msgid "Status"
+msgstr "وضعیت"
+
+#: includes/negaresh-bulk-table.php:123
+msgid "Changes"
+msgstr "تغییرها"
+
+#: includes/negaresh-bulk-table.php:124
+msgid "Date"
+msgstr "تاریخ"
+
+#: includes/negaresh-bulk-table.php:145
+msgid "Fix"
+msgstr "اصلاح"
+
+#: includes/negaresh-bulk-table.php:154
+#: includes/negaresh-bulk-table.php:294
+msgid "Waiting"
+msgstr "در انتظار"
+
+#: includes/negaresh-bulk-table.php:155
+#: includes/negaresh-bulk-table.php:295
+msgid "Fixed"
+msgstr "اصلاح‌شده"
+
+#: includes/negaresh-bulk-table.php:156
+#: includes/negaresh-bulk-table.php:296
+msgid "Left alone"
+msgstr "بدون تغییر"
+
+#: includes/negaresh-bulk-table.php:157
+msgid "All"
+msgstr "همه"
+
+#: includes/negaresh-bulk-table.php:188
+msgid "Filter by post type"
+msgstr "صافی بر پایهٔ نوع نوشته"
+
+#: includes/negaresh-bulk-table.php:189
+msgid "All post types"
+msgstr "همهٔ نوع‌های نوشته"
+
+#: includes/negaresh-bulk-table.php:200
+msgid "Filter"
+msgstr "صافی"
+
+#: includes/negaresh-bulk-table.php:207
+msgid "No posts are waiting: every post is checked with the current rules."
+msgstr "هیچ نوشته‌ای در انتظار نیست: همهٔ نوشته‌ها با قاعده‌های کنونی بررسی شده‌اند."
+
+#: includes/negaresh-bulk-table.php:209
+msgid "No posts found."
+msgstr "نوشته‌ای پیدا نشد."
+
+#. translators: %s: post title.
+#: includes/negaresh-bulk-table.php:225
+#, php-format
+msgid "Select %s"
+msgstr "گزینش %s"
+
+#: includes/negaresh-bulk-table.php:262
+msgid "Edit"
+msgstr "ویرایش"
+
+#: includes/negaresh-bulk-table.php:266
+msgid "View"
+msgstr "نمایش"
+
+#: includes/negaresh-bulk-table.php:273
+msgid "Fix now"
+msgstr "اصلاح کن"
+
+#. translators: %d: post ID, shown for posts without a title.
+#: includes/negaresh-bulk-table.php:349
+#, php-format
+msgid "(no title) #%d"
+msgstr "(بدون عنوان) #%d"
 
 #: includes/negaresh-dashboard.php:83
 msgid "Fixing text when a post is saved."
@@ -228,6 +341,10 @@ msgstr "زمان اصلاح"
 #: includes/negaresh-settings.php:525
 msgid "Words and phrases"
 msgstr "واژه‌ها و عبارت‌ها"
+
+#: includes/negaresh-settings.php:543
+msgid "Post types"
+msgstr "نوع‌های نوشته"
 
 #: includes/negaresh-settings.php:545
 msgid "Fix post titles"

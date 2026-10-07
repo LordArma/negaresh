@@ -27,34 +27,59 @@
     margin-inline-start: 0.5em;
 }
 
-/* Tools → Negaresh (I6) */
-.negaresh-bulk fieldset {
+/* Tools → Negaresh (I6), a list like the posts list (B33) */
+.negaresh-bulk .negaresh-bulk-status:not(:empty) {
     margin-block: 0.5rem;
+    font-weight: 600;
 }
 
-.negaresh-bulk-results pre {
+.negaresh-bulk .column-type,
+.negaresh-bulk .column-negaresh_state {
+    width: 10%;
+}
+
+.negaresh-bulk .column-date {
+    width: 12%;
+}
+
+.negaresh-bulk .column-negaresh_changes {
+    width: 40%;
+}
+
+.negaresh-bulk .negaresh-changes pre {
     white-space: pre-wrap;
     margin: 0.5rem 0;
     font-size: 0.95rem;
     line-height: 1.8;
     unicode-bidi: plaintext;
+    max-height: 24rem;
+    overflow: auto;
 }
 
-.negaresh-bulk-results .negaresh-removed {
+.negaresh-bulk .negaresh-removed {
     background: #fcf0f1;
     color: #8a2424;
 }
 
-.negaresh-bulk-results .negaresh-added {
+.negaresh-bulk .negaresh-added {
     background: #edfaef;
     color: #1d5a2c;
 }
 
-.negaresh-bulk-results tr.negaresh-done td:first-child::after {
+.negaresh-bulk .negaresh-no-change,
+.negaresh-bulk .negaresh-state-fixed {
+    color: #1d5a2c;
+}
+
+.negaresh-bulk .negaresh-error {
+    color: #8a2424;
+}
+
+.negaresh-bulk tr.negaresh-done .row-title::after {
     content: " ✓";
     color: #00a32a;
 }
 
-.negaresh-bulk-results tr.negaresh-skipped {
+.negaresh-bulk tr.negaresh-skipped {
     opacity: 0.6;
 }

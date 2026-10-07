@@ -48,6 +48,9 @@ class Negaresh_Bulk
         return array_values(array_filter(array_unique($candidates), [$this->plugin, 'saves_type']));
     }
 
+    /** Views of the bulk tool's list, as in the posts list (B33). */
+    public const VIEWS = ['waiting', 'fixed', 'opted_out', 'all'];
+
     /**
      * IDs of posts to look at, oldest first. Opted out posts are never included; posts already
      * fixed with the current rules only with 'all'. Without a limit every ID comes at once, so a
@@ -63,22 +66,6 @@ class Negaresh_Bulk
             return [];
         }
 
-        $meta_query = [
-            'relation' => 'AND',
-            [
-                'relation' => 'OR',
-                ['key' => Negaresh_Settings::SKIP_META, 'compare' => 'NOT EXISTS'],
-                ['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '!='],
-            ],
-        ];
-        if (empty($args['all'])) {
-            $meta_query[] = [
-                'relation' => 'OR',
-                ['key' => Negaresh_Settings::FIXED_META, 'compare' => 'NOT EXISTS'],
-                ['key' => Negaresh_Settings::FIXED_META, 'value' => $this->settings->rules_hash(), 'compare' => '!='],
-            ];
-        }
-
         $query = [
             'post_type' => $types,
             'post_status' => self::STATUSES,
@@ -87,13 +74,106 @@ class Negaresh_Bulk
             'orderby' => 'ID',
             'order' => 'ASC',
             'no_found_rows' => true,
-            'meta_query' => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+            // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+            'meta_query' => $this->meta_query(empty($args['all']) ? 'waiting' : 'checkable'),
         ];
         if (!empty($args['ids'])) {
             $query['post__in'] = array_map('intval', $args['ids']);
         }
 
         return array_values(array_map('intval', get_posts($query)));
+    }
+
+    /**
+     * One page of the bulk tool's list (B33): posts in a view, newest first by default, and how
+     * many there are in all.
+     *
+     * @param array{view?: string, post_type?: string, search?: string, paged?: int, per_page?: int,
+     *              orderby?: string, order?: string} $args
+     * @return array{posts: list<\WP_Post>, total: int}
+     */
+    public function listing(array $args): array
+    {
+        $types = $this->types(!empty($args['post_type']) ? [$args['post_type']] : []);
+        if (!$types) {
+            return ['posts' => [], 'total' => 0];
+        }
+        $view = in_array($args['view'] ?? '', self::VIEWS, true) ? (string) $args['view'] : 'waiting';
+        $orderby = in_array($args['orderby'] ?? '', ['title', 'date', 'type'], true) ? (string) $args['orderby'] : 'date';
+        $order = 'asc' === strtolower($args['order'] ?? '') ? 'ASC' : 'DESC';
+
+        $query = [
+            'post_type' => $types,
+            'post_status' => self::STATUSES,
+            'posts_per_page' => max(1, (int) ($args['per_page'] ?? 20)),
+            'paged' => max(1, (int) ($args['paged'] ?? 1)),
+            'orderby' => 'type' === $orderby ? 'post_type' : $orderby,
+            'order' => $order,
+            'ignore_sticky_posts' => true,
+        ];
+        $meta_query = $this->meta_query($view);
+        if ($meta_query) {
+            $query['meta_query'] = $meta_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+        }
+        $search = trim((string) ($args['search'] ?? ''));
+        if ('' !== $search) {
+            $query['s'] = $search;
+        }
+
+        $result = new \WP_Query($query);
+        $posts = [];
+        foreach ($result->posts as $post) {
+            if ($post instanceof \WP_Post) {
+                $posts[] = $post;
+            }
+        }
+        return ['posts' => $posts, 'total' => (int) $result->found_posts];
+    }
+
+    /**
+     * Where a post stands: 'opted_out', 'fixed' (with the current rules) or 'waiting'.
+     */
+    public function state(int $post_id): string
+    {
+        if ('1' === (string) get_post_meta($post_id, Negaresh_Settings::SKIP_META, true)) {
+            return 'opted_out';
+        }
+        return $this->settings->rules_hash() === (string) get_post_meta($post_id, Negaresh_Settings::FIXED_META, true)
+            ? 'fixed' : 'waiting';
+    }
+
+    /**
+     * Meta query for a view: 'checkable' (not opted out), 'waiting' (and not fixed with the current
+     * rules), 'fixed' (with the current rules), 'opted_out'; 'all' has none.
+     *
+     * @return array<int|string, mixed>
+     */
+    private function meta_query(string $view): array
+    {
+        if ('all' === $view) {
+            return [];
+        }
+        if ('opted_out' === $view) {
+            return [['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '=']];
+        }
+        $meta_query = [
+            'relation' => 'AND',
+            [
+                'relation' => 'OR',
+                ['key' => Negaresh_Settings::SKIP_META, 'compare' => 'NOT EXISTS'],
+                ['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '!='],
+            ],
+        ];
+        if ('waiting' === $view) {
+            $meta_query[] = [
+                'relation' => 'OR',
+                ['key' => Negaresh_Settings::FIXED_META, 'compare' => 'NOT EXISTS'],
+                ['key' => Negaresh_Settings::FIXED_META, 'value' => $this->settings->rules_hash(), 'compare' => '!='],
+            ];
+        } elseif ('fixed' === $view) {
+            $meta_query[] = ['key' => Negaresh_Settings::FIXED_META, 'value' => $this->settings->rules_hash(), 'compare' => '='];
+        }
+        return $meta_query;
     }
 
     /**
@@ -116,7 +196,7 @@ class Negaresh_Bulk
             'posts_per_page' => -1,
             'no_found_rows' => true,
             // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-            'meta_query' => [['key' => Negaresh_Settings::SKIP_META, 'value' => '1', 'compare' => '=']],
+            'meta_query' => $this->meta_query('opted_out'),
         ])) : 0;
 
         return ['total' => $total, 'fixed' => $total - $waiting, 'waiting' => $waiting, 'opted_out' => $opted_out];
@@ -169,6 +249,9 @@ class Negaresh_Bulk
             return $result;
         }
         update_post_meta($post_id, Negaresh_Settings::FIXED_META, $this->settings->rules_hash());
+        // A post that needed no change is only marked, which fires no save_post: the dashboard
+        // counts would stay stale for an hour (B33).
+        delete_transient(Negaresh_Dashboard::STATS_TRANSIENT);
 
         return $result;
     }

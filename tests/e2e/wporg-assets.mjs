@@ -102,9 +102,8 @@ await page.locator('.negaresh-fix-now').scrollIntoViewIfNeeded();
 await page.screenshot({ path: `${out}/screenshot-2${sfx}.png` });
 
 await page.goto(`${url}/wp-admin/tools.php?page=negaresh-bulk`);
-await page.locator('.negaresh-scan').click();
-await page.locator('.negaresh-bulk-results tr').first().waitFor({ timeout: 30000 });
-await page.locator('.negaresh-bulk-results summary').first().click();
+await page.locator('.negaresh-changes details').first().waitFor({ timeout: 30000 });
+await page.locator('.negaresh-changes summary').first().click();
 await page.screenshot({ path: `${out}/screenshot-3${sfx}.png`, clip: { x: left, y: 32, width: 1120, height: 560 } });
 
 await page.goto(`${url}/wp-admin/index.php`);

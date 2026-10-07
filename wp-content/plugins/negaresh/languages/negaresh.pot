@@ -2,21 +2,21 @@
 # This file is distributed under the GPLv3 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Negaresh 5.2.0\n"
-"Report-Msgid-Bugs-To: https://github.com/LordArma/negaresh/issues\n"
+"Project-Id-Version: Negaresh 5.2.3\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T19:28:10+00:00\n"
+"POT-Creation-Date: 2026-10-07T18:55:45+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: negaresh\n"
 
 #. Plugin Name of the plugin
 #: negaresh.php
-#: includes/negaresh-bulk-page.php:36
+#: includes/negaresh-bulk-page.php:67
 #: includes/negaresh-dashboard.php:75
 #: includes/negaresh-editor.php:57
 #: includes/negaresh-editor.php:179
@@ -45,89 +45,202 @@ msgstr ""
 msgid "https://LordArma.com/"
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:35
-#: includes/negaresh-bulk-page.php:167
+#: includes/negaresh-bulk-page.php:66
+#: includes/negaresh-bulk-page.php:300
 msgid "Negaresh: fix existing posts"
 msgstr ""
 
-#. translators: 1: posts checked so far, 2: posts to check.
-#: includes/negaresh-bulk-page.php:142
-#, php-format
-msgid "Checking posts: %1$d of %2$d"
+#: includes/negaresh-bulk-page.php:101
+msgid "Number of items per page:"
 msgstr ""
 
-#. translators: 1: posts fixed so far, 2: posts to fix.
-#: includes/negaresh-bulk-page.php:144
+#: includes/negaresh-bulk-page.php:265
+msgid "Checking…"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:266
+msgid "Already correct: fixing only marks it as checked."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:267
+msgid "Nothing to change."
+msgstr ""
+
+#. translators: %d: changed lines.
+#: includes/negaresh-bulk-page.php:269
+#, php-format
+msgid "Show changes (%d lines)"
+msgstr ""
+
+#. translators: %s: error message.
+#: includes/negaresh-bulk-page.php:271
+#, php-format
+msgid "Could not be checked: %s"
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:272
+msgid "You may not edit this post."
+msgstr ""
+
+#. translators: 1: posts done so far, 2: posts to fix.
+#: includes/negaresh-bulk-page.php:274
 #, php-format
 msgid "Fixing posts: %1$d of %2$d"
 msgstr ""
 
-#. translators: 1: posts that would change, 2: posts checked.
-#: includes/negaresh-bulk-page.php:146
+#. translators: %d: posts to fix.
+#: includes/negaresh-bulk-page.php:276
 #, php-format
-msgid "Posts that would change: %1$d of %2$d. Nothing has been saved yet."
-msgstr ""
-
-#: includes/negaresh-bulk-page.php:147
-msgid "Nothing to fix: every post checked is already correct."
-msgstr ""
-
-#. translators: %d: posts fixed.
-#: includes/negaresh-bulk-page.php:149
-#, php-format
-msgid "Done. Posts fixed: %d. The text before each change is kept in the post's revisions."
+msgid "Fix the selected posts (%d)? This changes the stored posts; each one can be restored from its revisions."
 msgstr ""
 
 #. translators: %d: posts to fix.
-#: includes/negaresh-bulk-page.php:151
+#: includes/negaresh-bulk-page.php:278
 #, php-format
-msgid "Fix the listed posts now (%d)? This changes the stored posts; each one can be restored from its revisions."
+msgid "Fix every waiting post (%d)? This changes the stored posts; each one can be restored from its revisions."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:152
+#: includes/negaresh-bulk-page.php:279
+msgid "Select at least one post."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:280
+msgid "No posts are waiting."
+msgstr ""
+
+#: includes/negaresh-bulk-page.php:281
 msgid "Something went wrong; the list shows what was done."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:153
-msgid "You may not edit this post."
+#. translators: %s: number of posts waiting.
+#: includes/negaresh-bulk-page.php:306
+#, php-format
+msgid "Fix all waiting posts (%s)"
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:154
-msgid "Edit"
+#: includes/negaresh-bulk-page.php:313
+msgid "Posts are checked with the saved rules."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:155
-#: includes/negaresh-bulk-page.php:201
-msgid "Changes"
+#: includes/negaresh-bulk-page.php:314
+msgid "The Changes column shows what fixing would change; nothing is saved until you fix."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:169
-msgid "Check the posts you already have with the saved rules, see what would change, then fix them."
-msgstr ""
-
-#: includes/negaresh-bulk-page.php:170
+#: includes/negaresh-bulk-page.php:315
 msgid "Posts marked “Leave this post alone” are never touched."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:174
-#: includes/negaresh-settings.php:543
-msgid "Post types"
+#: includes/negaresh-bulk-page.php:322
+msgid "Search posts"
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:186
-msgid "Also check posts already fixed with the current rules"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:344
+#, php-format
+msgid "Posts fixed: %s."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:191
-msgid "Scan (nothing is saved)"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:346
+#, php-format
+msgid "Posts already correct, now marked as checked: %s."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:193
-msgid "Fix all listed posts"
+#: includes/negaresh-bulk-page.php:349
+msgid "The text before each change is kept in the post's revisions."
 msgstr ""
 
-#: includes/negaresh-bulk-page.php:200
-msgid "Post"
+#. translators: %s: number of posts.
+#: includes/negaresh-bulk-page.php:353
+#, php-format
+msgid "Posts that could not be fixed: %s."
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:120
+msgid "Title"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:121
+msgid "Type"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:122
+msgid "Status"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:123
+msgid "Changes"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:124
+msgid "Date"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:145
+msgid "Fix"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:154
+#: includes/negaresh-bulk-table.php:294
+msgid "Waiting"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:155
+#: includes/negaresh-bulk-table.php:295
+msgid "Fixed"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:156
+#: includes/negaresh-bulk-table.php:296
+msgid "Left alone"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:157
+msgid "All"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:188
+msgid "Filter by post type"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:189
+msgid "All post types"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:200
+msgid "Filter"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:207
+msgid "No posts are waiting: every post is checked with the current rules."
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:209
+msgid "No posts found."
+msgstr ""
+
+#. translators: %s: post title.
+#: includes/negaresh-bulk-table.php:225
+#, php-format
+msgid "Select %s"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:262
+msgid "Edit"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:266
+msgid "View"
+msgstr ""
+
+#: includes/negaresh-bulk-table.php:273
+msgid "Fix now"
+msgstr ""
+
+#. translators: %d: post ID, shown for posts without a title.
+#: includes/negaresh-bulk-table.php:349
+#, php-format
+msgid "(no title) #%d"
 msgstr ""
 
 #: includes/negaresh-dashboard.php:83
@@ -224,6 +337,10 @@ msgstr ""
 
 #: includes/negaresh-settings.php:525
 msgid "Words and phrases"
+msgstr ""
+
+#: includes/negaresh-settings.php:543
+msgid "Post types"
 msgstr ""
 
 #: includes/negaresh-settings.php:545
