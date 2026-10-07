@@ -123,6 +123,22 @@ Severity: **Critical** = breaks sites or content. **High** = wrong behaviour use
   diacritics removed. *Fix:* rule functions re-ported step by step from Virastar.js 0.22.1 (I11).
   Tests: `VirastarFixesTest::testB28...`, `VirastarReferenceTest`.
 
+- [x] **B33 Tools → Negaresh only ever checked the first ten posts** *(High; every release since
+  I6; found 2026-10-07 by the owner on several sites: "3 posts per scan, 9 on another site")*.
+  `wp_localize_script()` sends `batch` as the string `"10"`, so `start += batch` in bulk.js built
+  `"010"`, `"01010"`: the second request asked for every remaining post, the route refused more
+  than ten, and the scan stopped with "Something went wrong" after listing the changed posts among
+  the first ten. "Fix all listed posts" fixed those, the next scan found the next ten. Also: posts
+  already correct were never marked (only changed ones were sent to be fixed), so the waiting count
+  (dashboard, notice) never went down, and marking a post without a change left the cached counts
+  stale for an hour. *Fix:* `parseInt` of the batch; the page rebuilt as a `WP_List_Table` like
+  edit.php (views, search, type filter, sorting, pagination with a per page screen option, bulk
+  action "Fix", row action "Fix now", "Fix all waiting posts", which marks unchanged posts too);
+  a failed request no longer stops a run; `process()` clears the stats transient; fixing sends no
+  diff. Released in 5.3.0. Tests: browser checks in `tests/e2e/browser.mjs` (list check failed with
+  `Invalid parameter(s): ids` before the `parseInt`; "no post waiting" after "Fix all"), unit tests
+  `BulkTest::testB33...`, `BulkPageTest::testB33...` (stats transient test seen failing first).
+
 - [x] **B32 Rule examples on the settings page shown left to right** *(Low; found 2026-10-05 by the
   owner)*: wp-admin's `code { direction: ltr; unicode-bidi: embed }` beats the `dir="rtl"`
   attribute, so "before ← after" was laid out left to right: before on the left, the arrow pointing

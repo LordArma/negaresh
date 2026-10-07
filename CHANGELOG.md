@@ -3,6 +3,25 @@
 All notable changes to Negaresh. Format: [Keep a Changelog](https://keepachangelog.com/),
 versions: [Semantic Versioning](https://semver.org/).
 
+## [5.3.0] (2026-10-07)
+
+### Fixed
+- Tools → Negaresh: a scan only ever checked the first ten posts. The batch size reached the
+  script as the text "10", so the second request asked for every remaining post at once, was
+  refused, and the scan stopped; only the few changed posts among the first ten were listed and
+  fixed, and each new scan found the next few (B33).
+- Posts already correct were never marked as checked by the bulk tool, so the number of posts
+  waiting (dashboard widget, notice) never went down; it was also cached for up to an hour after
+  a post was checked (B33).
+
+### Changed
+- Tools → Negaresh is now a list like the Posts screen: Waiting, Fixed, Left alone and All
+  views with counts, search, post type filter, sorting, pagination and a posts per page screen
+  option (50 by default). The Changes column shows each post's changed lines. Fix the selected
+  posts with the bulk action "Fix", one post with "Fix now", or every waiting post with "Fix all
+  waiting posts"; a request that fails no longer stops the run. Bulk action and "Fix now" also
+  work without JavaScript (B33).
+
 ## [5.2.3] (2026-10-05)
 
 ### Fixed

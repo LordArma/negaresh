@@ -4,7 +4,7 @@ Tags: persian, farsi, typography, rtl, virastar
 Requires at least: 5.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 5.2.3
+Stable tag: 5.3.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -58,11 +58,15 @@ In the block editor add `negaresh-skip` in *Advanced → Additional CSS class(es
 
 1. Settings → Negaresh: try the rules on your own text before saving, choose when to fix, pick the rules.
 2. The Negaresh panel in the block editor: leave a post alone, or fix it now (Undo reverts it).
-3. Tools → Negaresh: scan existing posts, see the changed lines, then fix them.
+3. Tools → Negaresh: existing posts in a list like the posts list, with the changed lines; fix the selected posts or every waiting post.
 4. The dashboard widget: how many posts are fixed, waiting to be checked or left alone.
 5. The rules and their examples, in Persian (with the Persian language pack).
 
 == Changelog ==
+
+= 5.3.0 =
+* Tools → Negaresh: the scan stopped after the first ten posts, so only a few posts were listed and fixed each time. Posts already correct were never marked as checked, so the count of waiting posts never went down. Both fixed.
+* Tools → Negaresh is now a list like the Posts screen: Waiting, Fixed, Left alone and All views, search, post type filter, sorting, pagination with a posts per page screen option (50 by default), the bulk action "Fix" for the selected posts, "Fix now" on each row, and "Fix all waiting posts".
 
 = 5.2.3 =
 * Settings page: the rule examples with numbers or punctuation are shown right to left again (they looked reversed), and the "Words to leave alone" box types Persian right to left.

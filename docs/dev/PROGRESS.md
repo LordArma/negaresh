@@ -3,13 +3,13 @@
 Newest entry on top. Each entry: date, session number, what was done, what was verified, next step.
 Status snapshot is kept up to date at the top.
 
-## Status snapshot (updated session 5, 2026-10-03)
+## Status snapshot (updated session 7, 2026-10-07)
 
 | Item | State |
 | --- | --- |
-| Current version | **5.2.3** (tag `v5.2.3`), published by the Release workflow; Latest on GitHub |
+| Current version | **5.3.0** in the working tree (B33), test zip only, **not released**; last release 5.2.3 (tag `v5.2.3`) |
 | Releases this session | 4.1.0 → 4.2.0 → 4.3.0 → 4.4.0 → 5.0.0 → 5.1.0 → 5.2.0 (all on 2026-09-25) |
-| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B31 fixed and released · B32 fixed in 5.2.3 |
+| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B32 fixed and released · B33 fixed in 5.3.0 (not released) |
 | Phase 2 (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I10, I11 done (I3 not needed) · ⏳ I9: plugin ready, submission is the user's step |
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
 | Branches | `master` = `phase-2` (5.2.2 plus handoff docs), both pushed; no local changes |
@@ -39,6 +39,26 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
    when relevant), docs + CHANGELOG `[Unreleased]`, one commit per slice on `phase-2`.
 5. Releasing: CLAUDE.md §5 (push `master`, wait for CI, then tag). The GitHub API sometimes times
    out here; retry `gh` calls instead of assuming failure.
+
+---
+
+## 2026-10-07 · Session 7 · B33 bulk tool, list like edit.php, 5.3.0 test zip
+
+Owner: Tools → Negaresh shows the right count but lists only a few posts (3 on one site, 9 on
+another); "Fix all listed posts" fixes those, and a new scan is needed for the next ones. Asked for
+a page like edit.php (more posts, checkboxes, bulk fix, pagination), a version bump and a test zip,
+nothing published. Found (B33): the batch size reached bulk.js as the string "10", so the scan
+stopped after the first ten posts; posts already correct were never marked; the stats transient
+was not cleared when a post was only marked. Done: `Negaresh_Bulk_Table` (`WP_List_Table`), views,
+search, type filter, sorting, pagination with screen option (50), bulk action "Fix", "Fix now",
+"Fix all waiting posts", Changes column checked over REST per page; no-JS fallback; translations;
+version 5.3.0. Verified: `composer check` (391 tests) on PHP 8.3 and 7.4; `BROWSER=1
+tests/e2e/run.sh` on WP 7.1.2 all passed (Plugin Check clean) except core's own update check in
+debug.log (no TLS to wordpress.org from the container, as in session 6); `BROWSER=1` on WP 5.8.3
+all passed; no-JS "Fix now" and nonce refusals checked with curl; 50 real posts from lordarma.com
+on the e2e site (50 waiting, 0 would change: the case the old page could never clear).
+Test zip: `build/negaresh.zip` from the working tree (same layout and exclusions as build-zip.sh).
+Not committed, not released. Next: owner tests `build/negaresh.zip`, then release (CLAUDE.md §5).
 
 ---
 
