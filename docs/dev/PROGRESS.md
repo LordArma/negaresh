@@ -7,12 +7,12 @@ Status snapshot is kept up to date at the top.
 
 | Item | State |
 | --- | --- |
-| Current version | **5.3.0** in the working tree (B33), test zip only, **not released**; last release 5.2.3 (tag `v5.2.3`) |
+| Current version | **5.3.0** (tag `v5.3.0`, 2026-10-07): GitHub release and wordpress.org (SVN `tags/5.3.0`) by the Release workflow |
 | Releases this session | 4.1.0 → 4.2.0 → 4.3.0 → 4.4.0 → 5.0.0 → 5.1.0 → 5.2.0 (all on 2026-09-25) |
-| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B32 fixed and released · B33 fixed in 5.3.0 (not released) |
+| Phase 1 bugs (`BUGFIX-PLAN.md`) | ✅ B0–B33 fixed and released (B33 in 5.3.0) |
 | Phase 2 (`IMPROVEMENT-PLAN.md`) | ✅ I1–I8, I10, I11 done (I3 not needed) · ⏳ I9: plugin ready, submission is the user's step |
 | Phase 3 (`IMPROVEMENT-PLAN.md`, P3-*) | ✅ P3-1 … P3-9 all done |
-| Branches | `master` = `phase-2` (5.2.2 plus handoff docs), both pushed; no local changes |
+| Branches | `master` = `phase-2` (5.3.0), both pushed |
 | Open pull requests | none (Dependabot #1 merged as `d2659be`) |
 | wordpress.org | submitted 2026-09-25, pended by the 2026-09-27 pre-review; fixes released in 5.2.1; DNS TXT on lordarma.com added, 5.2.1 uploaded 2026-10-01; manual review 2026-10-03 asked for escaped filter returns, fixed in 5.2.2 (B31); 5.2.2 uploaded and review answered 2026-10-03; **approved 2026-10-04**; 5.2.3 and the listing assets deployed by the Release workflow 2026-10-05 (**`WORDPRESS-ORG.md` §8**) |
 
@@ -58,7 +58,10 @@ debug.log (no TLS to wordpress.org from the container, as in session 6); `BROWSE
 all passed; no-JS "Fix now" and nonce refusals checked with curl; 50 real posts from lordarma.com
 on the e2e site (50 waiting, 0 would change: the case the old page could never clear).
 Test zip: `build/negaresh.zip` from the working tree (same layout and exclusions as build-zip.sh).
-Not committed, not released. Next: owner tests `build/negaresh.zip`, then release (CLAUDE.md §5).
+Then, on request, released 5.3.0: commits `ab14c9d` (B33) and `6893321` (release), `master` fast
+forwarded, CI green, tag `v5.3.0`; Release workflow green (GitHub release with zip, wordpress.org
+deploy); plugin API reports 5.3.0. Persian: no language pack yet; the owner imports
+`languages/negaresh-fa_IR.po` on translate.wordpress.org (`WORDPRESS-ORG.md` §6 step 3).
 
 ---
 
