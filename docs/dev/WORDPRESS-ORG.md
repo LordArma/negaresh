@@ -132,3 +132,15 @@ Order, once the owner approves the images:
 instead of steps 3–4 above: the secrets exist, so pushing the `v5.2.3` tag deploys the code, the
 readme and all `.wordpress-org/` assets in one go (CLAUDE.md §5). Pushing `master` before the tag
 also starts the listing workflow; it may fail or no-op while SVN trunk is still empty, which is harmless.
+
+## 9. Persian translation (the owner is the plugin's Persian translation editor, 2026-10-09)
+
+The owner has PTE rights for Negaresh in Persian, so imported strings are approved at once and
+ship as language packs. Two projects at https://translate.wordpress.org/projects/wp-plugins/negaresh/ :
+the plugin strings (Stable, from the released code) and the Stable Readme (from `readme.txt`).
+
+After every release that changes user facing strings or `readme.txt`:
+1. Plugin: `languages/negaresh-fa_IR.po` (kept complete by I18nTest), import into Stable.
+2. Readme: export the Persian Stable Readme from GlotPress, add the new readme strings (changelog
+   entry, captions, changed list items), import it back. Copies used for the upload live in
+   `build/translate/` (not committed). 5.3.0 was imported this way on 2026-10-09.

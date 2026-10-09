@@ -42,6 +42,14 @@ reference cases, 3 documented skips) clean on PHP 7.4 and 8.3; `BROWSER=1 tests/
 
 ---
 
+## 2026-10-09 · Session 8 · Persian translations for 5.3.0
+
+* translate.wordpress.org still listed untranslated strings: the uploaded PO files were stale
+  (plugin from 5.2.0, 36 strings short; readme from 5.2.3). Uploaded `languages/negaresh-fa_IR.po`
+  (130/130) and the readme PO with the 5.3.0 changelog and new screenshot 3 caption translated.
+* The owner is now the plugin's Persian translation editor; workflow in `WORDPRESS-ORG.md` §9.
+* Next: refresh both Persian uploads after every release that changes strings or `readme.txt`.
+
 ## 2026-10-07 · Session 7 · B33 bulk tool, list like edit.php, 5.3.0 test zip
 
 Owner: Tools → Negaresh shows the right count but lists only a few posts (3 on one site, 9 on
